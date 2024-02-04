@@ -1,0 +1,31 @@
+name: Test workflow-create-release
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - .github/workflows/test-workflow-create-release.yaml # self
+      - .github/workflows/workflow-create-release.yaml
+      - __testing__/workflow-create-release
+
+jobs:
+  create-artifact:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: test-release-dist
+          path: __testing__/workflow-create-release/
+          retention-days: 1
+          if-no-files-found: error
+
+  create-release:
+    permissions:
+      contents: write
+    needs: create-artifact
+    uses: ./.github/workflows/workflow-create-release.yaml
+    with:
+      artifact-name: test-release-dist
+      release-branch: test-workflow-create-release-release
+      release-tag-prefix: test-workflow-create-release-release
