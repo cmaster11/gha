@@ -7,19 +7,19 @@ on:
       artifact-name:
         description: The name of the artifact containing all the files we want to put in the release
         type: string
-        required: true
+        required: false
         default: release-dist
 
       release-branch:
         description: The name of the branch in which to create the release
         type: string
-        required: true
+        required: false
         default: release
 
       release-tag-prefix:
         description: The prefix of the release tag
         type: string
-        required: true
+        required: false
         default: release
 
     outputs:
