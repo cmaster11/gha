@@ -19,6 +19,8 @@ jobs:
           retention-days: 1
 
   create-release:
+    permissions:
+      contents: write
     needs: create-artifact
     uses: ./.github/workflows/workflow-create-release.yaml
     with:
