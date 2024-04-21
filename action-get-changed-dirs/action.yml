@@ -1,0 +1,39 @@
+name: Get changed directories
+description: Uses git diff to find the list of changed directories, compared to a previous commit SHA
+
+inputs:
+  base-sha:
+    description: The base commit SHA
+    required: true
+  ignore-if-all-deletions:
+    description: If true, ignore entries where there have been only deletions
+    required: false
+    default: 'false'
+  regex:
+    description: A regex used to evaluate directory paths
+    required: false
+  max-depth:
+    description: The max path depth to which aggregate directory names
+    required: false
+    default: '0'
+
+outputs:
+  matrix:
+    description: The JSON matrix containing the list of changed directories
+    value: ${{ steps.get-changes.outputs.matrix }}
+  matrix-empty:
+    description: >
+      "true" if the matrix is empty
+    value: ${{ steps.get-changes.outputs.matrix-empty }}
+runs:
+  using: "composite"
+  steps:
+    - name: Get changed directories
+      id: get-changes
+      shell: bash
+      run: npx zx -- $GITHUB_ACTION_PATH/scripts/get-changes.mjs
+      env:
+        INPUT_BASE_SHA: ${{ inputs.base-sha }}
+        INPUT_REGEX: ${{ inputs.regex }}
+        INPUT_MAX_DEPTH: ${{ inputs.max-depth }}
+        INPUT_IGNORE_IF_ALL_DELETIONS: ${{ inputs.ignore-if-all-deletions }}
