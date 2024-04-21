@@ -1,0 +1,25 @@
+name: Test action-get-changed-dirs
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - .github/workflows/test-action-get-changed-dirs.yml # self
+      - action-get-changed-dirs/**
+
+jobs:
+  test-action-get-changed-dirs:
+    name: action-get-changed-dirs
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: action-get-changed-dirs
+        uses: ./action-get-changed-dirs
+        with:
+          base-sha: ${{ github.event.pull_request.base.sha }}
+      - run: |
+          echo "$JSON" | jq '.'
+        env:
+          JSON: ${{ toJSON(steps.action-get-changed-dirs) }}
