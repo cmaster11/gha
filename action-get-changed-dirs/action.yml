@@ -31,7 +31,7 @@ runs:
     - name: Get changed directories
       id: get-changes
       shell: bash
-      run: npx zx -- $GITHUB_ACTION_PATH/scripts/get-changes.mjs
+      run: $GITHUB_ACTION_PATH/bin/get-changed-directories.js
       env:
         INPUT_BASE_SHA: ${{ inputs.base-sha }}
         INPUT_REGEX: ${{ inputs.regex }}
