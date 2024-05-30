@@ -1,11 +1,15 @@
 import 'zx/globals';
-import * as esbuild from 'esbuild';
+import { buildBinaries } from '../lib/build-binaries.mjs';
 
 const __dirname = import.meta.dirname;
-
 const rootDir = path.join(__dirname, '..');
 
-let actionToBuild = minimist(process.argv.slice(2))._[0];
+const args = minimist(process.argv.slice(2), {
+  // TODO tmp folder, copy action and binaries, strip PREBUILD step
+  // TODO If PR, dev branch, otherwise push to version branch?
+});
+let actionToBuild = args._[0];
+
 if (path.isAbsolute(actionToBuild)) {
   actionToBuild = path.relative(rootDir, actionToBuild);
 } else if (!actionToBuild.startsWith('actions/')) {
@@ -13,29 +17,5 @@ if (path.isAbsolute(actionToBuild)) {
 }
 
 const actionToBuildDirFullPath = path.join(rootDir, actionToBuild);
-const distDir = path.join(actionToBuildDirFullPath, 'dist');
-await fs.mkdirp(distDir);
 
-const binsToBuild = await fs.readdir(
-  path.join(actionToBuildDirFullPath, 'bin')
-);
-for (const bin of binsToBuild) {
-  console.log(`Building ${bin}`);
-  const fullPath = path.join(actionToBuildDirFullPath, 'bin', bin);
-  const outFile = path.join(distDir, bin.replace(/\.mts/, '') + '.mjs');
-  await esbuild.build({
-    entryPoints: [fullPath],
-    bundle: true,
-    keepNames: true,
-    sourcemap: false,
-    outfile: outFile,
-    platform: 'node',
-    format: 'esm',
-    inject: [path.join(__dirname, 'cjs-shim.ts')]
-  });
-
-  const unpatchedBuild = await fs.readFile(outFile, 'utf-8');
-  const patchedBuild = '#!/usr/bin/env node\n' + unpatchedBuild;
-  await fs.writeFile(outFile, patchedBuild);
-  await fs.chmod(outFile, 0o755);
-}
+await buildBinaries(actionToBuildDirFullPath);
