@@ -1,4 +1,3 @@
-#!/usr/bin/env npx tsx
 import 'zx/globals';
 import * as esbuild from 'esbuild';
 

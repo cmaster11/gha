@@ -5,4 +5,4 @@ const deps = require(path.join(rootDir, 'package.json')).devDependencies;
 const actionToBuild = minimist(process.argv.slice(2))._[0];
 
 await $`npm install esbuild@${deps.esbuild}`;
-await $`${path.join(__dirname, 'build.mts')} ${actionToBuild}`;
+await $`npx tsx ${path.join(__dirname, 'build.mts')} ${actionToBuild}`;
