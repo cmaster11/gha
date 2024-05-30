@@ -11,14 +11,30 @@ on:
 jobs:
   get-changes:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.get-changed-dirs.outputs.matrix }}
+      matrix-empty: ${{ steps.get-changed-dirs.outputs.matrix-empty }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: package.json
       - id: get-changed-dirs
         uses: ./actions/action-get-changed-dirs
         with:
           base-sha: ${{ github.event.pull_request.base.sha }}
+          max-depth: 1
+          regex: /^actions\//
+          ignore-if-all-deletions: true
+
+  build:
+    needs:
+      - get-changes
+    runs-on: ubuntu-latest
+    if: needs.get-changes.outputs.matrix-empty != 'true'
+    strategy:
+      matrix: ${{ fromJSON(needs.get-changes.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./hack/build
+        with:
+          action-path: ${{ matrix.directory }}
