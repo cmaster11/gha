@@ -31,7 +31,7 @@ runs:
     # Stripped out at build time
     - name: PREBUILD
       shell: bash
-      run: npx hack/build.mts $GITHUB_ACTION_PATH
+      run: hack/build.mts $GITHUB_ACTION_PATH
 
     - name: Get changed directories
       id: get-changes
