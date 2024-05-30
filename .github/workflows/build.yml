@@ -30,7 +30,7 @@ jobs:
         with:
           base-sha: ${{ github.event.pull_request.base.sha }}
           max-depth: 1
-          regex: /^actions\//
+          regex: ^actions/
           ignore-if-all-deletions: true
 
   build:
