@@ -8,7 +8,7 @@ const rootDir = path.join(__dirname, '..');
 let actionToBuild = minimist(process.argv.slice(2))._[0];
 if (path.isAbsolute(actionToBuild)) {
   actionToBuild = path.relative(rootDir, actionToBuild);
-} else {
+} else if (!actionToBuild.startsWith('actions/')) {
   actionToBuild = 'actions/' + actionToBuild;
 }
 
