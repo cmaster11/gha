@@ -34,10 +34,7 @@ for (const bin of binsToBuild) {
   });
 
   const unpatchedBuild = await fs.readFile(outFile, 'utf-8');
-  const patchedBuild = unpatchedBuild.replace(
-    "'use strict';",
-    "#!/usr/bin/env node\n\n'use strict;'\n"
-  );
-  await fs.writeFile(outFile, patchedBuild, 'utf-8');
+  const patchedBuild = '#!/usr/bin/env node\n' + unpatchedBuild;
+  await fs.writeFile(outFile, patchedBuild);
   await fs.chmod(outFile, 0o755);
 }
