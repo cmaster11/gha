@@ -23,5 +23,5 @@
     "esModuleInterop": true,
     "outDir": "dist"
   },
-  "include": ["bin","hack"]
+  "include": ["bin","hack","lib","actions"]
 }

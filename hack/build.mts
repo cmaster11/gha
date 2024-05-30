@@ -1,44 +1,30 @@
 #!/usr/bin/env npx tsx
 import 'zx/globals';
-import Joi from 'joi';
-import { parse } from 'yaml';
 import * as esbuild from 'esbuild';
+import { minimist } from 'zx';
+
 const __dirname = import.meta.dirname;
 
 const rootDir = path.join(__dirname, '..');
-const actionDirs = (await fs.readdir(rootDir)).filter((dir) =>
-  dir.startsWith('action-')
-);
 
-const configSchema = Joi.object({
-  bin: Joi.array().items(Joi.string())
-});
-
-interface Config {
-  bin?: string[];
+let actionToBuild = minimist(process.argv.slice(2))._[0];
+if (path.isAbsolute(actionToBuild)) {
+  actionToBuild = path.relative(rootDir, actionToBuild);
+} else {
+  actionToBuild = 'actions/' + actionToBuild;
 }
 
-async function loadConfig(dir: string): Promise<Config> {
-  const contents = await fs.readFile(path.join(dir, 'config.yml'), 'utf-8');
-  const configObj = parse(contents);
-  return Joi.attempt(configObj, configSchema);
-}
-
-// Build all binaries
-const binsToBuild = new Set<string>();
-for (const actionDir of actionDirs) {
-  const config = await loadConfig(path.join(rootDir, actionDir));
-  for (const binElement of config.bin ?? []) {
-    binsToBuild.add(binElement);
-  }
-}
-
-const distDir = path.join(rootDir, 'dist');
+const actionToBuildDirFullPath = path.join(rootDir, actionToBuild);
+const distDir = path.join(actionToBuildDirFullPath, 'dist');
 await fs.mkdirp(distDir);
 
+const binsToBuild = await fs.readdir(
+  path.join(actionToBuildDirFullPath, 'bin')
+);
 for (const bin of binsToBuild) {
-  const fullPath = path.join(rootDir, 'bin', bin + '.mts');
-  const outFile = path.join(distDir, bin + '.mjs');
+  console.log(`Building ${bin}`);
+  const fullPath = path.join(actionToBuildDirFullPath, 'bin', bin);
+  const outFile = path.join(distDir, bin.replace(/\.mts/, '') + '.mjs');
   await esbuild.build({
     entryPoints: [fullPath],
     bundle: true,
@@ -48,4 +34,11 @@ for (const bin of binsToBuild) {
     platform: 'node',
     format: 'esm'
   });
+
+  const unpatchedBuild = await fs.readFile(outFile, 'utf-8');
+  const patchedBuild = unpatchedBuild.replace(
+    "'use strict';",
+    "#!/usr/bin/env node\n\n'use strict;'\n"
+  );
+  await fs.writeFile(outFile, patchedBuild, 'utf-8');
 }

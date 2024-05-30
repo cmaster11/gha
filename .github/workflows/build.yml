@@ -1,0 +1,24 @@
+name: Build the actions library
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  get-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+      - id: get-changed-dirs
+        uses: ./actions/action-get-changed-dirs
+        with:
+          base-sha: ${{ github.event.pull_request.base.sha }}
