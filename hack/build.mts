@@ -39,4 +39,5 @@ for (const bin of binsToBuild) {
     "#!/usr/bin/env node\n\n'use strict;'\n"
   );
   await fs.writeFile(outFile, patchedBuild, 'utf-8');
+  await fs.chmod(outFile, 0o755);
 }
