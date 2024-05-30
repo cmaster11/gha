@@ -30,7 +30,8 @@ for (const bin of binsToBuild) {
     sourcemap: false,
     outfile: outFile,
     platform: 'node',
-    format: 'esm'
+    format: 'esm',
+    inject: [path.join(__dirname, 'cjs-shim.ts')]
   });
 
   const unpatchedBuild = await fs.readFile(outFile, 'utf-8');
