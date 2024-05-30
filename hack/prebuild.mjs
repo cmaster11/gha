@@ -1,6 +1,3 @@
-import 'zx/globals';
-import { minimist } from 'zx';
-
 const __dirname = import.meta.dirname;
 const rootDir = path.join(__dirname, '..');
 

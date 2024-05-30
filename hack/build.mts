@@ -1,7 +1,6 @@
 #!/usr/bin/env npx tsx
 import 'zx/globals';
 import * as esbuild from 'esbuild';
-import { minimist } from 'zx';
 
 const __dirname = import.meta.dirname;
 
