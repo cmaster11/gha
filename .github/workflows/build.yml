@@ -51,4 +51,6 @@ jobs:
 
       - name: Build
         shell: bash
-        run: npx tsx ./hack/build.mts "$GITHUB_ACTION_PATH"
+        run: npx tsx ./hack/build.mts "$MATRIX_DIRECTORY"
+        env:
+          MATRIX_DIRECTORY: ${{ matrix.directory }}
