@@ -1,10 +1,13 @@
 import * as esbuild from 'esbuild';
 
 export async function buildBinaries(actionDir: string) {
+  const binDir = path.join(actionDir, 'bin');
+  if (!(await fs.exists(binDir))) return;
+
   const distDir = path.join(actionDir, 'dist');
   await fs.mkdirp(distDir);
 
-  const binsToBuild = await fs.readdir(path.join(actionDir, 'bin'));
+  const binsToBuild = await fs.readdir(binDir);
   for (const bin of binsToBuild) {
     console.log(`Building ${bin}`);
     const fullPath = path.join(actionDir, 'bin', bin);
