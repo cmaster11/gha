@@ -1,7 +1,7 @@
 import 'zx/globals';
 import path from 'node:path';
 import { rootDir } from './constants.js';
-import { VersionLabel } from './version.js';
+import type { VersionLabel } from './version.js';
 
 export async function getGitTagsByGlob(glob: string): Promise<string[]> {
   const out =
@@ -41,6 +41,8 @@ export async function flowGitCloneReplaceAndCommit(
     const commitMessage = `[${versionLabel}] ${tag}`;
     await $`git commit -m ${commitMessage}`;
     await $`git tag ${tag}`;
+
+    await $`git show --name-status`;
   });
 
   return tmpDir;
