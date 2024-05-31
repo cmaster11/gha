@@ -42,6 +42,7 @@ export async function flowGitCloneReplaceAndCommit(
     await $`git commit -m ${commitMessage}`;
     await $`git tag ${tag}`;
 
+    await $`ls -al`;
     await $`git show --name-status`;
   });
 
