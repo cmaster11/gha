@@ -37,7 +37,13 @@ export async function githubGetPrVersionLabel(
 
   if (throwIfNoneFound)
     throw new Error(
-      `No version labels found. The PR needs to contain at least one of the following labels: ${[$enum(VersionLabel).getValues(), $enum(NoReleaseVersionLabel).getValues()].flat().join(',')}`
+      `No version labels found. The PR needs to contain at least one of the following labels: ` +
+        [
+          $enum(VersionLabel).getValues(),
+          $enum(NoReleaseVersionLabel).getValues()
+        ]
+          .flat()
+          .join(', ')
     );
 
   return;

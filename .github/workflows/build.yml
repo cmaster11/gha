@@ -7,6 +7,13 @@ on:
   pull_request:
     branches:
       - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      # Triggers the workflow when labels change in the PR
+      - labeled
+      - unlabeled
 
 jobs:
   get-changes:
