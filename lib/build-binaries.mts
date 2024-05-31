@@ -1,7 +1,10 @@
 import * as esbuild from 'esbuild';
+import path from 'node:path';
+import { actionsDir } from './constants.js';
 const __dirname = import.meta.dirname;
 
-export async function buildBinaries(actionDir: string) {
+export async function buildBinaries(actionName: string) {
+  const actionDir = path.join(actionsDir, actionName);
   const binDir = path.join(actionDir, 'bin');
   if (!(await fs.exists(binDir))) return;
 

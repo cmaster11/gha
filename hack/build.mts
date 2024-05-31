@@ -1,13 +1,11 @@
 import 'zx/globals';
 import { buildBinaries } from '../lib/build-binaries.mjs';
-import path from 'node:path';
 import { copyActionFiles } from '../lib/copy-action-files.js';
 import { Octokit } from '@octokit/rest';
 import type { GithubCommonProps } from '../lib/github-common.js';
 import { githubGetPrVersionLabel } from '../lib/github-get-pr-labels.js';
 import Joi from 'joi';
 import { flowGitCloneReplaceAndCommit, getGitTagsByGlob } from '../lib/git.js';
-import { rootDir } from '../lib/constants.js';
 import { getLatestTagSemVer, increaseSemver } from '../lib/version.js';
 import semver from 'semver/preload.js';
 
@@ -41,18 +39,11 @@ async function main() {
       ) as PromoteOpts)
     : undefined;
 
-  let actionToBuild = _[0];
-  if (path.isAbsolute(actionToBuild)) {
-    actionToBuild = path.relative(rootDir, actionToBuild);
-  } else if (!actionToBuild.startsWith('actions/')) {
-    actionToBuild = 'actions/' + actionToBuild;
-  }
-
-  const actionToBuildDirFullPath = path.join(rootDir, actionToBuild);
-  await buildBinaries(actionToBuildDirFullPath);
+  const actionName = _[0].split('/').reverse()[0];
+  await buildBinaries(actionName);
 
   if (promoteOpts) {
-    await promoteFlow(actionToBuildDirFullPath, promoteOpts);
+    await promoteFlow(actionName, promoteOpts);
   }
 }
 
