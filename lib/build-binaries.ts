@@ -21,7 +21,7 @@ export async function buildBinaries(actionDir: string) {
       outfile: outFile,
       platform: 'node',
       format: 'esm',
-      inject: [path.join(__dirname, 'cjs-shim.ts')]
+      inject: [path.join(__dirname, 'cjs-shim.mts')]
     });
 
     const unpatchedBuild = await fs.readFile(outFile, 'utf-8');
