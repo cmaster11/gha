@@ -57,9 +57,9 @@ jobs:
         run: >
           npx tsx ./hack/build.mts
           --promote
-          --token "$GITHUB_TOKEN"
-          --repository "$GITHUB_REPOSITORY"
-          --pullNumber "PR_NUMBER"
+          --token="$GITHUB_TOKEN"
+          --repository="$GITHUB_REPOSITORY"
+          --pullNumber="$PR_NUMBER"
           "$MATRIX_DIRECTORY"
         env:
           MATRIX_DIRECTORY: ${{ matrix.directory }}
