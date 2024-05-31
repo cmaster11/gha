@@ -1,4 +1,5 @@
 import * as esbuild from 'esbuild';
+const __dirname = import.meta.dirname;
 
 export async function buildBinaries(actionDir: string) {
   const binDir = path.join(actionDir, 'bin');
