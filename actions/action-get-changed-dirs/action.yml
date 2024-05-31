@@ -38,3 +38,8 @@ runs:
       id: get-changes
       shell: bash
       run: $GITHUB_ACTION_PATH/dist/get-changed-directories.mjs
+      env:
+        INPUT_BASE-SHA: ${{ inputs.base-sha }}
+        INPUT_REGEX: ${{ inputs.regex }}
+        INPUT_MAX-DEPTH: ${{ inputs.max-depth }}
+        INPUT_IGNORE-IF-ALL-DELETIONS: ${{ inputs.ignore-if-all-deletions }}
