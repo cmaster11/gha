@@ -1,5 +1,5 @@
 import 'zx/globals';
-import { buildBinaries } from '../lib/build-binaries.js';
+import { buildBinaries } from '../lib/build-binaries.mjs';
 import path from 'node:path';
 import { copyActionFiles } from '../lib/copy-action-files.js';
 import { Octokit } from '@octokit/rest';
