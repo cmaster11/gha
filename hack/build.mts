@@ -3,26 +3,17 @@ import { buildBinaries } from '../lib/build-binaries.js';
 import path from 'node:path';
 import { copyActionFiles } from '../lib/copy-action-files.js';
 import { Octokit } from '@octokit/rest';
-import { GithubCommonProps } from '../lib/github-common.js';
-import {
-  githubGetPrLabels,
-  githubGetPrVersionLabel
-} from '../lib/github-get-pr-labels.js';
+import type { GithubCommonProps } from '../lib/github-common.js';
+import { githubGetPrVersionLabel } from '../lib/github-get-pr-labels.js';
 import Joi from 'joi';
 import { flowGitCloneReplaceAndCommit, getGitTagsByGlob } from '../lib/git.js';
 import { rootDir } from '../lib/constants.js';
-import {
-  getLatestTagSemVer,
-  increaseSemver,
-  semverSort,
-  semverSortDesc
-} from '../lib/version.js';
+import { getLatestTagSemVer, increaseSemver } from '../lib/version.js';
 import semver from 'semver/preload.js';
 
 interface PromoteOpts {
   token: string;
-  owner: string;
-  repo: string;
+  repository: string;
   pullNumber: number;
 }
 
@@ -32,7 +23,8 @@ async function main() {
     promote: promoteFlag,
     ...rest
   } = minimist(process.argv.slice(2), {
-    boolean: ['promote']
+    boolean: ['promote'],
+    string: ['token', 'repository', 'pullNumber']
   });
 
   const promoteOpts = promoteFlag
@@ -40,10 +32,12 @@ async function main() {
         rest,
         Joi.object({
           token: Joi.string().required(),
-          owner: Joi.string().required(),
-          repo: Joi.string().required(),
+          repository: Joi.string().required(),
           pullNumber: Joi.number().required()
-        }).required()
+        }).required(),
+        {
+          allowUnknown: true
+        }
       ) as PromoteOpts)
     : undefined;
 
@@ -64,8 +58,9 @@ async function main() {
 
 async function promoteFlow(
   actionName: string,
-  { token, owner, repo, pullNumber }: PromoteOpts
+  { token, repository, pullNumber }: PromoteOpts
 ) {
+  const [owner, repo] = repository.split('/');
   const octokit = new Octokit({
     auth: token
   });

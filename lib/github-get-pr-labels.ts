@@ -1,4 +1,4 @@
-import { GithubCommonProps } from './github-common.js';
+import type { GithubCommonProps } from './github-common.js';
 import { $enum } from 'ts-enum-util';
 import { NoReleaseVersionLabel, VersionLabel } from './version.js';
 

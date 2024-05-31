@@ -38,6 +38,9 @@ jobs:
       - get-changes
     runs-on: ubuntu-latest
     if: needs.get-changes.outputs.matrix-empty != 'true'
+    permissions:
+      pull-requests: read
+      contents: write
     strategy:
       matrix: ${{ fromJSON(needs.get-changes.outputs.matrix) }}
     steps:
@@ -51,6 +54,13 @@ jobs:
 
       - name: Build
         shell: bash
-        run: npx tsx ./hack/build.mts "$MATRIX_DIRECTORY"
+        run: >
+          npx tsx ./hack/build.mts
+          --promote
+          --token "$GITHUB_TOKEN"
+          --repository "$GITHUB_REPOSITORY"
+          --pullNumber "PR_NUMBER"
+          "$MATRIX_DIRECTORY"
         env:
           MATRIX_DIRECTORY: ${{ matrix.directory }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}

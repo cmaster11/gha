@@ -21,11 +21,8 @@ export default tseslint.config({
     }
   },
   rules: {
-    '@typescript-eslint/no-var-requires': 'off'
+    '@typescript-eslint/no-var-requires': 'off',
+    '@typescript-eslint/consistent-type-imports': 'error'
   },
-  ignores: [
-    'node_modules/**',
-    '*.d.ts',
-    '*.config.mjs'
-  ]
+  ignores: ['node_modules/**', '*.d.ts', '*.config.mjs']
 });
