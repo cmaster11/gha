@@ -9,10 +9,13 @@ import { flowGitCloneReplaceAndCommit, getGitTagsByGlob } from '../git.js';
 import { getLatestTagSemVer, increaseSemver } from '../version.js';
 import semver from 'semver/preload.js';
 
+$.verbose = true;
+
 interface PromoteOpts {
   token: string;
   repository: string;
   pullNumber: number;
+  push: boolean;
 }
 
 async function main() {
@@ -21,7 +24,7 @@ async function main() {
     promote: promoteFlag,
     ...rest
   } = minimist(process.argv.slice(2), {
-    boolean: ['promote'],
+    boolean: ['promote', 'push'],
     string: ['token', 'repository', 'pullNumber']
   });
 
@@ -31,7 +34,8 @@ async function main() {
         Joi.object({
           token: Joi.string().required(),
           repository: Joi.string().required(),
-          pullNumber: Joi.number().required()
+          pullNumber: Joi.number().required(),
+          push: Joi.boolean().required()
         }).required(),
         {
           allowUnknown: true
@@ -49,8 +53,10 @@ async function main() {
 
 async function promoteFlow(
   actionName: string,
-  { token, repository, pullNumber }: PromoteOpts
+  { token, repository, pullNumber, push }: PromoteOpts
 ) {
+  await $`git fetch --tags`;
+
   const [owner, repo] = repository.split('/');
   const octokit = new Octokit({
     auth: token
@@ -89,6 +95,12 @@ async function promoteFlow(
     newTag,
     contentsDir
   );
+
+  if (push) {
+    const pushShell = $({ cwd: newBranchDir });
+    await pushShell`git push origin ${versionBranch}`;
+    await pushShell`git push origin tag ${newTag}`;
+  }
 }
 
 void main();

@@ -1,9 +1,6 @@
 name: Build the actions library
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
@@ -11,12 +8,16 @@ on:
       - opened
       - synchronize
       - reopened
+      - closed
       # Triggers the workflow when labels change in the PR
       - labeled
       - unlabeled
 
 jobs:
   get-changes:
+    if: >
+      github.event.action != 'closed' ||
+      (github.event.action == 'closed' && github.event.pull_request.merged)
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.get-changed-dirs.outputs.matrix }}
@@ -68,8 +69,10 @@ jobs:
           --token "$TOKEN"
           --repository "$GITHUB_REPOSITORY"
           --pullNumber "$PR_NUMBER"
+          --push "$PUSH"
           "$MATRIX_DIRECTORY"
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MATRIX_DIRECTORY: ${{ matrix.directory }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          PUSH: ${{ github.event.action == 'closed' && github.event.pull_request.merged }}
