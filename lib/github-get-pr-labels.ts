@@ -1,5 +1,6 @@
 import { GithubCommonProps } from './github-common.js';
 import { $enum } from 'ts-enum-util';
+import { NoReleaseVersionLabel, VersionLabel } from './version.js';
 
 export interface GitHubGetPrLabelsOpts {
   gh: GithubCommonProps;
@@ -18,16 +19,6 @@ export async function githubGetPrLabels(
     pull_number: opts.pullNumber
   });
   return pr.data.labels.map((l) => l.name);
-}
-
-export enum VersionLabel {
-  patch = 'patch',
-  minor = 'minor',
-  major = 'major'
-}
-
-export enum NoReleaseVersionLabel {
-  'no-release' = 'no-release'
 }
 
 export async function githubGetPrVersionLabel(

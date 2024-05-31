@@ -1,7 +1,11 @@
 import path from 'node:path';
+import { actionsDir } from './constants.js';
 
-export async function copyActionFiles(actionDir: string) {
+export async function copyActionFiles(actionName: string) {
   const tmpDir = tmpdir();
+  console.log(`Cloning action ${actionName} files to ${tmpDir}`);
+
+  const actionDir = path.join(actionsDir, actionName);
 
   // Copy over all relevant action files
   await fs.copy(

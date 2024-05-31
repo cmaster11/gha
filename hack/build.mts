@@ -1,17 +1,23 @@
 import 'zx/globals';
-import { buildBinaries } from '../lib/build-binaries.mjs';
+import { buildBinaries } from '../lib/build-binaries.js';
 import path from 'node:path';
-import { copyActionFiles } from '../lib/copy-action-files.mjs';
+import { copyActionFiles } from '../lib/copy-action-files.js';
 import { Octokit } from '@octokit/rest';
 import { GithubCommonProps } from '../lib/github-common.js';
 import {
   githubGetPrLabels,
   githubGetPrVersionLabel
-} from '../lib/github-get-pr-labels.mjs';
+} from '../lib/github-get-pr-labels.js';
 import Joi from 'joi';
-
-const __dirname = import.meta.dirname;
-const rootDir = path.join(__dirname, '..');
+import { flowGitCloneReplaceAndCommit, getGitTagsByGlob } from '../lib/git.js';
+import { rootDir } from '../lib/constants.js';
+import {
+  getLatestTagSemVer,
+  increaseSemver,
+  semverSort,
+  semverSortDesc
+} from '../lib/version.js';
+import semver from 'semver/preload.js';
 
 interface PromoteOpts {
   token: string;
@@ -57,7 +63,7 @@ async function main() {
 }
 
 async function promoteFlow(
-  actionDir: string,
+  actionName: string,
   { token, owner, repo, pullNumber }: PromoteOpts
 ) {
   const octokit = new Octokit({
@@ -77,11 +83,26 @@ async function promoteFlow(
   });
   if (versionLabel == null) {
     console.log('No version label found. Not proceeding with promote flow.');
+    return;
   }
 
-  // TODO find the oldest version tag and bump it up
+  const tagPrefix = actionName + '-v';
+  const tags = await getGitTagsByGlob(tagPrefix + '*');
+  const latestSemVer = getLatestTagSemVer(tags, tagPrefix);
+  const newSemVer = increaseSemver(latestSemVer, versionLabel);
+  const versionBranch = tagPrefix + semver.major(newSemVer);
+  const newTag = tagPrefix + newSemVer;
+  console.log(
+    `Proceeding with new version tag ${newTag} and version branch ${versionBranch}`
+  );
 
-  const tmpDir = await copyActionFiles(actionDir);
+  const contentsDir = await copyActionFiles(actionName);
+  const newBranchDir = await flowGitCloneReplaceAndCommit(
+    versionBranch,
+    versionLabel,
+    newTag,
+    contentsDir
+  );
 }
 
 void main();

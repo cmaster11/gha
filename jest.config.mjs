@@ -5,8 +5,16 @@
 export default {
   testEnvironment: 'node',
   roots: ['<rootDir>/test'],
-  testMatch: ['**/*.test.ts'],
+  extensionsToTreatAsEsm: ['.ts'],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
   transform: {
-    '^.+\\.tsx?$': 'ts-jest'
-  }
+    '^.+\\.m?ts$': [
+      'ts-jest',
+      {
+        useESM: true,
+      },
+    ],
+  },
 };

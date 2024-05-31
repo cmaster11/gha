@@ -1,6 +1,6 @@
 import { inspect } from 'node:util';
 import 'zx/globals';
-import { getChangedDirectories } from '../../../lib/get-changed-directories.mjs';
+import { getChangedDirectories } from '../../../lib/get-changed-directories.js';
 
 const {
   INPUT_BASE_SHA,

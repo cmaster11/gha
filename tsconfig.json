@@ -3,7 +3,10 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "NodeNext",
-    "lib": ["es2022", "dom"],
+    "lib": [
+      "es2022",
+      "dom"
+    ],
     "declaration": true,
     "strict": true,
     "noImplicitAny": true,
@@ -18,10 +21,17 @@
     "inlineSources": true,
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
-    "typeRoots": ["./node_modules/@types"],
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
     "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "outDir": "dist"
+    "esModuleInterop": true
   },
-  "include": ["bin","hack","lib","actions"]
+  "include": [
+    "bin",
+    "hack",
+    "lib",
+    "actions",
+    "test"
+  ]
 }
