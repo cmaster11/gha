@@ -1,5 +1,5 @@
 import { describe } from 'node:test';
-import { semverSort, semverSortDesc } from '../lib/version.js';
+import { semverSort, semverSortDesc } from '../version.js';
 
 describe('version', () => {
   const tags = ['1.0.0', '1.0.1', '2.0.0'];

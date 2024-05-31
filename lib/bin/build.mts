@@ -1,12 +1,12 @@
 import 'zx/globals';
-import { buildBinaries } from '../lib/build-binaries.mjs';
-import { copyActionFiles } from '../lib/copy-action-files.js';
+import { buildBinaries } from '../build-binaries.mjs';
+import { copyActionFiles } from '../copy-action-files.js';
 import { Octokit } from '@octokit/rest';
-import type { GithubCommonProps } from '../lib/github-common.js';
-import { githubGetPrVersionLabel } from '../lib/github-get-pr-labels.js';
+import type { GithubCommonProps } from '../github-common.js';
+import { githubGetPrVersionLabel } from '../github-get-pr-labels.js';
 import Joi from 'joi';
-import { flowGitCloneReplaceAndCommit, getGitTagsByGlob } from '../lib/git.js';
-import { getLatestTagSemVer, increaseSemver } from '../lib/version.js';
+import { flowGitCloneReplaceAndCommit, getGitTagsByGlob } from '../git.js';
+import { getLatestTagSemVer, increaseSemver } from '../version.js';
 import semver from 'semver/preload.js';
 
 interface PromoteOpts {

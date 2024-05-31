@@ -52,6 +52,7 @@ jobs:
       matrix: ${{ fromJSON(needs.get-changes.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
+      - uses: ./actions/action-git-init-userinfo
       - uses: actions/setup-node@v4
         with:
           node-version-file: package.json
@@ -62,7 +63,7 @@ jobs:
       - name: Build
         shell: bash
         run: >
-          npx tsx ./hack/build.mts
+          npx tsx ./lib/bin/build.mts
           --promote
           --token "$TOKEN"
           --repository "$GITHUB_REPOSITORY"

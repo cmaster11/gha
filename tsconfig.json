@@ -28,10 +28,7 @@
     "esModuleInterop": true
   },
   "include": [
-    "bin",
-    "hack",
     "lib",
-    "actions",
-    "test"
+    "actions"
   ]
 }

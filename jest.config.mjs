@@ -4,17 +4,17 @@
 
 export default {
   testEnvironment: 'node',
-  roots: ['<rootDir>/test'],
+  roots: ['<rootDir>/lib/test'],
   extensionsToTreatAsEsm: ['.ts'],
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
+    '^(\\.{1,2}/.*)\\.js$': '$1'
   },
   transform: {
     '^.+\\.m?ts$': [
       'ts-jest',
       {
-        useESM: true,
-      },
-    ],
-  },
+        useESM: true
+      }
+    ]
+  }
 };
