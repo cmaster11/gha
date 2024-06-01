@@ -89,7 +89,7 @@ jobs:
 
   build:
     concurrency:
-      group: "${{ (github.event.action == 'closed' && github.event.pull_request.merged) && 'release' || 'build' }}-${{ matrix.directory }}"
+      group: "${{ (github.event.action == 'closed' && github.event.pull_request.merged) && 'release' || format('pr-{0}', github.event.pull_request.number) }}-${{ matrix.directory }}"
       # Only cancel existing builds if we're in dev mode
       cancel-in-progress: ${{ github.event.action != 'closed' }}
     needs:
