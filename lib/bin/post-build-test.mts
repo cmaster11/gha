@@ -2,9 +2,6 @@ import 'zx/globals';
 import { Octokit } from '@octokit/rest';
 import type { GithubCommonProps } from '../github-common.js';
 import Joi from 'joi';
-import { getPRDevBranch } from '../version.js';
-import path from 'node:path';
-import { rootDir } from '../constants.js';
 
 $.verbose = true;
 
@@ -12,14 +9,14 @@ interface Opts {
   token: string;
   repository: string;
   versionBranch: string;
-  pullNumber: number;
+  headRef: string;
   release: boolean;
 }
 
 async function main() {
   const { _, ...rest } = minimist(process.argv.slice(2), {
     boolean: ['release'],
-    string: ['token', 'repository', 'versionBranch', 'pullNumber']
+    string: ['token', 'repository', 'versionBranch', 'headRef']
   });
 
   const opts = Joi.attempt(
@@ -28,7 +25,7 @@ async function main() {
       token: Joi.string().required(),
       repository: Joi.string().required(),
       versionBranch: Joi.string().required(),
-      pullNumber: Joi.number().required(),
+      headRef: Joi.string().required(),
       release: Joi.boolean().required()
     }).required(),
     {
@@ -42,16 +39,8 @@ async function main() {
 
 async function flow(
   actionName: string,
-  { token, repository, versionBranch, pullNumber, release }: Opts
+  { token, repository, versionBranch, release, headRef }: Opts
 ) {
-  const workflowName = `test-${actionName}.yml`;
-  if (
-    !(await fs.exists(path.join(rootDir, '.github', 'workflows', workflowName)))
-  ) {
-    console.log('No test workflow found');
-    return;
-  }
-
   const [owner, repo] = repository.split('/');
   const octokit = new Octokit({
     auth: token
@@ -64,7 +53,26 @@ async function flow(
     }
   };
 
-  const ref = release ? 'main' : getPRDevBranch(actionName, pullNumber);
+  const ref = release ? 'main' : headRef;
+  const workflowName = `test-${actionName}.yml`;
+
+  // Check if there is a workflow to trigger
+  try {
+    await octokit.rest.repos.getContent({
+      ...gh.repoProps,
+      ref,
+      path: `.github/workflows/${workflowName}`
+    });
+  } catch (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    err: any
+  ) {
+    if (err.response.status === 404) {
+      // No workflow to trigger
+      return;
+    }
+    throw err;
+  }
 
   await octokit.rest.actions.createWorkflowDispatch({
     ...gh.repoProps,

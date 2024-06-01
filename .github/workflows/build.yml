@@ -140,14 +140,13 @@ jobs:
           npx tsx ./lib/bin/post-build-test.mts
           --token "$TOKEN"
           --repository "$GITHUB_REPOSITORY"
-          --pullNumber "$PR_NUMBER"
           --versionBranch "$VERSION_BRANCH"
+          --headRef "$GITHUB_HEAD_REF"
           --release "$RELEASE"
           "$MATRIX_DIRECTORY"
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MATRIX_DIRECTORY: ${{ matrix.directory }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
           VERSION_BRANCH: ${{ fromJson(steps.read-build-output.outputs.result).version-branch[matrix.directory] }}
           RELEASE: ${{ github.event.action == 'closed' && github.event.pull_request.merged }}
 
