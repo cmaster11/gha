@@ -1,7 +1,0 @@
-name: Test action
-description: A test action
-runs:
-  using: "composite"
-  steps:
-    - shell: bash
-      run: echo "Hello!"
