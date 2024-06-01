@@ -51,13 +51,15 @@ jobs:
       - shell: bash
         run: npm ci
 
-      - id: get-changed-dirs
-        uses: ./actions/action-get-changed-dirs
-        with:
-          base-sha: ${{ github.event.pull_request.base.sha }}
-          max-depth: 1
-          regex: ^actions/
-          ignore-if-all-deletions: true
+      - name: Get changes
+        id: get-changed-dirs
+        shell: bash
+        run: >
+          npx tsx ./lib/bin/get-changes-matrix.mts
+          --baseSHA "$BASE_SHA"
+          "$MATRIX_DIRECTORY"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
 
   build:
     needs:

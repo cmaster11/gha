@@ -48,3 +48,20 @@ export async function flowGitCloneReplaceAndCommit(
 
   return tmpDir;
 }
+
+export async function gitDiffLines(baseSHA: string) {
+  const lineRegex = /^(\w+)\s+(\S.+)$/;
+
+  return (await $`git diff --name-status ${baseSHA}`).stdout
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line !== '')
+    .map((line) => lineRegex.exec(line))
+    .filter((arr) => arr != null)
+    .map((arr) => [
+      // Git status
+      arr![1],
+      // Path
+      arr![2]
+    ]);
+}

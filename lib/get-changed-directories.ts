@@ -1,5 +1,6 @@
 import * as path from 'node:path';
 import 'zx/globals';
+import { gitDiffLines } from './git.js';
 
 export interface GetChangedDirectoriesOpts {
   baseSHA: string;
@@ -17,16 +18,9 @@ export async function getChangedDirectories({
   directoryRegex ??= /.*/;
   maxDepth ??= 0;
 
-  const lineRegex = /^(\w+)\s+(\S.+)$/;
-
-  const diffLines = (await $`git diff --name-status ${baseSHA}`).stdout
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line !== '')
-    .map((line) => lineRegex.exec(line))
-    .filter((arr) => arr != null)
-    .map((arr) => [arr![1], arr![2]])
-    .filter(([, p]) => directoryRegex.test(p));
+  const diffLines = (await gitDiffLines(baseSHA)).filter(([, p]) =>
+    directoryRegex.test(p)
+  );
 
   // Composes an object where the key is the directory and the value is `true` if at least 1 file was NOT deleted
   const aggregatedChanges = diffLines
