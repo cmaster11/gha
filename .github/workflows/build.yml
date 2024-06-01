@@ -36,7 +36,7 @@ jobs:
       - name: Get release label
         uses: ./actions/action-get-release-label
         with:
-          token: ${{ secret.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   test:
     if: >
