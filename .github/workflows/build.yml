@@ -69,10 +69,45 @@ jobs:
           --token "$TOKEN"
           --repository "$GITHUB_REPOSITORY"
           --pullNumber "$PR_NUMBER"
-          --push "$PUSH"
+          --release "$RELEASE"
           "$MATRIX_DIRECTORY"
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MATRIX_DIRECTORY: ${{ matrix.directory }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          PUSH: ${{ github.event.action == 'closed' && github.event.pull_request.merged }}
+          RELEASE: ${{ github.event.action == 'closed' && github.event.pull_request.merged }}
+
+  cleanup:
+    needs:
+      - get-changes
+    runs-on: ubuntu-latest
+    if: >
+      needs.get-changes.outputs.matrix-empty != 'true' && 
+      github.event.action == 'closed'
+    permissions:
+      pull-requests: read
+      contents: write
+    strategy:
+      matrix: ${{ fromJSON(needs.get-changes.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./actions/action-git-init-userinfo
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: npm
+      - shell: bash
+        run: npm ci
+
+      - name: Cleanup
+        shell: bash
+        run: >
+          npx tsx ./lib/bin/cleanup.mts
+          --token "$TOKEN"
+          --repository "$GITHUB_REPOSITORY"
+          --pullNumber "$PR_NUMBER"
+          "$MATRIX_DIRECTORY"
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MATRIX_DIRECTORY: ${{ matrix.directory }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}

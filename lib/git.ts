@@ -1,7 +1,6 @@
 import 'zx/globals';
 import path from 'node:path';
 import { rootDir } from './constants.js';
-import type { VersionLabel } from './version.js';
 
 export async function getGitTagsByGlob(glob: string): Promise<string[]> {
   const out = (await $`git tag -l ${glob}`).stdout;
@@ -10,9 +9,9 @@ export async function getGitTagsByGlob(glob: string): Promise<string[]> {
 
 export async function flowGitCloneReplaceAndCommit(
   branchName: string,
-  versionLabel: VersionLabel,
-  tag: string,
-  contentsDir: string
+  contentsDir: string,
+  commitMessage: string,
+  tag?: string
 ): Promise<string> {
   // Clone the current repo
   const tmpDir = tmpdir();
@@ -38,9 +37,10 @@ export async function flowGitCloneReplaceAndCommit(
 
     await $`git add .`;
 
-    const commitMessage = `[${versionLabel}] ${tag}`;
     await $`git commit -m ${commitMessage}`;
-    await $`git tag ${tag}`;
+    if (tag) {
+      await $`git tag ${tag}`;
+    }
 
     await $`ls -al`;
     await $`git show --name-status`;

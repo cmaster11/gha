@@ -1,4 +1,5 @@
 import * as semver from 'semver';
+import type { ReleaseType } from 'semver';
 
 export enum VersionLabel {
   patch = 'patch',
@@ -26,12 +27,29 @@ export function getLatestTagSemVer(tags: string[], prefix: string): string {
 
 export function increaseSemver(
   tag: string,
-  versionLabel: VersionLabel
+  versionLabel: VersionLabel,
+  preReleasePrefix?: string,
+  usePrereleaseReleaseType?: boolean
 ): string {
-  const newVersion = semver.inc(tag, versionLabel);
+  let releaseType: ReleaseType = versionLabel;
+  if (usePrereleaseReleaseType) {
+    releaseType = 'prerelease';
+  } else if (preReleasePrefix) {
+    releaseType = ('pre' + versionLabel) as ReleaseType;
+  }
+  const newVersion = semver.inc(tag, releaseType, false, preReleasePrefix);
   if (newVersion == null)
     throw new Error(
       `Invalid semver increase request for tag ${tag} and version label ${versionLabel}`
     );
   return newVersion;
+}
+
+export function getPRSuffix(pullNumber: number) {
+  return `pr-${pullNumber}`;
+}
+
+export function getPRDevBranch(actionName: string, pullNumber: number) {
+  const branchSuffix = 'dev-' + getPRSuffix(pullNumber);
+  return `${actionName}/${branchSuffix}`;
 }

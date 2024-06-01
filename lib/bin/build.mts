@@ -6,7 +6,12 @@ import type { GithubCommonProps } from '../github-common.js';
 import { githubGetPrVersionLabel } from '../github-get-pr-labels.js';
 import Joi from 'joi';
 import { flowGitCloneReplaceAndCommit, getGitTagsByGlob } from '../git.js';
-import { getLatestTagSemVer, increaseSemver } from '../version.js';
+import {
+  getLatestTagSemVer,
+  getPRDevBranch,
+  getPRSuffix,
+  increaseSemver
+} from '../version.js';
 import semver from 'semver/preload.js';
 
 $.verbose = true;
@@ -15,7 +20,7 @@ interface PromoteOpts {
   token: string;
   repository: string;
   pullNumber: number;
-  push: boolean;
+  release: boolean;
 }
 
 async function main() {
@@ -24,7 +29,7 @@ async function main() {
     promote: promoteFlag,
     ...rest
   } = minimist(process.argv.slice(2), {
-    boolean: ['promote', 'push'],
+    boolean: ['promote', 'release'],
     string: ['token', 'repository', 'pullNumber']
   });
 
@@ -35,7 +40,7 @@ async function main() {
           token: Joi.string().required(),
           repository: Joi.string().required(),
           pullNumber: Joi.number().required(),
-          push: Joi.boolean().required()
+          release: Joi.boolean().required()
         }).required(),
         {
           allowUnknown: true
@@ -53,7 +58,7 @@ async function main() {
 
 async function promoteFlow(
   actionName: string,
-  { token, repository, pullNumber, push }: PromoteOpts
+  { token, repository, pullNumber, release }: PromoteOpts
 ) {
   await $`git fetch --tags`;
 
@@ -78,29 +83,44 @@ async function promoteFlow(
     return;
   }
 
-  const tagPrefix = actionName + '-v';
+  const contentsDir = await copyActionFiles(actionName);
+
+  // If we are NOT releasing a new version, just generate a dev branch
+  if (!release) {
+    const versionBranch = getPRDevBranch(actionName, pullNumber);
+    console.log(`Proceeding with dev version branch ${versionBranch}`);
+    const newBranchDir = await flowGitCloneReplaceAndCommit(
+      versionBranch,
+      contentsDir,
+      `[${versionBranch}] ${new Date().toISOString()}`
+    );
+
+    const pushShell = $({ cwd: newBranchDir });
+    await pushShell`git push origin ${versionBranch}`;
+    return;
+  }
+
+  // On release, generate a tag and a major-version branch
+  const tagPrefix = actionName + '/v';
   const tags = await getGitTagsByGlob(tagPrefix + '*');
   const latestSemVer = getLatestTagSemVer(tags, tagPrefix);
+
   const newSemVer = increaseSemver(latestSemVer, versionLabel);
   const versionBranch = tagPrefix + semver.major(newSemVer);
   const newTag = tagPrefix + newSemVer;
   console.log(
     `Proceeding with new version tag ${newTag} and version branch ${versionBranch}`
   );
-
-  const contentsDir = await copyActionFiles(actionName);
   const newBranchDir = await flowGitCloneReplaceAndCommit(
     versionBranch,
-    versionLabel,
-    newTag,
-    contentsDir
+    contentsDir,
+    `[${versionBranch}] ${newTag}`,
+    newTag
   );
 
-  if (push) {
-    const pushShell = $({ cwd: newBranchDir });
-    await pushShell`git push origin ${versionBranch}`;
-    await pushShell`git push origin tag ${newTag}`;
-  }
+  const pushShell = $({ cwd: newBranchDir });
+  await pushShell`git push origin ${versionBranch}`;
+  await pushShell`git push origin tag ${newTag}`;
 }
 
 void main();
