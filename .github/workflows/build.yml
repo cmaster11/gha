@@ -148,7 +148,7 @@ jobs:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MATRIX_DIRECTORY: ${{ matrix.directory }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          VERSION_BRANCH: ${{ fromJson(steps.read-build-output.outputs.result)[matrix.directory].version-branch }}
+          VERSION_BRANCH: ${{ fromJson(steps.read-build-output.outputs.result).version-branch[matrix.directory] }}
           RELEASE: ${{ github.event.action == 'closed' && github.event.pull_request.merged }}
 
   cleanup:
