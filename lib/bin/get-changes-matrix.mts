@@ -77,3 +77,5 @@ async function main() {
   );
   setOutput('matrix-empty', changedDirs.length === 0);
 }
+
+void main();
