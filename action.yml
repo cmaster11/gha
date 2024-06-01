@@ -1,8 +1,7 @@
 name: Get PR labels
 description: >
-  This actions looks for any release labels such as: patch, minor, major, no-release.
-  It will fail it no labels are found.
-
+  This actions looks for any release labels such as: patch, minor, major,
+  no-release. It will fail it no labels are found.
 inputs:
   token:
     description: A GitHub token
@@ -15,7 +14,6 @@ inputs:
     description: The PR number
     required: false
     default: ${{ github.event.pull_request.number }}
-
 outputs:
   release-label:
     description: The label found
@@ -24,12 +22,8 @@ outputs:
     description: True if the release can continue
     value: ${{ steps.get-pr-labels.outputs.continue-release }}
 runs:
-  using: "composite"
+  using: composite
   steps:
-    - id: PREBUILD
-      shell: bash
-      run: npx tsx ./lib/bin/build.mts "$GITHUB_ACTION_PATH"
-
     - name: Get PR labels
       id: get-pr-labels
       shell: bash

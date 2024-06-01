@@ -1,6 +1,0 @@
-if command -v actionlint >/dev/null 2>&1; then
-    echo "Running actionlint"
-    actionlint
-else
-    echo "actionlint not found"
-fi
