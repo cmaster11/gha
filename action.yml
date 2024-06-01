@@ -1,8 +1,7 @@
 name: Get changed directories
 description: >
-  Uses git diff to find the list of changed directories, 
-  compared to a previous commit SHA
-
+  Uses git diff to find the list of changed directories,  compared to a previous
+  commit SHA
 inputs:
   base-sha:
     description: The base commit SHA
@@ -10,30 +9,28 @@ inputs:
   ignore-if-all-deletions:
     description: If true, ignore entries where there have been only deletions
     required: false
-    default: 'false'
+    default: "false"
   regex:
     description: A regex used to evaluate directory paths
     required: false
   max-depth:
     description: The max path depth to which aggregate directory names
     required: false
-    default: '0'
-
+    default: "0"
 outputs:
   matrix:
     description: The JSON matrix containing the list of changed directories
     value: ${{ steps.get-changes.outputs.matrix }}
   matrix-empty:
-    description: >
+    description: |
       "true" if the matrix is empty
     value: ${{ steps.get-changes.outputs.matrix-empty }}
 runs:
-  using: "composite"
+  using: composite
   steps:
     - id: PREBUILD
       shell: bash
       run: npx tsx ./lib/bin/build.mts "$GITHUB_ACTION_PATH"
-
     - name: Get changed directories
       id: get-changes
       shell: bash
