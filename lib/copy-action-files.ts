@@ -20,7 +20,8 @@ export async function copyActionFiles(actionName: string) {
       const idx = (actionYmlContents.runs.steps as { id: string }[]).findIndex(
         (step) => step.id == 'PREBUILD'
       );
-      if (idx > 0) {
+      if (idx >= 0) {
+        console.log('Found PREBUILD step, removing it for build');
         actionYmlContents.runs.steps.splice(idx, 1);
       }
     }
