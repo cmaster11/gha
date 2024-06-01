@@ -33,7 +33,9 @@ jobs:
         run: npm run test
 
   get-changes:
-    needs: test
+    if: >
+      github.event.action != 'closed' ||
+      (github.event.action == 'closed' && github.event.pull_request.merged)
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.get-changed-dirs.outputs.matrix }}
@@ -59,6 +61,7 @@ jobs:
 
   build:
     needs:
+      - test
       - get-changes
     runs-on: ubuntu-latest
     if: needs.get-changes.outputs.matrix-empty != 'true'
@@ -66,6 +69,7 @@ jobs:
       pull-requests: read
       contents: write
     strategy:
+      fail-fast: false
       matrix: ${{ fromJSON(needs.get-changes.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
@@ -120,6 +124,9 @@ jobs:
         id: read-build-output
         with:
           matrix-step-name: build
+      - run: echo "$JSON" | jq
+        env:
+          JSON: ${{ steps.read-build-output.outputs.result }}
       - uses: actions/setup-node@v4
         with:
           node-version-file: package.json
