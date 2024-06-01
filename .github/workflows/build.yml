@@ -88,6 +88,10 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
 
   build:
+    concurrency:
+      group: "${{ (github.event.action == 'closed' && github.event.pull_request.merged) && 'release' || 'build' }}-${{ matrix.directory }}"
+      # Only cancel existing builds if we're in dev mode
+      cancel-in-progress: ${{ github.event.action != 'closed' }}
     needs:
       - test
       - get-changes
