@@ -1,7 +1,6 @@
 import path from 'node:path';
 import { actionsDir } from './constants.js';
 import { parse, stringify } from 'yaml';
-import { string } from 'joi';
 
 export async function copyActionFiles(actionName: string) {
   const tmpDir = tmpdir();
