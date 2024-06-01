@@ -9,3 +9,12 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+  # Maintain dependencies for npm
+  - package-ecosystem: "npm"
+    groups:
+      npm:
+        patterns:
+          - '*'
+    directory: '/'
+    schedule:
+      interval: "daily"

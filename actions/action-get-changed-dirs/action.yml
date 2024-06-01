@@ -1,5 +1,7 @@
 name: Get changed directories
-description: Uses git diff to find the list of changed directories, compared to a previous commit SHA
+description: >
+  Uses git diff to find the list of changed directories, 
+  compared to a previous commit SHA
 
 inputs:
   base-sha:
@@ -28,12 +30,16 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - id: PREBUILD
+      shell: bash
+      run: npx tsx ./lib/bin/build.mts "$GITHUB_ACTION_PATH"
+
     - name: Get changed directories
       id: get-changes
       shell: bash
-      run: npx zx -- $GITHUB_ACTION_PATH/scripts/get-changes.mjs
+      run: $GITHUB_ACTION_PATH/dist/get-changed-directories.mjs
       env:
-        INPUT_BASE_SHA: ${{ inputs.base-sha }}
+        INPUT_BASE-SHA: ${{ inputs.base-sha }}
         INPUT_REGEX: ${{ inputs.regex }}
-        INPUT_MAX_DEPTH: ${{ inputs.max-depth }}
-        INPUT_IGNORE_IF_ALL_DELETIONS: ${{ inputs.ignore-if-all-deletions }}
+        INPUT_MAX-DEPTH: ${{ inputs.max-depth }}
+        INPUT_IGNORE-IF-ALL-DELETIONS: ${{ inputs.ignore-if-all-deletions }}
