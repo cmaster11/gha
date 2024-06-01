@@ -1,8 +1,7 @@
 import 'zx/globals';
 import { buildBinaries } from '../build-binaries.mjs';
 import { copyActionFiles } from '../copy-action-files.js';
-import { Octokit } from '@octokit/rest';
-import type { GithubCommonProps } from '../github-common.js';
+import { getOctokit } from '../github-common.js';
 import { githubGetPrVersionLabel } from '../github-get-pr-labels.js';
 import Joi from 'joi';
 import { flowGitCloneReplaceAndCommit, getGitTagsByGlob } from '../git.js';
@@ -60,17 +59,7 @@ async function flow(
   actionName: string,
   { token, repository, pullNumber, release }: Opts
 ) {
-  const [owner, repo] = repository.split('/');
-  const octokit = new Octokit({
-    auth: token
-  });
-  const gh: GithubCommonProps = {
-    octokit,
-    repoProps: {
-      owner,
-      repo
-    }
-  };
+  const gh = getOctokit(repository, token);
 
   const versionLabel = await githubGetPrVersionLabel({
     gh,

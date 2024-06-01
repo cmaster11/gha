@@ -1,6 +1,5 @@
 import 'zx/globals';
-import { Octokit } from '@octokit/rest';
-import type { GithubCommonProps } from '../github-common.js';
+import { getOctokit } from '../github-common.js';
 import Joi from 'joi';
 
 $.verbose = true;
@@ -41,24 +40,14 @@ async function flow(
   actionName: string,
   { token, repository, versionBranch, release, headRef }: Opts
 ) {
-  const [owner, repo] = repository.split('/');
-  const octokit = new Octokit({
-    auth: token
-  });
-  const gh: GithubCommonProps = {
-    octokit,
-    repoProps: {
-      owner,
-      repo
-    }
-  };
+  const gh = getOctokit(repository, token);
 
   const ref = release ? 'main' : headRef;
   const workflowName = `test-${actionName}.yml`;
 
   // Check if there is a workflow to trigger
   try {
-    await octokit.rest.repos.getContent({
+    await gh.octokit.rest.repos.getContent({
       ...gh.repoProps,
       ref,
       path: `.github/workflows/${workflowName}`
@@ -74,7 +63,7 @@ async function flow(
     throw err;
   }
 
-  await octokit.rest.actions.createWorkflowDispatch({
+  await gh.octokit.rest.actions.createWorkflowDispatch({
     ...gh.repoProps,
     workflow_id: workflowName,
     ref,
