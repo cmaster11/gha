@@ -18,5 +18,13 @@ updates:
     directory: '/'
     schedule:
       interval: "daily"
+    ignore:
+      # Major upgrade not yet supported by all packages
+      - dependency-name: eslint
+        versions:
+          - '^9.0.0'
+      - dependency-name: eslint-plugin-unused-imports
+        versions:
+          - '^4.0.0'
     labels:
       - "patch"
