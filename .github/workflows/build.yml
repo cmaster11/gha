@@ -104,6 +104,7 @@ jobs:
   # Trigger any test workflows after everything has been built
   post-build-test:
     needs:
+      - get-changes
       - build
     runs-on: ubuntu-latest
     if: needs.get-changes.outputs.matrix-empty != 'true'
