@@ -1,7 +1,6 @@
 import path from 'node:path';
 import { actionsDir } from './constants.js';
 import { parse, stringify } from 'yaml';
-import { string } from 'joi';
 
 export async function copyActionFiles(actionName: string) {
   const tmpDir = tmpdir();
@@ -21,7 +20,8 @@ export async function copyActionFiles(actionName: string) {
       const idx = (actionYmlContents.runs.steps as { id: string }[]).findIndex(
         (step) => step.id == 'PREBUILD'
       );
-      if (idx > 0) {
+      if (idx >= 0) {
+        console.log('Found PREBUILD step, removing it for build');
         actionYmlContents.runs.steps.splice(idx, 1);
       }
     }

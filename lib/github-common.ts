@@ -7,3 +7,18 @@ export interface GithubCommonProps {
     repo: string;
   };
 }
+
+export function getOctokit(repository: string, token: string) {
+  const [owner, repo] = repository.split('/');
+  const octokit = new Octokit({
+    auth: token
+  });
+  const gh: GithubCommonProps = {
+    octokit,
+    repoProps: {
+      owner,
+      repo
+    }
+  };
+  return gh;
+}
