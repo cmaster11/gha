@@ -18,7 +18,7 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
       - id: action-test
-        uses: .
+        uses: ./
       - run: |
           echo "$JSON" | jq '.'
         env:
