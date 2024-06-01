@@ -9,14 +9,14 @@ import { flowGitCloneReplaceAndCommit, getGitTagsByGlob } from '../git.js';
 import {
   getLatestTagSemVer,
   getPRDevBranch,
-  getPRSuffix,
   increaseSemver
 } from '../version.js';
 import semver from 'semver/preload.js';
+import { setOutput } from '@actions/core';
 
 $.verbose = true;
 
-interface PromoteOpts {
+interface Opts {
   token: string;
   repository: string;
   pullNumber: number;
@@ -33,7 +33,7 @@ async function main() {
     string: ['token', 'repository', 'pullNumber']
   });
 
-  const promoteOpts = promoteFlag
+  const opts = promoteFlag
     ? (Joi.attempt(
         rest,
         Joi.object({
@@ -45,23 +45,21 @@ async function main() {
         {
           allowUnknown: true
         }
-      ) as PromoteOpts)
+      ) as Opts)
     : undefined;
 
   const actionName = _[0].split('/').reverse()[0];
   await buildBinaries(actionName);
 
-  if (promoteOpts) {
-    await promoteFlow(actionName, promoteOpts);
+  if (opts) {
+    await flow(actionName, opts);
   }
 }
 
-async function promoteFlow(
+async function flow(
   actionName: string,
-  { token, repository, pullNumber, release }: PromoteOpts
+  { token, repository, pullNumber, release }: Opts
 ) {
-  await $`git fetch --tags`;
-
   const [owner, repo] = repository.split('/');
   const octokit = new Octokit({
     auth: token
@@ -97,10 +95,12 @@ async function promoteFlow(
 
     const pushShell = $({ cwd: newBranchDir });
     await pushShell`git push origin ${versionBranch}`;
+    setOutput('version-branch', versionBranch);
     return;
   }
 
   // On release, generate a tag and a major-version branch
+  await $`git fetch --tags`;
   const tagPrefix = actionName + '/v';
   const tags = await getGitTagsByGlob(tagPrefix + '*');
   const latestSemVer = getLatestTagSemVer(tags, tagPrefix);
@@ -121,6 +121,7 @@ async function promoteFlow(
   const pushShell = $({ cwd: newBranchDir });
   await pushShell`git push origin ${versionBranch}`;
   await pushShell`git push origin tag ${newTag}`;
+  setOutput('version-branch', versionBranch);
 }
 
 void main();

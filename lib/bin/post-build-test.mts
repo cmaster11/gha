@@ -3,18 +3,23 @@ import { Octokit } from '@octokit/rest';
 import type { GithubCommonProps } from '../github-common.js';
 import Joi from 'joi';
 import { getPRDevBranch } from '../version.js';
+import path from 'node:path';
+import { rootDir } from '../constants.js';
 
 $.verbose = true;
 
 interface Opts {
   token: string;
   repository: string;
+  versionBranch: string;
   pullNumber: number;
+  release: boolean;
 }
 
 async function main() {
   const { _, ...rest } = minimist(process.argv.slice(2), {
-    string: ['token', 'repository', 'pullNumber']
+    boolean: ['release'],
+    string: ['token', 'repository', 'versionBranch', 'pullNumber']
   });
 
   const opts = Joi.attempt(
@@ -22,7 +27,9 @@ async function main() {
     Joi.object({
       token: Joi.string().required(),
       repository: Joi.string().required(),
-      pullNumber: Joi.number().required()
+      versionBranch: Joi.string().required(),
+      pullNumber: Joi.number().required(),
+      release: Joi.boolean().required()
     }).required(),
     {
       allowUnknown: true
@@ -35,8 +42,16 @@ async function main() {
 
 async function flow(
   actionName: string,
-  { token, repository, pullNumber }: Opts
+  { token, repository, versionBranch, pullNumber, release }: Opts
 ) {
+  const workflowName = `test-${actionName}.yml`;
+  if (
+    !(await fs.exists(path.join(rootDir, '.github', 'workflows', workflowName)))
+  ) {
+    console.log('No test workflow found');
+    return;
+  }
+
   const [owner, repo] = repository.split('/');
   const octokit = new Octokit({
     auth: token
@@ -49,31 +64,15 @@ async function flow(
     }
   };
 
-  // Delete any dev branch created via the PR
-  const versionBranch = getPRDevBranch(actionName, pullNumber);
+  const ref = release ? 'main' : getPRDevBranch(actionName, pullNumber);
 
-  try {
-    await octokit.rest.git.getRef({
-      ...gh.repoProps,
-      ref: `heads/${versionBranch}`
-    });
-  } catch (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    err: any
-  ) {
-    if ('status' in err && err.status == 404) {
-      // Ok!
-      console.log('Branch not found, all good!');
-      return;
-    }
-    throw err;
-  }
-
-  console.log(`Deleting dev branch ${versionBranch}`);
-
-  await octokit.rest.git.deleteRef({
+  await octokit.rest.actions.createWorkflowDispatch({
     ...gh.repoProps,
-    ref: `heads/${versionBranch}`
+    workflow_id: workflowName,
+    ref,
+    inputs: {
+      ref: versionBranch
+    }
   });
 }
 
