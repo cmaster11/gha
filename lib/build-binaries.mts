@@ -33,8 +33,8 @@ export async function buildBinaries(actionName: string) {
   for (const bin of binsToBuild) {
     const fullPath = path.join(actionDir, bin);
 
-    console.log(`Building ${bin}`);
-    const outFile = path.join(distDir, bin.replace(/\.mts/, '') + '.mjs');
+    const outFile = path.join(distDir, bin.replace(/\.mts$/, '.mjs'));
+    console.log(`Building ${bin} to ${outFile}`);
     const outFileDir = path.dirname(outFile);
     await fs.mkdirp(outFileDir);
     await esbuild.build({
