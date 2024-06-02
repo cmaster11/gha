@@ -33,6 +33,9 @@ jobs:
       - shell: bash
         run: npm ci
 
+      - name: Build action-get-release-label
+        shell: bash
+        run: npx tsx ./lib/bin/build.mts action-get-release-label
       - name: Get release label
         uses: ./actions/action-get-release-label
         with:

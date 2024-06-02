@@ -23,18 +23,7 @@ outputs:
   continue-release:
     description: True if the release can continue
     value: ${{ steps.get-pr-labels.outputs.continue-release }}
-runs:
-  using: "composite"
-  steps:
-    - id: PREBUILD
-      shell: bash
-      run: npx tsx ./lib/bin/build.mts "$GITHUB_ACTION_PATH"
 
-    - name: Get PR labels
-      id: get-pr-labels
-      shell: bash
-      run: $GITHUB_ACTION_PATH/dist/bin.mjs
-      env:
-        INPUT_TOKEN: ${{ inputs.token }}
-        INPUT_REPOSITORY: ${{ inputs.repository }}
-        INPUT_PULL-NUMBER: ${{ inputs.pull-number }}
+runs:
+  using: node20
+  main: dist/index.mjs
