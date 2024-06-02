@@ -26,14 +26,5 @@ outputs:
       "true" if the matrix is empty
     value: ${{ steps.get-changes.outputs.matrix-empty }}
 runs:
-  using: composite
-  steps:
-    - name: Get changed directories
-      id: get-changes
-      shell: bash
-      run: $GITHUB_ACTION_PATH/dist/bin.mjs
-      env:
-        INPUT_BASE-SHA: ${{ inputs.base-sha }}
-        INPUT_REGEX: ${{ inputs.regex }}
-        INPUT_MAX-DEPTH: ${{ inputs.max-depth }}
-        INPUT_IGNORE-IF-ALL-DELETIONS: ${{ inputs.ignore-if-all-deletions }}
+  using: node20
+  main: dist/index.mjs
