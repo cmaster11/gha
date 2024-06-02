@@ -22,13 +22,5 @@ outputs:
     description: True if the release can continue
     value: ${{ steps.get-pr-labels.outputs.continue-release }}
 runs:
-  using: composite
-  steps:
-    - name: Get PR labels
-      id: get-pr-labels
-      shell: bash
-      run: $GITHUB_ACTION_PATH/dist/bin.mjs
-      env:
-        INPUT_TOKEN: ${{ inputs.token }}
-        INPUT_REPOSITORY: ${{ inputs.repository }}
-        INPUT_PULL-NUMBER: ${{ inputs.pull-number }}
+  using: node20
+  main: dist/index.mjs
