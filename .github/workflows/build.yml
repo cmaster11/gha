@@ -187,17 +187,11 @@ jobs:
           RELEASE: ${{ github.event.action == 'closed' && github.event.pull_request.merged }}
 
   cleanup:
-    needs:
-      - get-changes
     runs-on: ubuntu-latest
-    if: >
-      needs.get-changes.outputs.matrix-empty != 'true' && 
-      github.event.action == 'closed'
+    if: github.event.action == 'closed'
     permissions:
       pull-requests: read
       contents: write
-    strategy:
-      matrix: ${{ fromJSON(needs.get-changes.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -214,8 +208,6 @@ jobs:
           --token "$TOKEN"
           --repository "$GITHUB_REPOSITORY"
           --pullNumber "$PR_NUMBER"
-          "$MATRIX_DIRECTORY"
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MATRIX_DIRECTORY: ${{ matrix.directory }}
           PR_NUMBER: ${{ github.event.pull_request.number }}

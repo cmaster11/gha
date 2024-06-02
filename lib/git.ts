@@ -7,6 +7,16 @@ export async function getGitTagsByGlob(glob: string): Promise<string[]> {
   return out.split('\n').filter((l) => l.trim() != '');
 }
 
+export async function getGitRemoteBranchesByGlob(
+  glob: string
+): Promise<string[]> {
+  const out = (await $`git branch -r -l origin/${glob}`).stdout;
+  return out
+    .split('\n')
+    .filter((l) => l.trim() != '')
+    .map((b) => b.replace(/^origin\//, ''));
+}
+
 export async function flowGitCloneReplaceAndCommit(
   branchName: string,
   contentsDir: string,
