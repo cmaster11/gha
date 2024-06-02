@@ -1,6 +1,5 @@
 if command -v actionlint >/dev/null 2>&1; then
-    echo "Running actionlint"
-    actionlint
+    bash .husky/scripts/actionlint.sh
 else
     echo "actionlint not found"
 fi

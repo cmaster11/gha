@@ -1,7 +1,7 @@
 import 'zx/globals';
 import Joi from 'joi';
-import { getOctokit } from '../../../lib/github-common.js';
-import { githubGetPrVersionLabel } from '../../../lib/github-get-pr-labels.js';
+import { getOctokit } from '../../lib/github-common.js';
+import { githubGetPrVersionLabel } from '../../lib/github-get-pr-labels.js';
 import { getInput, setOutput } from '@actions/core';
 
 $.verbose = true;
