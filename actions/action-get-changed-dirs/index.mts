@@ -1,6 +1,6 @@
 import { inspect } from 'node:util';
 import 'zx/globals';
-import { getChangedDirectories } from '../../../lib/get-changed-directories.js';
+import { getChangedDirectories } from '../../lib/get-changed-directories.js';
 import { getInput, setOutput } from '@actions/core';
 import Joi from 'joi';
 

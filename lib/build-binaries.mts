@@ -11,10 +11,15 @@ export async function buildBinaries(actionName: string) {
   const distDir = path.join(actionDir, 'dist');
   await fs.mkdirp(distDir);
 
-  const binsToBuild = await fs.readdir(binDir);
+  const binsToBuild = [
+    'index.mts',
+    ...(await fs.readdir(binDir)).filter((p) => /\.mts$/.test(p))
+  ];
   for (const bin of binsToBuild) {
-    console.log(`Building ${bin}`);
     const fullPath = path.join(actionDir, 'bin', bin);
+    if (!(await fs.exists(fullPath))) continue;
+
+    console.log(`Building ${bin}`);
     const outFile = path.join(distDir, bin.replace(/\.mts/, '') + '.mjs');
     await esbuild.build({
       entryPoints: [fullPath],
