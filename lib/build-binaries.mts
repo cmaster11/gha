@@ -1,25 +1,37 @@
 import * as esbuild from 'esbuild';
 import path from 'node:path';
 import { actionsDir } from './constants.js';
+
 const __dirname = import.meta.dirname;
 
 export async function buildBinaries(actionName: string) {
   const actionDir = path.join(actionsDir, actionName);
   const binDir = path.join(actionDir, 'bin');
-  if (!(await fs.exists(binDir))) return;
+
+  const binsToBuild: string[] = [];
+
+  if (await fs.exists(binDir)) {
+    binsToBuild.push(
+      ...(await fs.readdir(binDir))
+        .filter((p) => /\.mts$/.test(p))
+        .map((p) => `bin/${p}`)
+    );
+  }
+
+  if (await fs.exists(path.join(actionDir, 'index.mts'))) {
+    binsToBuild.push('index.mts');
+  }
+
+  if (binsToBuild.length == 0) {
+    console.log('No binaries to build found, exiting');
+    return;
+  }
 
   const distDir = path.join(actionDir, 'dist');
   await fs.mkdirp(distDir);
 
-  const binsToBuild = [
-    'index.mts',
-    ...(await fs.readdir(binDir))
-      .filter((p) => /\.mts$/.test(p))
-      .map((p) => `bin/${p}`)
-  ];
   for (const bin of binsToBuild) {
     const fullPath = path.join(actionDir, bin);
-    if (!(await fs.exists(fullPath))) continue;
 
     console.log(`Building ${bin}`);
     const outFile = path.join(distDir, bin.replace(/\.mts/, '') + '.mjs');
