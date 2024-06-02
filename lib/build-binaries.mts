@@ -13,14 +13,18 @@ export async function buildBinaries(actionName: string) {
 
   const binsToBuild = [
     'index.mts',
-    ...(await fs.readdir(binDir)).filter((p) => /\.mts$/.test(p))
+    ...(await fs.readdir(binDir))
+      .filter((p) => /\.mts$/.test(p))
+      .map((p) => `bin/${p}`)
   ];
   for (const bin of binsToBuild) {
-    const fullPath = path.join(actionDir, 'bin', bin);
+    const fullPath = path.join(actionDir, bin);
     if (!(await fs.exists(fullPath))) continue;
 
     console.log(`Building ${bin}`);
     const outFile = path.join(distDir, bin.replace(/\.mts/, '') + '.mjs');
+    const outFileDir = path.dirname(outFile);
+    await fs.mkdirp(outFileDir);
     await esbuild.build({
       entryPoints: [fullPath],
       bundle: true,
