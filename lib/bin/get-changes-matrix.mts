@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024. Alberto Marchetti [ https://www.linkedin.com/in/albertomarchetti/ ]
+ */
+
 import 'zx/globals';
 import Joi from 'joi';
 import { gitDiffLines } from '../git.js';

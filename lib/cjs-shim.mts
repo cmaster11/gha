@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024. Alberto Marchetti [ https://www.linkedin.com/in/albertomarchetti/ ]
+ */
+
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import url from 'node:url';

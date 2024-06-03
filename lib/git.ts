@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024. Alberto Marchetti [ https://www.linkedin.com/in/albertomarchetti/ ]
+ */
+
 import 'zx/globals';
 import path from 'node:path';
 import { rootDir } from './constants.js';

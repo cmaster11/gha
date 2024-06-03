@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024. Alberto Marchetti [ https://www.linkedin.com/in/albertomarchetti/ ]
+ */
+
 import 'zx/globals';
 import { buildBinaries } from '../build-binaries.mjs';
 import { copyActionFiles } from '../copy-action-files.js';
