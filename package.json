@@ -16,11 +16,12 @@
     "test": "jest -u",
     "lint": "npm run check && npm run lint:prettier && npm run lint:eslint",
     "lint:fix": "npm run lint:prettier:fix && npm run lint:eslint:fix && npm run lint",
-    "lint:prettier": "prettier --check '**/*.{ts,json}'",
-    "lint:prettier:fix": "prettier --write '**/*.{ts,json}'",
+    "lint:prettier": "prettier --check '**/*.{ts,json,md}'",
+    "lint:prettier:fix": "prettier --write '**/*.{ts,json,md}'",
     "lint:eslint": "eslint .",
     "lint:eslint:fix": "npm run lint:eslint -- --fix",
-    "prepare": "husky"
+    "gen:docs": "npx tsx lib/bin/gen-docs.mts",
+    "prepare": "husky && npx replace-in-file '#!/usr/bin/env sh' '#!/usr/bin/env bash' '.husky/_/h' --quiet && npx replace-in-file 'sh -e' 'bash -e' '.husky/_/h' --quiet"
   },
   "devDependencies": {
     "@actions/artifact": "^2.1.7",
