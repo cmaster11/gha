@@ -1,5 +1,15 @@
+#!/usr/bin/env bash
+
+#
+# Copyright (c) 2024. Alberto Marchetti [ https://www.linkedin.com/in/albertomarchetti/ ]
+#
+
+env
+
 if command -v actionlint >/dev/null 2>&1; then
     bash .husky/scripts/actionlint.sh
 else
     echo "actionlint not found"
 fi
+
+npm run gen:docs
