@@ -17,7 +17,7 @@ system to version and release such Actions!
 
 1. Create a new action in the `actions` folder (e.g. `action-test`).
 2. Create PR and assign a release label (`patch`, `minor`, `major`).
-    1. Note that **versions start from 0**, which mean that if you want to release a `v1`, you will need to use a `major` label in the PR.
+   1. Note that **versions start from 0**, which means that, if you want to release a `v1`, you will need to use a `major` label in the PR.
 3. On PR merge, the action will be built and released to its own version branch (e.g. `action-test/v1`).
 4. You can then use the action in a GitHub Actions workflow with:
 
