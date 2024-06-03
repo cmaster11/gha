@@ -1,5 +1,5 @@
 name: Test action
-description: A test action
+description: This is just a test action.
 runs:
   using: composite
   steps:
