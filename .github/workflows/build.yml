@@ -11,7 +11,6 @@ on:
       - closed
       # Triggers the workflow when labels change in the PR
       - labeled
-      - unlabeled
 
 jobs:
   check-release-label:
