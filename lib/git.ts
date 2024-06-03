@@ -14,7 +14,7 @@ export async function getGitRemoteBranchesByGlob(
   return out
     .split('\n')
     .filter((l) => l.trim() != '')
-    .map((b) => b.replace(/^origin\//, ''));
+    .map((b) => b.trim().replace(/^origin\//, ''));
 }
 
 export async function flowGitCloneReplaceAndCommit(
