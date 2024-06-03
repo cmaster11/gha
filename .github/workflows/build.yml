@@ -19,6 +19,8 @@ jobs:
       github.event.action != 'closed' ||
       (github.event.action == 'closed' && github.event.pull_request.merged)
     runs-on: ubuntu-latest
+    outputs:
+      continue-release: ${{ steps.get-release-label.outputs.continue-release }}
     permissions:
       pull-requests: read
       contents: read
@@ -37,6 +39,7 @@ jobs:
         shell: bash
         run: npx tsx ./lib/bin/build.mts action-get-release-label
       - name: Get release label
+        id: get-release-label
         uses: ./actions/action-get-release-label
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -100,7 +103,7 @@ jobs:
       - get-changes
       - check-release-label
     runs-on: ubuntu-latest
-    if: needs.get-changes.outputs.matrix-empty != 'true'
+    if: needs.check-release-label.outputs.continue-release == 'true' && needs.get-changes.outputs.matrix-empty != 'true'
     permissions:
       pull-requests: read
       contents: write
@@ -146,8 +149,9 @@ jobs:
     needs:
       - get-changes
       - build
+      - check-release-label
     runs-on: ubuntu-latest
-    if: needs.get-changes.outputs.matrix-empty != 'true'
+    if: needs.check-release-label.outputs.continue-release == 'true' && needs.get-changes.outputs.matrix-empty != 'true'
     permissions:
       pull-requests: read
       contents: write

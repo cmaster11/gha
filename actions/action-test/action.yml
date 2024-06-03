@@ -1,7 +1,8 @@
 name: Test action
 description: This is just a test action.
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - shell: bash
       run: echo "Hello!"
+# BUMP
