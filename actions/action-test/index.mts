@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024. Alberto Marchetti [ https://www.linkedin.com/in/albertomarchetti/ ]
  */
-
+import 'zx/globals';
 import { getInput, setOutput } from '@actions/core';
 
 const greeting = getInput('greeting', { required: true });
