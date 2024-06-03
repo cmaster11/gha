@@ -30,7 +30,7 @@
     "@octokit/rest": "^20.1.1",
     "@types/jest": "^29.5.12",
     "@types/klaw": "^3.0.6",
-    "@types/node": "^20.13.0",
+    "@types/node": "^20.14.0",
     "@types/semver": "^7.5.8",
     "cross-env": "^7.0.3",
     "esbuild": "^0.21.4",
@@ -46,10 +46,10 @@
     "ts-enum-util": "^4.1.0",
     "ts-jest": "^29.1.4",
     "ts-node": "^10.9.2",
-    "tsx": "^4.11.0",
+    "tsx": "^4.11.2",
     "typescript": "~5.4.3",
     "typescript-eslint": "^7.11.0",
-    "yaml": "^2.4.2",
+    "yaml": "^2.4.3",
     "zx": "^8.1.2"
   }
 }
