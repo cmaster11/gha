@@ -3,7 +3,7 @@ name: Test action-test
 on:
   workflow_dispatch: { inputs: { ref: { required: true } } }
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
       - .github/workflows/test-action-test.yml # self
       - actions/action-test
@@ -19,6 +19,8 @@ jobs:
           ref: ${{ inputs.ref }}
       - id: action-test
         uses: ./
+        with:
+          greeting: Hello world!
       - run: |
           echo "$JSON" | jq '.'
         env:

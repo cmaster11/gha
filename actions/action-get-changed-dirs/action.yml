@@ -22,11 +22,9 @@ inputs:
 outputs:
   matrix:
     description: The JSON matrix containing the list of changed directories
-    value: ${{ steps.get-changes.outputs.matrix }}
   matrix-empty:
     description: >
       "true" if the matrix is empty
-    value: ${{ steps.get-changes.outputs.matrix-empty }}
 
 runs:
   using: node20
