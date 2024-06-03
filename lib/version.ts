@@ -53,3 +53,8 @@ export function getPRDevBranch(actionName: string, pullNumber: number) {
   const branchSuffix = 'dev-' + getPRSuffix(pullNumber);
   return `${actionName}/${branchSuffix}`;
 }
+
+export function getPRDevBranchGlob(pullNumber: number) {
+  const branchSuffix = 'dev-' + getPRSuffix(pullNumber);
+  return `action-*/${branchSuffix}`;
+}

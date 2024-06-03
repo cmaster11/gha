@@ -10,8 +10,8 @@ Workflows:
 ```mermaid
 flowchart
   test["Job: test\nRuns CI lint/tests"]
-  get-changes["Job: get-changes\nDetect changed actions"]
   check-release-label["Job: check-release-label\nFind the release label\nassociated with the PR"]
+  get-changes["Job: get-changes\nDetect changed actions"]
   build["Job: build\nBuilds all the changed actions"]
   
   test --> build
@@ -20,7 +20,6 @@ flowchart
 
   post-build-test["Job: post-build-test\nTriggers testing jobs via\nworkflow_dispatch"]
   build -- "Releases the changed\nactions on their branches\n(dev or versioned)" --> post-build-test
-  get-changes --> post-build-test
 
   cleanup["Job: cleanup\nDeletes all dev branches\ncreated during the PR's\nlifetime"]
   get-changes -- If the PR has been closed --> cleanup

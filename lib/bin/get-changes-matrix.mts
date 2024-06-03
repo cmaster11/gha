@@ -47,9 +47,10 @@ async function main() {
       [
         'package.json',
         'package-lock.json',
+        /^lib\//,
         'jest.config.mjs',
         'tsconfig.json'
-      ].includes(p)
+      ].some((m) => (m instanceof RegExp ? m.test(p) : m == p))
     ) != null
   ) {
     const allActions = await fs.readdir(actionsDir);
