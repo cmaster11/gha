@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024. Alberto Marchetti [ https://www.linkedin.com/in/albertomarchetti/ ]
+ */
+
 import { describe } from 'node:test';
 import {
   increaseSemver,

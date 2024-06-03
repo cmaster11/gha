@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024. Alberto Marchetti [ https://www.linkedin.com/in/albertomarchetti/ ]
+ */
+
 import * as esbuild from 'esbuild';
 import path from 'node:path';
 import { actionsDir } from './constants.js';

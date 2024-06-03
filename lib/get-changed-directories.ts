@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024. Alberto Marchetti [ https://www.linkedin.com/in/albertomarchetti/ ]
+ */
+
 import * as path from 'node:path';
 import 'zx/globals';
 import { gitDiffLines } from './git.js';

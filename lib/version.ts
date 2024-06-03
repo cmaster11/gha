@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024. Alberto Marchetti [ https://www.linkedin.com/in/albertomarchetti/ ]
+ */
+
 import * as semver from 'semver';
 import type { ReleaseType } from 'semver';
 

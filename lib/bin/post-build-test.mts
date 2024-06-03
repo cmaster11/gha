@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024. Alberto Marchetti [ https://www.linkedin.com/in/albertomarchetti/ ]
+ */
+
 import 'zx/globals';
 import { getOctokit } from '../github-common.js';
 import Joi from 'joi';

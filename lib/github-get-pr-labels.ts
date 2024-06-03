@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024. Alberto Marchetti [ https://www.linkedin.com/in/albertomarchetti/ ]
+ */
+
 import type { GithubCommonProps } from './github-common.js';
 import { $enum } from 'ts-enum-util';
 import { NoReleaseVersionLabel, VersionLabel } from './version.js';
