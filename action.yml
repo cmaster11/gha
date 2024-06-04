@@ -1,15 +1,12 @@
-name: Test action
-description: This is just a test action.
-
+name: Example action
+description: This is just an example action.
 inputs:
   greeting:
     description: A greeting
     default: Hello!
-
 outputs:
   greet-back:
     description: An answer
-
 runs:
   using: node20
-  main: index.mts
+  main: dist/index.mjs
