@@ -15,10 +15,12 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/github-script@v7
+        env:
+          JSON: ${{ inputs.needs-json }}
         with:
           script: |
             // Find at least one failed job in the "needs" context
-            const needs = JSON.parse(core.getInput('needs-json', {required: true}));
+            const needs = JSON.parse(process.env.JSON);
             const anyFailed = Object.fromEntries(needs)
               .find(([k,v]) => v.result == 'failure') != null;
 
