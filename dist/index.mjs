@@ -54047,6 +54047,7 @@ import path3 from "node:path";
 var __dirname = import.meta.dirname;
 var rootDir = path3.join(__dirname, "..");
 var actionsDir = path3.join(rootDir, "actions");
+var workflowsDir = path3.join(rootDir, ".github", "workflows");
 
 // lib/git.ts
 async function gitDiffLines(baseSHA2) {
