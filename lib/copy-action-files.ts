@@ -27,14 +27,14 @@ export async function fixActionYml(
         console.log('Found PREBUILD step, removing it for build');
         actionYmlContents.runs.steps.splice(idx, 1);
       }
-    } else if ('main' in actionYmlContents) {
+    } else if ('main' in actionYmlContents.runs) {
       // Replace the entrypoint if it is a TypeScript file, with the built one
-      const bin = actionYmlContents.main;
+      const bin = actionYmlContents.runs.main;
       if (bin in mappedBinaries) {
         console.log(
           `Replacing main entrypoint ${bin} with ${mappedBinaries[bin]}`
         );
-        actionYmlContents.main = mappedBinaries[bin];
+        actionYmlContents.runs.main = mappedBinaries[bin];
       }
     }
   }
