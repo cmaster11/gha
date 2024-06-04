@@ -30,6 +30,5 @@ jobs:
       - test
     if: always() && github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/ci-post-build-after-test.yml
-    secrets: inherit
-    with:
-      needs-json: ${{ toJSON(needs) }}
+    permissions: { checks: write }
+    with: { needs-json: '${{ toJSON(needs) }}' }

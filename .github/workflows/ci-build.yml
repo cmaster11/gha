@@ -1,4 +1,4 @@
-name: Build the actions library
+name: CI - Build the actions
 
 on:
   pull_request:
