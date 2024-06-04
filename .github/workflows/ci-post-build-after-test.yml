@@ -19,6 +19,8 @@ jobs:
           JSON: ${{ inputs.needs-json }}
         with:
           script: |
+            const util = require('node:util');
+
             if (process.env.JSON == null) {
               throw new Error('needs-json input not found.');
             }
@@ -26,6 +28,8 @@ jobs:
             const needs = JSON.parse(process.env.JSON);
             const anyFailed = Object.entries(needs)
               .find(([k,v]) => v.result == 'failure') != null;
+
+            console.log('Context: ' + util.inspect(context, {depth:null}))
 
             // cmaster11/gha/.github/workflows/test.yml@refs/heads/main
             // cmaster11/gha/.github/workflows/test.yml
