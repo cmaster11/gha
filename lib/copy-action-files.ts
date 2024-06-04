@@ -6,44 +6,62 @@ import path from 'node:path';
 import { actionsDir } from './constants.js';
 import { parse, stringify } from 'yaml';
 
-export async function copyActionFiles(actionName: string) {
+export async function fixActionYml(
+  actionDir: string,
+  mappedBinaries: Record<string, string>
+) {
+  const actionYmlPath = path.join(actionDir, 'action.yml');
+  if (!(await fs.exists(actionYmlPath))) {
+    throw new Error(`Could not find ${actionYmlPath} file`);
+  }
+
+  const actionYmlContents = parse(await fs.readFile(actionYmlPath, 'utf-8'));
+
+  if ('runs' in actionYmlContents) {
+    const runs = actionYmlContents.runs;
+
+    // Fix the action.yml file to strip out any PREBUILD steps
+    if ('steps' in runs) {
+      const idx = (runs.steps as { id: string }[]).findIndex(
+        (step) => step.id == 'PREBUILD'
+      );
+      if (idx >= 0) {
+        console.log('Found PREBUILD step, removing it for build');
+        runs.steps.splice(idx, 1);
+      }
+    } else if ('main' in runs) {
+      // Replace the entrypoint if it is a TypeScript file, with the built one
+      const bin = runs.main;
+      if (bin in mappedBinaries) {
+        console.log(
+          `Replacing main entrypoint ${bin} with ${mappedBinaries[bin]}`
+        );
+        runs.main = mappedBinaries[bin];
+      }
+    }
+  }
+
+  await fs.writeFile(actionYmlPath, stringify(actionYmlContents));
+}
+
+export async function copyActionFiles(
+  actionName: string,
+  mappedBinaries: Record<string, string>
+) {
   const tmpDir = tmpdir();
   console.log(`Cloning action ${actionName} files to ${tmpDir}`);
 
   const actionDir = path.join(actionsDir, actionName);
 
   // Copy over all relevant action files
-
-  // Fix the action.yml file to strip out any PREBUILD steps
-  {
-    const actionYmlContents = parse(
-      await fs.readFile(path.join(actionDir, 'action.yml'), 'utf-8')
-    );
-
-    if ('runs' in actionYmlContents && 'steps' in actionYmlContents.runs) {
-      const idx = (actionYmlContents.runs.steps as { id: string }[]).findIndex(
-        (step) => step.id == 'PREBUILD'
-      );
-      if (idx >= 0) {
-        console.log('Found PREBUILD step, removing it for build');
-        actionYmlContents.runs.steps.splice(idx, 1);
-      }
+  const filesToCopy = ['action.yml', 'README.md', 'dist'];
+  for (const file of filesToCopy) {
+    if (await fs.exists(path.join(actionDir, file))) {
+      await fs.copy(path.join(actionDir, file), path.join(tmpDir, file));
     }
-
-    await fs.writeFile(
-      path.join(tmpDir, 'action.yml'),
-      stringify(actionYmlContents)
-    );
   }
 
-  if (await fs.exists(path.join(actionDir, 'dist')))
-    await fs.copy(path.join(actionDir, 'dist'), path.join(tmpDir, 'dist'));
-
-  if (await fs.exists(path.join(actionDir, 'README.md')))
-    await fs.copy(
-      path.join(actionDir, 'README.md'),
-      path.join(tmpDir, 'README.md')
-    );
+  await fixActionYml(tmpDir, mappedBinaries);
 
   return tmpDir;
 }

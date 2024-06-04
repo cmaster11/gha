@@ -4,7 +4,7 @@
 
 import 'zx/globals';
 import { buildBinaries } from '../build-binaries.mjs';
-import { copyActionFiles } from '../copy-action-files.js';
+import { copyActionFiles, fixActionYml } from '../copy-action-files.js';
 import { getOctokit } from '../github-common.js';
 import { githubGetPrVersionLabel } from '../github-get-pr-labels.js';
 import Joi from 'joi';
@@ -16,6 +16,8 @@ import {
 } from '../version.js';
 import semver from 'semver/preload.js';
 import { setOutput } from '@actions/core';
+import path from 'node:path';
+import { actionsDir } from '../constants.js';
 
 $.verbose = true;
 
@@ -30,9 +32,10 @@ async function main() {
   const {
     _,
     promote: promoteFlag,
+    inline,
     ...rest
   } = minimist(process.argv.slice(2), {
-    boolean: ['promote', 'release'],
+    boolean: ['promote', 'release', 'inline'],
     string: ['token', 'repository', 'pullNumber']
   });
 
@@ -52,16 +55,20 @@ async function main() {
     : undefined;
 
   const actionName = _[0].split('/').reverse()[0];
-  await buildBinaries(actionName);
+  const mappedBinaries = await buildBinaries(actionName);
 
   if (opts) {
-    await flow(actionName, opts);
+    await flow(actionName, opts, mappedBinaries);
+  } else if (inline) {
+    console.log('Fixing action.yml inline');
+    await fixActionYml(path.join(actionsDir, actionName), mappedBinaries);
   }
 }
 
 async function flow(
   actionName: string,
-  { token, repository, pullNumber, release }: Opts
+  { token, repository, pullNumber, release }: Opts,
+  mappedBinaries: Record<string, string>
 ) {
   const gh = getOctokit(repository, token);
 
@@ -74,7 +81,7 @@ async function flow(
     return;
   }
 
-  const contentsDir = await copyActionFiles(actionName);
+  const contentsDir = await copyActionFiles(actionName, mappedBinaries);
 
   // If we are NOT releasing a new version, just generate a dev branch
   if (!release) {

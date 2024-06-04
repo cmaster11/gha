@@ -7,6 +7,7 @@ system to version and release such Actions!
 
 <!-- GENERATE_ACTIONS BEGIN -->
 
+- [`action-example`](./actions/action-example): This is just an example action.
 - [`action-get-changed-dirs`](./actions/action-get-changed-dirs): Uses git diff to find the list of changed directories, compared to a previous commit SHA.
 - [`action-get-release-label`](./actions/action-get-release-label): This actions looks for any release labels such as: patch, minor, major, no-release. It will fail it no labels are found.
 - [`action-git-init-userinfo`](./actions/action-git-init-userinfo): Sets the user name and email for git to use. Defaults to a GitHub actions user.
@@ -33,17 +34,40 @@ jobs:
 
 ```mermaid
 flowchart
-    test["Job: test\nRuns CI lint/tests"]
-    check-release-label["Job: check-release-label\nFind the release label\nassociated with the PR"]
-    get-changes["Job: get-changes\nDetect changed actions"]
-    build["Job: build\nBuilds all the changed actions"]
-    test --> build
-    get-changes --> build
-    check-release-label -- Generates the build matrix --> build
-    post-build-test["Job: post-build-test\nTriggers testing jobs via\nworkflow_dispatch"]
-    build -- " Releases the changed\nactions on their branches\n(dev or versioned) " --> post-build-test
-    cleanup["Job: cleanup\nDeletes all dev branches\ncreated during the PR's\nlifetime"]
-    get-changes -- If the PR has been closed --> cleanup
+   commit["Commit on a PR-branch"]
+
+   subgraph ci-build.yml
+      test["Job: test\nRuns CI tests"]
+      check-release-label["Job: check-release-label\nFind the release label\nassociated with the PR"]
+      get-changes["Job: get-changes\nDetect changed actions"]
+      build["Job: build\nBuilds all the changed actions"]
+      cleanup["Job: cleanup\nIf the PR has been closed,\ndeletes all dev branches\ncreated during the PR's\nlifetime"]
+      test --> build
+      get-changes -- Generates the build matrix --> build
+      check-release-label --> build
+      post-build-test["Job: post-build-test\nTriggers testing jobs via\nworkflow_dispatch"]
+      build -- " Releases the changed\nactions on their branches\n(dev or versioned) " --> post-build-test
+
+   end
+
+   commit --> ci-build.yml
+
+   subgraph ci-post-build-after-test.yml
+      finalize-check["Job: finalize-check\nNotifies GitHub about the result of the test"]
+   end
+
+   subgraph test-action-example.yml
+      test-action-example["Job: test\nTests the action"]
+   end
+
+   subgraph test-action-another.yml
+      test-action-another["Job: test\nTests the action"]
+   end
+
+   test-action-example --> ci-post-build-after-test.yml
+   test-action-another --> ci-post-build-after-test.yml
+   post-build-test --> test-action-example.yml
+   post-build-test --> test-action-another.yml
 ```
 
 ### Pure NodeJs actions
@@ -53,5 +77,5 @@ Create an `index.mts` file in the action folder and use the following configurat
 ```yaml
 runs:
   using: node20
-  main: dist/index.mjs
+  main: index.mts
 ```

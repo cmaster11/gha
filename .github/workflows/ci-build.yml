@@ -1,4 +1,4 @@
-name: Build the actions library
+name: CI - Build the actions
 
 on:
   pull_request:
@@ -11,6 +11,11 @@ on:
       - closed
       # Triggers the workflow when labels change in the PR
       - labeled
+
+concurrency:
+  group: "${{ (github.event.action == 'closed' && github.event.pull_request.merged) && 'release' || format('pr-{0}', github.event.pull_request.number) }}"
+  # Only cancel existing builds if we're in dev mode
+  cancel-in-progress: ${{ github.event.action != 'closed' }}
 
 jobs:
   check-release-label:
@@ -36,7 +41,7 @@ jobs:
 
       - name: Build action-get-release-label
         shell: bash
-        run: npx tsx ./lib/bin/build.mts action-get-release-label
+        run: npx tsx ./lib/bin/build.mts --inline action-get-release-label
       - name: Get release label
         id: get-release-label
         uses: ./actions/action-get-release-label
@@ -93,10 +98,6 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
 
   build:
-    concurrency:
-      group: "${{ (github.event.action == 'closed' && github.event.pull_request.merged) && 'release' || format('pr-{0}', github.event.pull_request.number) }}-${{ matrix.directory }}"
-      # Only cancel existing builds if we're in dev mode
-      cancel-in-progress: ${{ github.event.action != 'closed' }}
     needs:
       - test
       - get-changes
@@ -155,6 +156,7 @@ jobs:
       pull-requests: read
       contents: write
       actions: write
+      checks: write
     strategy:
       matrix: ${{ fromJSON(needs.get-changes.outputs.matrix) }}
     steps:
@@ -181,10 +183,12 @@ jobs:
           --repository "$GITHUB_REPOSITORY"
           --versionBranch "$VERSION_BRANCH"
           --headRef "$GITHUB_HEAD_REF"
+          --headSHA "$HEAD_SHA"
           --release "$RELEASE"
           "$MATRIX_DIRECTORY"
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           MATRIX_DIRECTORY: ${{ matrix.directory }}
           VERSION_BRANCH: ${{ fromJson(steps.read-build-output.outputs.result).version-branch[matrix.directory] }}
           RELEASE: ${{ github.event.action == 'closed' && github.event.pull_request.merged }}
