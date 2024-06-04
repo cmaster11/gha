@@ -53,5 +53,5 @@ Create an `index.mts` file in the action folder and use the following configurat
 ```yaml
 runs:
   using: node20
-  main: dist/index.mjs
+  main: index.mts
 ```

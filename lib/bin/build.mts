@@ -52,16 +52,17 @@ async function main() {
     : undefined;
 
   const actionName = _[0].split('/').reverse()[0];
-  await buildBinaries(actionName);
+  const mappedBinaries = await buildBinaries(actionName);
 
   if (opts) {
-    await flow(actionName, opts);
+    await flow(actionName, opts, mappedBinaries);
   }
 }
 
 async function flow(
   actionName: string,
-  { token, repository, pullNumber, release }: Opts
+  { token, repository, pullNumber, release }: Opts,
+  mappedBinaries: Record<string, string>
 ) {
   const gh = getOctokit(repository, token);
 
@@ -74,7 +75,7 @@ async function flow(
     return;
   }
 
-  const contentsDir = await copyActionFiles(actionName);
+  const contentsDir = await copyActionFiles(actionName, mappedBinaries);
 
   // If we are NOT releasing a new version, just generate a dev branch
   if (!release) {

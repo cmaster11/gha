@@ -1,5 +1,5 @@
-name: Test action
-description: This is just a test action.
+name: Example action
+description: This is just an example action.
 
 inputs:
   greeting:

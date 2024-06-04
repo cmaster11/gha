@@ -8,7 +8,11 @@ import { actionsDir } from './constants.js';
 
 const __dirname = import.meta.dirname;
 
-export async function buildBinaries(actionName: string) {
+// Builds the various binaries for the action and returns a map
+// containing the mapped paths of the compiled files (src -> dest)
+export async function buildBinaries(
+  actionName: string
+): Promise<Record<string, string>> {
   const actionDir = path.join(actionsDir, actionName);
   const binDir = path.join(actionDir, 'bin');
 
@@ -28,16 +32,18 @@ export async function buildBinaries(actionName: string) {
 
   if (binsToBuild.length == 0) {
     console.log('No binaries to build found, exiting');
-    return;
+    return {};
   }
 
   const distDir = path.join(actionDir, 'dist');
   await fs.mkdirp(distDir);
 
+  const mappedBinaries: Record<string, string> = {};
   for (const bin of binsToBuild) {
     const fullPath = path.join(actionDir, bin);
 
-    const outFile = path.join(distDir, bin.replace(/\.mts$/, '.mjs'));
+    const renamedFile = bin.replace(/\.mts$/, '.mjs');
+    const outFile = path.join(distDir, renamedFile);
     console.log(`Building ${bin} to ${outFile}`);
     const outFileDir = path.dirname(outFile);
     await fs.mkdirp(outFileDir);
@@ -56,5 +62,9 @@ export async function buildBinaries(actionName: string) {
     const patchedBuild = '#!/usr/bin/env node\n' + unpatchedBuild;
     await fs.writeFile(outFile, patchedBuild);
     await fs.chmod(outFile, 0o755);
+
+    mappedBinaries[bin] = renamedFile;
   }
+
+  return mappedBinaries;
 }

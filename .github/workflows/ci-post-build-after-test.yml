@@ -19,6 +19,9 @@ jobs:
           JSON: ${{ inputs.needs-json }}
         with:
           script: |
+            if (process.env.JSON == null) {
+              throw new Error('needs-json input not found.');
+            }
             // Find at least one failed job in the "needs" context
             const needs = JSON.parse(process.env.JSON);
             const anyFailed = Object.fromEntries(needs)

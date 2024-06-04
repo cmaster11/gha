@@ -1,4 +1,4 @@
-name: Test action-get-release-label
+name: Test action-example
 on:
   workflow_dispatch:
     inputs:
@@ -11,30 +11,29 @@ on:
     branches:
       - main
     paths:
-      - .github/workflows/test-action-get-release-label.yml
+      - .github/workflows/test-action-example.yml
+
 jobs:
   test:
-    name: Test action-get-release-label
+    name: Test action-example
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-22.04
-    permissions:
-      pull-requests: read
-      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref }}
 
-      - id: action-get-release-label
+      # Run the action to test it
+      - id: action-example
         uses: ./
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          pull-number: 6
+          greeting: Hello world!
 
+      # Dump the outputs
       - run: |
           echo "$JSON" | jq '.'
         env:
-          JSON: ${{ toJSON(steps.action-get-release-label) }}
+          JSON: ${{ toJSON(steps.action-example) }}
 
   # Notify GitHub about the result of the test
   ci-after-test:
