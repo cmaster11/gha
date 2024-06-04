@@ -25,10 +25,10 @@ jobs:
             // cmaster11/gha/.github/workflows/test.yml@refs/heads/main
             // cmaster11/gha/.github/workflows/test.yml
             // test.yml
-            const name = context.payload.workflow_ref.split('@')[0].split('/').reverse()[0], 
+            const name = context.payload.workflow_ref.split('@')[0].split('/').reverse()[0];
 
             // Finalize the status check for the workflow
-            github.rest.checks.create({
+            await github.rest.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               name,
