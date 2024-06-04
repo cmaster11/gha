@@ -31,6 +31,9 @@ export async function fixActionYml(
       // Replace the entrypoint if it is a TypeScript file, with the built one
       const bin = actionYmlContents.main;
       if (bin in mappedBinaries) {
+        console.log(
+          `Replacing main entrypoint ${bin} with ${mappedBinaries[bin]}`
+        );
         actionYmlContents.main = mappedBinaries[bin];
       }
     }

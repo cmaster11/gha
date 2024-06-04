@@ -60,6 +60,7 @@ async function main() {
   if (opts) {
     await flow(actionName, opts, mappedBinaries);
   } else if (inline) {
+    console.log('Fixing action.yml inline');
     await fixActionYml(path.join(actionsDir, actionName), mappedBinaries);
   }
 }
