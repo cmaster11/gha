@@ -54,7 +54,7 @@ export async function copyActionFiles(
   const actionDir = path.join(actionsDir, actionName);
 
   // Copy over all relevant action files
-  const filesToCopy = ['action.yml', 'README.md'];
+  const filesToCopy = ['action.yml', 'README.md', 'dist'];
   for (const file of filesToCopy) {
     if (await fs.exists(path.join(actionDir, file))) {
       await fs.copy(path.join(actionDir, file), path.join(tmpDir, file));
