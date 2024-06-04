@@ -5,6 +5,7 @@
 import * as esbuild from 'esbuild';
 import path from 'node:path';
 import { actionsDir } from './constants.js';
+import { inspect } from './inspect.js';
 
 const __dirname = import.meta.dirname;
 
@@ -63,8 +64,9 @@ export async function buildBinaries(
     await fs.writeFile(outFile, patchedBuild);
     await fs.chmod(outFile, 0o755);
 
-    mappedBinaries[bin] = renamedFile;
+    mappedBinaries[bin] = path.relative(actionDir, outFile);
   }
 
+  console.log(`Built binaries: ${inspect(mappedBinaries)}`);
   return mappedBinaries;
 }
