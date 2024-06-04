@@ -17,10 +17,8 @@ inputs:
 outputs:
   release-label:
     description: The label found
-    value: ${{ steps.get-pr-labels.outputs.release-label }}
   continue-release:
     description: True if the release can continue
-    value: ${{ steps.get-pr-labels.outputs.continue-release }}
 runs:
   using: node20
   main: dist/index.mjs
