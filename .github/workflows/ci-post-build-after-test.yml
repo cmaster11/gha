@@ -19,22 +19,23 @@ jobs:
           JSON: ${{ inputs.needs-json }}
         with:
           script: |
-            const util = require('node:util');
-
-            if (process.env.JSON == null) {
+            const { JSON, GITHUB_WORKFLOW_REF } = process.env;
+            if (JSON == null) {
               throw new Error('needs-json input not found.');
             }
+            if (GITHUB_WORKFLOW_REF == null) {
+              throw new Error('GITHUB_WORKFLOW_REF environment variable not defined.');
+            }
+
             // Find at least one failed job in the "needs" context
             const needs = JSON.parse(process.env.JSON);
             const anyFailed = Object.entries(needs)
               .find(([k,v]) => v.result == 'failure') != null;
 
-            console.log('Context: ' + util.inspect(context, {depth:null}))
-
             // cmaster11/gha/.github/workflows/test.yml@refs/heads/main
             // cmaster11/gha/.github/workflows/test.yml
             // test.yml
-            const name = context.payload.workflow_ref.split('@')[0].split('/').reverse()[0];
+            const name = GITHUB_WORKFLOW_REF.split('@')[0].split('/').reverse()[0];
 
             // Finalize the status check for the workflow
             await github.rest.checks.create({
