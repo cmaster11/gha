@@ -16,11 +16,11 @@ jobs:
     steps:
       - uses: actions/github-script@v7
         env:
-          JSON: ${{ inputs.needs-json }}
+          NEEDS_JSON: ${{ inputs.needs-json }}
         with:
           script: |
-            const { JSON, GITHUB_WORKFLOW_REF } = process.env;
-            if (JSON == null) {
+            const { NEEDS_JSON, GITHUB_WORKFLOW_REF } = process.env;
+            if (NEEDS_JSON == null) {
               throw new Error('needs-json input not found.');
             }
             if (GITHUB_WORKFLOW_REF == null) {
@@ -28,7 +28,7 @@ jobs:
             }
 
             // Find at least one failed job in the "needs" context
-            const needs = JSON.parse(process.env.JSON);
+            const needs = JSON.parse(NEEDS_JSON);
             const anyFailed = Object.entries(needs)
               .find(([k,v]) => v.result == 'failure') != null;
 
