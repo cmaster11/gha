@@ -7,6 +7,7 @@ system to version and release such Actions!
 
 <!-- GENERATE_ACTIONS BEGIN -->
 
+- [`action-example`](./actions/action-example): This is just an example action.
 - [`action-get-changed-dirs`](./actions/action-get-changed-dirs): Uses git diff to find the list of changed directories, compared to a previous commit SHA.
 - [`action-get-release-label`](./actions/action-get-release-label): This actions looks for any release labels such as: patch, minor, major, no-release. It will fail it no labels are found.
 - [`action-git-init-userinfo`](./actions/action-git-init-userinfo): Sets the user name and email for git to use. Defaults to a GitHub actions user.

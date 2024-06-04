@@ -4,7 +4,7 @@
 
 import 'zx/globals';
 import { buildBinaries } from '../build-binaries.mjs';
-import { copyActionFiles } from '../copy-action-files.js';
+import { copyActionFiles, fixActionYml } from '../copy-action-files.js';
 import { getOctokit } from '../github-common.js';
 import { githubGetPrVersionLabel } from '../github-get-pr-labels.js';
 import Joi from 'joi';
@@ -16,6 +16,8 @@ import {
 } from '../version.js';
 import semver from 'semver/preload.js';
 import { setOutput } from '@actions/core';
+import path from 'node:path';
+import { actionsDir } from '../constants.js';
 
 $.verbose = true;
 
@@ -30,9 +32,10 @@ async function main() {
   const {
     _,
     promote: promoteFlag,
+    inline,
     ...rest
   } = minimist(process.argv.slice(2), {
-    boolean: ['promote', 'release'],
+    boolean: ['promote', 'release', 'inline'],
     string: ['token', 'repository', 'pullNumber']
   });
 
@@ -56,6 +59,8 @@ async function main() {
 
   if (opts) {
     await flow(actionName, opts, mappedBinaries);
+  } else if (inline) {
+    await fixActionYml(path.join(actionsDir, actionName), mappedBinaries);
   }
 }
 
