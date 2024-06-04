@@ -24,7 +24,7 @@ jobs:
             }
             // Find at least one failed job in the "needs" context
             const needs = JSON.parse(process.env.JSON);
-            const anyFailed = Object.fromEntries(needs)
+            const anyFailed = Object.entries(needs)
               .find(([k,v]) => v.result == 'failure') != null;
 
             // cmaster11/gha/.github/workflows/test.yml@refs/heads/main
