@@ -17,14 +17,18 @@ jobs:
       - uses: actions/github-script@v7
         env:
           NEEDS_JSON: ${{ inputs.needs-json }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         with:
           script: |
-            const { NEEDS_JSON, GITHUB_WORKFLOW_REF } = process.env;
+            const { NEEDS_JSON, GITHUB_WORKFLOW_REF, HEAD_SHA } = process.env;
             if (NEEDS_JSON == null) {
               throw new Error('needs-json input not found.');
             }
             if (GITHUB_WORKFLOW_REF == null) {
               throw new Error('GITHUB_WORKFLOW_REF environment variable not defined.');
+            }
+            if (HEAD_SHA == null) {
+              throw new Error('HEAD_SHA environment variable not defined.');
             }
 
             // Find at least one failed job in the "needs" context
@@ -44,4 +48,5 @@ jobs:
               name,
               status: 'completed',
               conclusion: anyFailed ? 'failure' : 'success',
+              head_sha: HEAD_SHA,
             })
