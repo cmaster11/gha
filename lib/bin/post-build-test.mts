@@ -13,13 +13,14 @@ interface Opts {
   repository: string;
   versionBranch: string;
   headRef: string;
+  headSHA: string;
   release: boolean;
 }
 
 async function main() {
   const { _, ...rest } = minimist(process.argv.slice(2), {
     boolean: ['release'],
-    string: ['token', 'repository', 'versionBranch', 'headRef']
+    string: ['token', 'repository', 'versionBranch', 'headRef', 'headSHA']
   });
 
   const opts = Joi.attempt(
@@ -29,6 +30,7 @@ async function main() {
       repository: Joi.string().required(),
       versionBranch: Joi.string().required(),
       headRef: Joi.string().required(),
+      headSHA: Joi.string().required(),
       release: Joi.boolean().required()
     }).required(),
     {
@@ -42,7 +44,7 @@ async function main() {
 
 async function flow(
   actionName: string,
-  { token, repository, versionBranch, release, headRef }: Opts
+  { token, repository, versionBranch, release, headRef, headSHA }: Opts
 ) {
   const gh = getOctokit(repository, token);
 
@@ -53,7 +55,7 @@ async function flow(
   try {
     await gh.octokit.rest.repos.getContent({
       ...gh.repoProps,
-      ref,
+      ref: headSHA,
       path: `.github/workflows/${workflowName}`
     });
   } catch (
@@ -67,6 +69,15 @@ async function flow(
     throw err;
   }
 
+  // Create the status check for the upcoming test workflow
+  await gh.octokit.rest.checks.create({
+    ...gh.repoProps,
+    name: workflowName,
+    status: 'in_progress',
+    head_sha: headSHA
+  });
+
+  // Trigger the test workflow
   await gh.octokit.rest.actions.createWorkflowDispatch({
     ...gh.repoProps,
     workflow_id: workflowName,

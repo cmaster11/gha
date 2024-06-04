@@ -1,0 +1,40 @@
+# This workflow need to be invoked by any test workflow, after all other jobs
+# are completed.
+name: build-after-test
+
+on:
+  workflow_call:
+    inputs:
+      needs-json:
+        description: Pass toJSON(needs) to this input
+        required: true
+        type: string
+
+jobs:
+  notify:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            // Find at least one failed job in the "needs" context
+            const needs = JSON.parse(core.getInput('needs-json', {required: true}));
+            const anyFailed = Object.fromEntries(needs)
+              .find(([k,v]) => v.result == 'failure') != null;
+
+            // cmaster11/gha/.github/workflows/test.yml@refs/heads/main
+            // cmaster11/gha/.github/workflows/test.yml
+            // test.yml
+            const name = context.payload.workflow_ref.split('@')[0].split('/').reverse()[0], 
+
+            // Finalize the status check for the workflow
+            github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name,
+              status: 'completed',
+              conclusion: anyFailed ? 'failure' : 'success',
+            })

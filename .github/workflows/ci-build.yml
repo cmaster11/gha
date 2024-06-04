@@ -156,6 +156,7 @@ jobs:
       pull-requests: read
       contents: write
       actions: write
+      checks: write
     strategy:
       matrix: ${{ fromJSON(needs.get-changes.outputs.matrix) }}
     steps:
@@ -182,10 +183,12 @@ jobs:
           --repository "$GITHUB_REPOSITORY"
           --versionBranch "$VERSION_BRANCH"
           --headRef "$GITHUB_HEAD_REF"
+          --headSHA "$HEAD_SHA"
           --release "$RELEASE"
           "$MATRIX_DIRECTORY"
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           MATRIX_DIRECTORY: ${{ matrix.directory }}
           VERSION_BRANCH: ${{ fromJson(steps.read-build-output.outputs.result).version-branch[matrix.directory] }}
           RELEASE: ${{ github.event.action == 'closed' && github.event.pull_request.merged }}
