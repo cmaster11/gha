@@ -18,23 +18,25 @@ export async function fixActionYml(
   const actionYmlContents = parse(await fs.readFile(actionYmlPath, 'utf-8'));
 
   if ('runs' in actionYmlContents) {
+    const runs = actionYmlContents.runs;
+
     // Fix the action.yml file to strip out any PREBUILD steps
-    if ('steps' in actionYmlContents.runs) {
-      const idx = (actionYmlContents.runs.steps as { id: string }[]).findIndex(
+    if ('steps' in runs) {
+      const idx = (runs.steps as { id: string }[]).findIndex(
         (step) => step.id == 'PREBUILD'
       );
       if (idx >= 0) {
         console.log('Found PREBUILD step, removing it for build');
-        actionYmlContents.runs.steps.splice(idx, 1);
+        runs.steps.splice(idx, 1);
       }
-    } else if ('main' in actionYmlContents.runs) {
+    } else if ('main' in runs) {
       // Replace the entrypoint if it is a TypeScript file, with the built one
-      const bin = actionYmlContents.runs.main;
+      const bin = runs.main;
       if (bin in mappedBinaries) {
         console.log(
           `Replacing main entrypoint ${bin} with ${mappedBinaries[bin]}`
         );
-        actionYmlContents.runs.main = mappedBinaries[bin];
+        runs.main = mappedBinaries[bin];
       }
     }
   }
