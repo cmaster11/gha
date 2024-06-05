@@ -19,6 +19,7 @@ concurrency:
 
 jobs:
   check-release-label:
+    name: Check release label
     if: >
       github.event.action != 'closed' ||
       (github.event.action == 'closed' && github.event.pull_request.merged)
@@ -49,6 +50,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   test:
+    name: Test (JS)
     if: >
       github.event.action != 'closed' ||
       (github.event.action == 'closed' && github.event.pull_request.merged)
@@ -69,6 +71,7 @@ jobs:
         run: npm run test
 
   get-changes:
+    name: Get changes
     if: >
       github.event.action != 'closed' ||
       (github.event.action == 'closed' && github.event.pull_request.merged)
@@ -98,6 +101,7 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
 
   build:
+    name: Build (${{ matrix.directory }})
     needs:
       - test
       - get-changes
@@ -146,6 +150,7 @@ jobs:
 
   # Trigger any test workflows after everything has been built
   post-build-test:
+    name: Post-build (${{ matrix.directory }})
     needs:
       - get-changes
       - build
