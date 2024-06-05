@@ -46,7 +46,7 @@ jobs:
             const url = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`; 
 
             // Finalize the status for the workflow
-            await gh.octokit.rest.repos.createCommitStatus({
+            await github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
               name: ctx.statusName,
