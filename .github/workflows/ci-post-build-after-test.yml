@@ -22,26 +22,18 @@ jobs:
         env:
           CI_CTX_JSON: ${{ inputs.ctx }}
           NEEDS_JSON: ${{ inputs.needs-json }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         with:
           script: |
             const { 
               CI_CTX_JSON, 
               NEEDS_JSON, 
               HEAD_SHA,
-              GITHUB_WORKFLOW_REF, 
             } = process.env;
             if (CI_CTX_JSON == null) {
               throw new Error('ctx input not found.');
             }
             if (NEEDS_JSON == null) {
               throw new Error('needs-json input not found.');
-            }
-            if (GITHUB_WORKFLOW_REF == null) {
-              throw new Error('GITHUB_WORKFLOW_REF environment variable not defined.');
-            }
-            if (HEAD_SHA == null) {
-              throw new Error('HEAD_SHA environment variable not defined.');
             }
 
             const ctx = JSON.parse(CI_CTX_JSON);
@@ -51,21 +43,14 @@ jobs:
             const anyFailed = Object.entries(needs)
               .find(([k,v]) => v.result == 'failure') != null;
 
-            // cmaster11/gha/.github/workflows/test.yml@refs/heads/main
-            // cmaster11/gha/.github/workflows/test.yml
-            // test.yml
-            const name = GITHUB_WORKFLOW_REF.split('@')[0].split('/').reverse()[0];
-
             const url = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`; 
 
             // Finalize the status check for the workflow
             await github.rest.checks.update({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              name,
               status: 'completed',
               conclusion: anyFailed ? 'failure' : 'success',
-              head_sha: HEAD_SHA,
               check_run_id: ctx.check,
               details_url: url,
             })

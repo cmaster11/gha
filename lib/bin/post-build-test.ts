@@ -72,7 +72,7 @@ async function flow(
   // Create the status check for the upcoming test workflow
   const check = await gh.octokit.rest.checks.create({
     ...gh.repoProps,
-    name: workflowName,
+    name: `CI Test: ${actionName}`,
     status: 'in_progress',
     head_sha: headSHA
   });
