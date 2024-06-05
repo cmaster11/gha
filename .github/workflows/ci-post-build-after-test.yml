@@ -22,6 +22,7 @@ jobs:
         env:
           CI_CTX_JSON: ${{ inputs.ctx }}
           NEEDS_JSON: ${{ inputs.needs-json }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         with:
           script: |
             const { 
