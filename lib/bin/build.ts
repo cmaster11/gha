@@ -8,7 +8,7 @@ import { copyActionFiles, fixActionYml } from '../copy-action-files.js';
 import { getOctokit } from '../github-common.js';
 import { githubGetPrVersionLabel } from '../github-get-pr-labels.js';
 import Joi from 'joi';
-import { flowGitCloneReplaceAndCommit, getGitTagsByGlob } from '../git.js';
+import { getGitTagsByGlob } from '../git.js';
 import {
   getLatestTagSemVer,
   getPRDevBranch,
@@ -18,6 +18,7 @@ import semver from 'semver/preload.js';
 import { setOutput } from '@actions/core';
 import path from 'node:path';
 import { actionsDir } from '../constants.js';
+import { flowGitCloneReplaceAndCommit } from '../git-clone-and-replace.js';
 
 $.verbose = true;
 
