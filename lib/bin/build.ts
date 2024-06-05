@@ -3,7 +3,7 @@
  */
 
 import 'zx/globals';
-import { buildBinaries } from '../build-binaries.mjs';
+import { buildBinaries } from '../build-binaries.js';
 import { copyActionFiles, fixActionYml } from '../copy-action-files.js';
 import { getOctokit } from '../github-common.js';
 import { githubGetPrVersionLabel } from '../github-get-pr-labels.js';
