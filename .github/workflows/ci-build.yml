@@ -41,7 +41,7 @@ jobs:
 
       - name: Build action-get-release-label
         shell: bash
-        run: npx tsx ./lib/bin/build.mts --inline action-get-release-label
+        run: npx tsx ./lib/bin/build.ts --inline action-get-release-label
       - name: Get release label
         id: get-release-label
         uses: ./actions/action-get-release-label
@@ -91,7 +91,7 @@ jobs:
         id: get-changed-dirs
         shell: bash
         run: >
-          npx tsx ./lib/bin/get-changes-matrix.mts
+          npx tsx ./lib/bin/get-changes-matrix.ts
           --baseSHA "$BASE_SHA"
           "$MATRIX_DIRECTORY"
         env:
@@ -124,7 +124,7 @@ jobs:
         id: build
         shell: bash
         run: >
-          npx tsx ./lib/bin/build.mts
+          npx tsx ./lib/bin/build.ts
           --promote
           --token "$TOKEN"
           --repository "$GITHUB_REPOSITORY"
@@ -178,7 +178,7 @@ jobs:
       - name: Post build test
         shell: bash
         run: >
-          npx tsx ./lib/bin/post-build-test.mts
+          npx tsx ./lib/bin/post-build-test.ts
           --token "$TOKEN"
           --repository "$GITHUB_REPOSITORY"
           --versionBranch "$VERSION_BRANCH"
@@ -211,7 +211,7 @@ jobs:
       - name: Cleanup
         shell: bash
         run: >
-          npx tsx ./lib/bin/cleanup.mts
+          npx tsx ./lib/bin/cleanup.ts
           --token "$TOKEN"
           --repository "$GITHUB_REPOSITORY"
           --pullNumber "$PR_NUMBER"
