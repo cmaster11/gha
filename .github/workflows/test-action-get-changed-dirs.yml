@@ -22,7 +22,7 @@ jobs:
       - id: action
         uses: ./
         with:
-          base-sha: HEAD
+          base-sha: HEAD~1
 
       # Dump the outputs
       - run: |
