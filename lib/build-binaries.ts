@@ -52,7 +52,7 @@ export async function buildBinaries(
       entryPoints: [fullPath],
       bundle: true,
       keepNames: true,
-      sourcemap: true,
+      sourcemap: 'inline',
       outfile: outFile,
       platform: 'node',
       format: 'esm',
