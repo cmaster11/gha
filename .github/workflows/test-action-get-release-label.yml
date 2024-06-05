@@ -10,7 +10,6 @@ on:
       - .github/workflows/test-action-get-release-label.yml
 jobs:
   test:
-    name: Test action-get-release-label
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-22.04
     permissions:

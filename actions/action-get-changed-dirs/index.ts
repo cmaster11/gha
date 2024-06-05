@@ -8,6 +8,8 @@ import { getChangedDirectories } from '../../lib/get-changed-directories.js';
 import { getInput, setOutput } from '@actions/core';
 import Joi from 'joi';
 
+$.verbose = true;
+
 const baseSHA = getInput('base-sha', { required: true });
 const directoryRegex = new RegExp(getInput('regex') || '.*');
 const maxDepth: number = Joi.attempt(

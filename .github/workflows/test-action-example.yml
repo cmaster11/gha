@@ -11,7 +11,6 @@ on:
 
 jobs:
   test:
-    name: Test action-example
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-22.04
     steps:
