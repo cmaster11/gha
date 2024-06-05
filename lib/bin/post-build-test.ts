@@ -70,10 +70,10 @@ async function flow(
   }
 
   // Create the status check for the upcoming test workflow
-  const statusName = `CI Test: ${actionName}`;
+  const statusContext = `CI Test: ${actionName}`;
   await gh.octokit.rest.repos.createCommitStatus({
     ...gh.repoProps,
-    name: statusName,
+    context: statusContext,
     state: 'pending',
     sha: headSHA
   });
@@ -86,7 +86,7 @@ async function flow(
     inputs: {
       ctx: JSON.stringify({
         ref: versionBranch,
-        statusName
+        statusContext
       })
     }
   });

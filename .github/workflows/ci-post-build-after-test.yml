@@ -52,7 +52,7 @@ jobs:
             await github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              name: ctx.statusName,
+              context: ctx.statusContext,
               state: anyFailed ? 'failure' : 'success',
               sha: HEAD_SHA,
               target_url: url,
