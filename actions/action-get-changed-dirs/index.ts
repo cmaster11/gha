@@ -8,8 +8,10 @@ import { getChangedDirectories } from '../../lib/get-changed-directories.js';
 import { getInput, setOutput } from '@actions/core';
 import Joi from 'joi';
 
+$.verbose = true;
+
 const baseSHA = getInput('base-sha', { required: true });
-const directoryRegex = new RegExp(getInput('regex') || '.*');
+const regex = new RegExp(getInput('regex') || '.*');
 const maxDepth: number = Joi.attempt(
   getInput('max-depth') || '0',
   Joi.number().required()
@@ -21,7 +23,7 @@ const ignoreIfAllDeletions: boolean = Joi.attempt(
 
 const changes = await getChangedDirectories({
   baseSHA,
-  directoryRegex,
+  regex,
   maxDepth,
   ignoreIfAllDeletions
 });

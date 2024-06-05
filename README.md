@@ -72,10 +72,10 @@ flowchart
 
 ### Pure NodeJs actions
 
-Create an `index.mts` file in the action folder and use the following configuration for the `action.yml` file:
+Create an `index.ts` file in the action folder and use the following configuration for the `action.yml` file:
 
 ```yaml
 runs:
   using: node20
-  main: index.mts
+  main: index.ts
 ```

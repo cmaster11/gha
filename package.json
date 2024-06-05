@@ -20,7 +20,7 @@
     "lint:prettier:fix": "prettier --write '**/*.{ts,json,md}'",
     "lint:eslint": "eslint .",
     "lint:eslint:fix": "npm run lint:eslint -- --fix",
-    "gen:docs": "npx tsx lib/bin/gen-docs.mts",
+    "gen:docs": "npx tsx lib/bin/gen-docs.ts",
     "prepare": "husky && npx replace-in-file '#!/usr/bin/env sh' '#!/usr/bin/env bash' '.husky/_/h' --quiet && npx replace-in-file 'sh -e' 'bash -e' '.husky/_/h' --quiet"
   },
   "devDependencies": {

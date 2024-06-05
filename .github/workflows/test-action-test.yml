@@ -1,10 +1,6 @@
 name: Test action-test
 on:
-  workflow_dispatch:
-    inputs:
-      ref:
-        description: The ref of the commit to clone
-        required: true
+  workflow_dispatch: { inputs: { ctx: {} } }
   # Register the workflow so that it can be triggered
   # via workflow_dispatch event
   pull_request:
@@ -15,15 +11,14 @@ on:
 
 jobs:
   test:
-    name: Test action-test
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.ref }}
+          ref: '${{ fromJSON(inputs.ctx).ref }}'
 
-      - id: action-test
+      - id: action
         uses: ./
         with:
           greeting: Hello world!
@@ -31,7 +26,7 @@ jobs:
       - run: |
           echo "$JSON" | jq '.'
         env:
-          JSON: ${{ toJSON(steps.action-test) }}
+          JSON: ${{ toJSON(steps.action) }}
 
   ci-after-test:
     needs:
@@ -39,6 +34,7 @@ jobs:
     if: always() && github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/ci-post-build-after-test.yml
     permissions:
-      checks: write
+      statuses: write
     with:
+      ctx: ${{ inputs.ctx }}
       needs-json: ${{ toJSON(needs) }}

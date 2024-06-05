@@ -22,13 +22,13 @@ export async function buildBinaries(
   if (await fs.exists(binDir)) {
     binsToBuild.push(
       ...(await fs.readdir(binDir))
-        .filter((p) => /\.mts$/.test(p))
+        .filter((p) => /\.ts$/.test(p))
         .map((p) => `bin/${p}`)
     );
   }
 
-  if (await fs.exists(path.join(actionDir, 'index.mts'))) {
-    binsToBuild.push('index.mts');
+  if (await fs.exists(path.join(actionDir, 'index.ts'))) {
+    binsToBuild.push('index.ts');
   }
 
   if (binsToBuild.length == 0) {
@@ -43,7 +43,7 @@ export async function buildBinaries(
   for (const bin of binsToBuild) {
     const fullPath = path.join(actionDir, bin);
 
-    const renamedFile = bin.replace(/\.mts$/, '.mjs');
+    const renamedFile = bin.replace(/\.ts$/, '.mjs');
     const outFile = path.join(distDir, renamedFile);
     console.log(`Building ${bin} to ${outFile}`);
     const outFileDir = path.dirname(outFile);
@@ -52,11 +52,11 @@ export async function buildBinaries(
       entryPoints: [fullPath],
       bundle: true,
       keepNames: true,
-      sourcemap: false,
+      sourcemap: 'inline',
       outfile: outFile,
       platform: 'node',
       format: 'esm',
-      inject: [path.join(__dirname, 'cjs-shim.mts')]
+      inject: [path.join(__dirname, 'cjs-shim.ts')]
     });
 
     const unpatchedBuild = await fs.readFile(outFile, 'utf-8');

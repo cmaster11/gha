@@ -4,6 +4,8 @@
 import 'zx/globals';
 import { getInput, setOutput } from '@actions/core';
 
+$.verbose = true;
+
 const greeting = getInput('greeting', { required: true });
 
 console.log(`We received a greeting: ${greeting}`);

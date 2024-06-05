@@ -19,6 +19,7 @@ concurrency:
 
 jobs:
   check-release-label:
+    name: Check release label
     if: >
       github.event.action != 'closed' ||
       (github.event.action == 'closed' && github.event.pull_request.merged)
@@ -41,7 +42,7 @@ jobs:
 
       - name: Build action-get-release-label
         shell: bash
-        run: npx tsx ./lib/bin/build.mts --inline action-get-release-label
+        run: npx tsx ./lib/bin/build.ts --inline action-get-release-label
       - name: Get release label
         id: get-release-label
         uses: ./actions/action-get-release-label
@@ -49,6 +50,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   test:
+    name: Test (JS)
     if: >
       github.event.action != 'closed' ||
       (github.event.action == 'closed' && github.event.pull_request.merged)
@@ -69,6 +71,7 @@ jobs:
         run: npm run test
 
   get-changes:
+    name: Get changes
     if: >
       github.event.action != 'closed' ||
       (github.event.action == 'closed' && github.event.pull_request.merged)
@@ -91,13 +94,14 @@ jobs:
         id: get-changed-dirs
         shell: bash
         run: >
-          npx tsx ./lib/bin/get-changes-matrix.mts
+          npx tsx ./lib/bin/get-changes-matrix.ts
           --baseSHA "$BASE_SHA"
           "$MATRIX_DIRECTORY"
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
 
   build:
+    name: Build (${{ matrix.directory }})
     needs:
       - test
       - get-changes
@@ -124,7 +128,7 @@ jobs:
         id: build
         shell: bash
         run: >
-          npx tsx ./lib/bin/build.mts
+          npx tsx ./lib/bin/build.ts
           --promote
           --token "$TOKEN"
           --repository "$GITHUB_REPOSITORY"
@@ -146,6 +150,7 @@ jobs:
 
   # Trigger any test workflows after everything has been built
   post-build-test:
+    name: Post-build (${{ matrix.directory }})
     needs:
       - get-changes
       - build
@@ -156,7 +161,7 @@ jobs:
       pull-requests: read
       contents: write
       actions: write
-      checks: write
+      statuses: write
     strategy:
       matrix: ${{ fromJSON(needs.get-changes.outputs.matrix) }}
     steps:
@@ -178,7 +183,7 @@ jobs:
       - name: Post build test
         shell: bash
         run: >
-          npx tsx ./lib/bin/post-build-test.mts
+          npx tsx ./lib/bin/post-build-test.ts
           --token "$TOKEN"
           --repository "$GITHUB_REPOSITORY"
           --versionBranch "$VERSION_BRANCH"
@@ -211,7 +216,7 @@ jobs:
       - name: Cleanup
         shell: bash
         run: >
-          npx tsx ./lib/bin/cleanup.mts
+          npx tsx ./lib/bin/cleanup.ts
           --token "$TOKEN"
           --repository "$GITHUB_REPOSITORY"
           --pullNumber "$PR_NUMBER"

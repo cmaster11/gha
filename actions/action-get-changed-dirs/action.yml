@@ -28,4 +28,4 @@ outputs:
 
 runs:
   using: node20
-  main: index.mts
+  main: index.ts

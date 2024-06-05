@@ -70,11 +70,12 @@ async function flow(
   }
 
   // Create the status check for the upcoming test workflow
-  await gh.octokit.rest.checks.create({
+  const statusContext = `CI Test: ${actionName}`;
+  await gh.octokit.rest.repos.createCommitStatus({
     ...gh.repoProps,
-    name: workflowName,
-    status: 'in_progress',
-    head_sha: headSHA
+    context: statusContext,
+    state: 'pending',
+    sha: headSHA
   });
 
   // Trigger the test workflow
@@ -83,7 +84,10 @@ async function flow(
     workflow_id: workflowName,
     ref,
     inputs: {
-      ref: versionBranch
+      ctx: JSON.stringify({
+        ref: versionBranch,
+        statusContext
+      })
     }
   });
 }
