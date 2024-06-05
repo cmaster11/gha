@@ -70,7 +70,7 @@ async function flow(
   }
 
   // Create the status check for the upcoming test workflow
-  await gh.octokit.rest.checks.create({
+  const check = await gh.octokit.rest.checks.create({
     ...gh.repoProps,
     name: workflowName,
     status: 'in_progress',
@@ -83,7 +83,10 @@ async function flow(
     workflow_id: workflowName,
     ref,
     inputs: {
-      ref: versionBranch
+      ctx: JSON.stringify({
+        ref: versionBranch,
+        check: check.data.id
+      })
     }
   });
 }
