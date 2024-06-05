@@ -19,7 +19,7 @@ jobs:
           ref: '${{ fromJSON(inputs.ctx).ref }}'
 
       # Run the action to test it
-      - id: action-example
+      - id: action
         uses: ./
         with:
           greeting: Hello world!
@@ -28,7 +28,7 @@ jobs:
       - run: |
           echo "$JSON" | jq '.'
         env:
-          JSON: ${{ toJSON(steps.action-example) }}
+          JSON: ${{ toJSON(steps.action) }}
 
   # Notify GitHub about the result of the test
   ci-after-test:

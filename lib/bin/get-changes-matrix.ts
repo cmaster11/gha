@@ -5,7 +5,7 @@
 import 'zx/globals';
 import Joi from 'joi';
 import { gitDiffLines } from '../git.js';
-import { getChangedDirectories } from '../get-changed-directories.js';
+import { getChangedFiles } from '../get-changed-directories.js';
 import { inspect } from 'node:util';
 import { setOutput } from '@actions/core';
 import { actionsDir } from '../constants.js';
@@ -33,16 +33,17 @@ async function main() {
     }
   ) as Opts;
 
-  const changedActions = new Set<string>(
-    (
-      await getChangedDirectories({
+  const changedActions = new Set<string>([
+    ...(
+      await getChangedFiles({
         baseSHA: opts.baseSHA,
-        directoryRegex: /^actions\/.*/,
-        maxDepth: 1,
-        ignoreIfAllDeletions: true
+        regex: /^\.github\/workflows\/test-action-.+\.yml$/,
+        ignoreDeletions: true
       })
-    ).map((d) => d.substring('actions/'.length))
-  );
+    ).map((d) =>
+      d.replace(/^\.github\/workflows\/test-(action-.+)\.yml$/, '$1')
+    )
+  ]);
 
   // If any JS-related files change, rebuild all JS actions
   const diffLines = await gitDiffLines(opts.baseSHA);

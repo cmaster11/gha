@@ -1,4 +1,4 @@
-name: Test action-get-release-label
+name: Test action-get-changed-dirs
 on:
   workflow_dispatch: { inputs: { ctx: {} } }
   # Register the workflow so that it can be triggered
@@ -7,25 +7,24 @@ on:
     branches:
       - main
     paths:
-      - .github/workflows/test-action-get-release-label.yml
+      - .github/workflows/test-action-get-changed-dirs.yml
+
 jobs:
   test:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-22.04
-    permissions:
-      pull-requests: read
-      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
           ref: '${{ fromJSON(inputs.ctx).ref }}'
 
+      # Run the action to test it
       - id: action
         uses: ./
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          pull-number: 6
+          base-sha: HEAD
 
+      # Dump the outputs
       - run: |
           echo "$JSON" | jq '.'
         env:

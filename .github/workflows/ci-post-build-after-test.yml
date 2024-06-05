@@ -35,6 +35,9 @@ jobs:
             if (NEEDS_JSON == null) {
               throw new Error('needs-json input not found.');
             }
+            if (HEAD_SHA == null) {
+              throw new Error('HEAD_SHA environment variable not defined.');
+            }
 
             const ctx = JSON.parse(CI_CTX_JSON);
 
@@ -51,6 +54,6 @@ jobs:
               repo: context.repo.repo,
               name: ctx.statusName,
               state: anyFailed ? 'failure' : 'success',
-              sha: headSHA,
+              sha: HEAD_SHA,
               target_url: url,
             });
