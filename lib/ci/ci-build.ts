@@ -37,6 +37,7 @@ export async function ciBuild(
   const { actionName } = opts;
 
   const mappedBinaries = await buildBinaries(actionName);
+  const contentsDir = await copyActionFiles(actionName, mappedBinaries);
 
   if ('inline' in opts) {
     console.log('Fixing action.yml inline');
@@ -45,8 +46,6 @@ export async function ciBuild(
   }
 
   const { release, pullNumber, releaseLabel } = opts;
-
-  const contentsDir = await copyActionFiles(actionName, mappedBinaries);
 
   // If we are NOT releasing a new version, just generate a dev branch
   if (!release) {

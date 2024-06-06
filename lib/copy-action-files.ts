@@ -5,15 +5,7 @@
 import path from 'node:path';
 import { actionsDir } from './constants.js';
 import { parse, stringify } from 'yaml';
-import Joi from 'joi';
-
-interface ActionConfig {
-  copy?: Record<string, string>;
-}
-
-const ActionConfigSchema = Joi.object({
-  copy: Joi.object({}).unknown(true).meta({ unknownType: Joi.string() })
-});
+import { getActionConfig } from './action-config.js';
 
 export async function fixActionYml(
   actionDir: string,
@@ -88,17 +80,4 @@ export async function copyActionFiles(
   await fixActionYml(tmpDir, mappedBinaries);
 
   return tmpDir;
-}
-
-export async function getActionConfig(
-  actionConfigFile: string
-): Promise<ActionConfig> {
-  if (!(await fs.exists(actionConfigFile))) {
-    return {};
-  }
-
-  return Joi.attempt(
-    parse(await fs.readFile(actionConfigFile, 'utf-8')),
-    ActionConfigSchema
-  );
 }
