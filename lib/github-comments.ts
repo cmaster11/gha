@@ -21,7 +21,7 @@ export async function gitHubFindCommentByTag(
 
   for await (const resp of pg) {
     for (const comment of resp.data) {
-      if (comment.body_text?.includes(marker)) return comment.id;
+      if (comment.body?.includes(marker)) return comment.id;
     }
   }
 
