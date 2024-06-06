@@ -19,10 +19,13 @@ async function main() {
   const phase = getInput('phase', { required: true });
   const token = getInput('token', { required: true });
 
-  console.log('Running ci-build', {
-    phase,
-    cwd: process.cwd()
-  });
+  console.log(
+    `Running ci-build: ${inspect({
+      phase,
+      cwd: process.cwd(),
+      env: process.env
+    })}`
+  );
 
   let pullNumber = context.payload.pull_request?.number;
   if (pullNumber == null) {
