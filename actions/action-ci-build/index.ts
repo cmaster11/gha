@@ -22,8 +22,7 @@ async function main() {
   console.log(
     `Running ci-build: ${inspect({
       phase,
-      cwd: process.cwd(),
-      env: process.env
+      cwd: process.cwd()
     })}`
   );
 
@@ -48,7 +47,11 @@ async function main() {
       return ciGetReleaseLabel(gh, pullNumber);
     }
     case 'get-changed-actions': {
-      return ciGetChangesMatrix(context.payload.pull_request!.base.sha);
+      return ciGetChangesMatrix({
+        gh,
+        pullNumber,
+        baseSHA: context.payload.pull_request!.base.sha
+      });
     }
     case 'build': {
       const actionName = getInput('action-name', { required: true });

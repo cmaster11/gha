@@ -13,8 +13,18 @@ import { setOutput } from '@actions/core';
 import { actionsDir } from '../constants.js';
 import path from 'node:path';
 import klaw from 'klaw';
+import type { GithubCommonProps } from '../github-common.js';
+import { gitHubCreateOrUpdateComment } from '../github-comments.js';
 
-export async function ciGetChangesMatrix(baseSHA: string) {
+export async function ciGetChangesMatrix({
+  gh,
+  pullNumber,
+  baseSHA
+}: {
+  gh: GithubCommonProps;
+  pullNumber: number;
+  baseSHA: string;
+}) {
   const changedActions = new Set<string>([
     ...(
       await getChangedDirectories({
@@ -65,6 +75,21 @@ export async function ciGetChangesMatrix(baseSHA: string) {
 
   console.log(`Changes: ${inspect(changedDirs)}`);
 
+  {
+    const body = [
+      '### [cmaster11/gha] Changed actions',
+      ...(changedDirs.length == 0
+        ? ['No changes detected']
+        : [changedDirs.map((a) => `- \`${a}\``).join('\n')])
+    ].join('\n\n');
+    await gitHubCreateOrUpdateComment(
+      gh,
+      pullNumber,
+      'ci-get-changes-matrix',
+      body
+    );
+  }
+
   setOutput(
     'matrix',
     JSON.stringify({
@@ -72,4 +97,6 @@ export async function ciGetChangesMatrix(baseSHA: string) {
     })
   );
   setOutput('matrix-empty', changedDirs.length === 0);
+
+  return changedDirs;
 }
