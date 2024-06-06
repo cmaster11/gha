@@ -16,7 +16,7 @@ interface Opts {
   pullNumber: number;
 }
 
-export async function actionGetReleaseLabel() {
+async function main() {
   const opts = Joi.attempt(
     {
       token: getInput('token', { required: true }),
@@ -48,6 +48,4 @@ export async function actionGetReleaseLabel() {
   }
 }
 
-if (require.main === module) {
-  void actionGetReleaseLabel();
-}
+void main();

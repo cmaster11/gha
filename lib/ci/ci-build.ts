@@ -18,6 +18,7 @@ import { setOutput } from '@actions/core';
 import path from 'node:path';
 import { actionsDir } from '../constants.js';
 import { flowGitCloneReplaceAndCommit } from '../git-clone-and-replace.js';
+import { isScriptInvokedDirectly } from '../esm.js';
 
 export async function ciBuild(
   opts:
@@ -88,7 +89,7 @@ export async function ciBuild(
   setOutput('version-branch', versionBranch);
 }
 
-if (require.main === module) {
+if (isScriptInvokedDirectly(import.meta)) {
   $.verbose = true;
   const { _, inline } = minimist(process.argv.slice(2), {
     boolean: ['inline']
