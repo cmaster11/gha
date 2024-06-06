@@ -130,6 +130,7 @@ jobs:
           release: ${{ github.event.action == 'closed' && github.event.pull_request.merged }}
 
   cleanup:
+    name: Cleanup
     runs-on: ubuntu-latest
     if: github.event.action == 'closed'
     permissions:
