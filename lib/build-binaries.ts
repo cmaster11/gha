@@ -7,8 +7,6 @@ import path from 'node:path';
 import { actionsDir } from './constants.js';
 import { inspect } from './inspect.js';
 
-const __dirname = import.meta.dirname;
-
 // Builds the various binaries for the action and returns a map
 // containing the mapped paths of the compiled files (src -> dest)
 export async function buildBinaries(
@@ -55,8 +53,7 @@ export async function buildBinaries(
       sourcemap: 'inline',
       outfile: outFile,
       platform: 'node',
-      format: 'esm',
-      inject: [path.join(__dirname, 'cjs-shim.ts')]
+      format: 'esm'
     });
 
     const unpatchedBuild = await fs.readFile(outFile, 'utf-8');

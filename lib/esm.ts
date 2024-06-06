@@ -14,12 +14,8 @@ export function isScriptInvokedDirectly(meta: ImportMeta): boolean {
 
   const scriptPath = createRequire(meta.url).resolve(process.argv[1]);
   const modulePath = fileURLToPath(meta.url);
-  const invoked = path.extname(scriptPath)
+  return path.extname(scriptPath)
     ? modulePath == scriptPath
     : // Compare without extensions, because Node.js supports invoking scripts without extension
       modulePath.replace(/\.[^.]+$/, '') == scriptPath;
-  if (invoked) {
-    console.log('Script invoked directly', { scriptPath, modulePath });
-  }
-  return invoked;
 }
