@@ -94,13 +94,11 @@ if (isScriptInvokedDirectly(import.meta)) {
   const { _, inline } = minimist(process.argv.slice(2), {
     boolean: ['inline']
   });
-  if (!inline)
-    throw new Error(
-      'ci-build.ts can only be directly invoked if the --inline option is passed'
-    );
-  const actionName = _[0].split('/').reverse()[0];
-  void ciBuild({
-    inline,
-    actionName
-  });
+  if (inline) {
+    const actionName = _[0].split('/').reverse()[0];
+    void ciBuild({
+      inline,
+      actionName
+    });
+  }
 }
