@@ -80,7 +80,7 @@ async function main() {
     }
     case 'test-action-ci-build': {
       return ciBuild({
-        actionName: 'test-action-ci-build',
+        actionName: 'test-action',
         inline: true
       });
     }
