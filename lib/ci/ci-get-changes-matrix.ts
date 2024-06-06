@@ -4,7 +4,10 @@
 
 import 'zx/globals';
 import { gitDiffLines } from '../git.js';
-import { getChangedFiles } from '../get-changed-directories.js';
+import {
+  getChangedDirectories,
+  getChangedFiles
+} from '../get-changed-directories.js';
 import { inspect } from 'node:util';
 import { setOutput } from '@actions/core';
 import { actionsDir } from '../constants.js';
@@ -14,8 +17,16 @@ import klaw from 'klaw';
 export async function ciGetChangesMatrix(baseSHA: string) {
   const changedActions = new Set<string>([
     ...(
+      await getChangedDirectories({
+        baseSHA,
+        regex: /^actions\//,
+        ignoreIfAllDeletions: true,
+        maxDepth: 1
+      })
+    ).map((d) => d.replace(/^actions\//, '')),
+    ...(
       await getChangedFiles({
-        baseSHA: baseSHA,
+        baseSHA,
         regex: /^\.github\/workflows\/test-action-.+\.yml$/,
         ignoreDeletions: true
       })
