@@ -19,6 +19,11 @@ async function main() {
   const phase = getInput('phase', { required: true });
   const token = getInput('token', { required: true });
 
+  console.log('Running ci-build', {
+    phase,
+    cwd: process.cwd()
+  });
+
   const pullNumber = context.payload.pull_request?.number;
   if (pullNumber == null) {
     throw new Error(`Missing PR number: ${inspect(context)}`);
