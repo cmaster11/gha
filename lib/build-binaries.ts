@@ -60,7 +60,7 @@ export async function buildBinaries(
     });
 
     const unpatchedBuild = await fs.readFile(outFile, 'utf-8');
-    const patchedBuild = '#!/usr/bin/env node\n' + unpatchedBuild;
+    const patchedBuild = '#!/usr/ci/env node\n' + unpatchedBuild;
     await fs.writeFile(outFile, patchedBuild);
     await fs.chmod(outFile, 0o755);
 

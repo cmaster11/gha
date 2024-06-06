@@ -5,10 +5,9 @@
 import 'zx/globals';
 import { buildBinaries } from '../build-binaries.js';
 import { copyActionFiles, fixActionYml } from '../copy-action-files.js';
-import { getOctokit } from '../github-common.js';
-import { githubGetPrVersionLabel } from '../github-get-pr-labels.js';
-import Joi from 'joi';
+import type { GithubCommonProps } from '../github-common.js';
 import { getGitTagsByGlob } from '../git.js';
+import type { ReleaseLabel } from '../version.js';
 import {
   getLatestTagSemVer,
   getPRDevBranch,
@@ -20,67 +19,31 @@ import path from 'node:path';
 import { actionsDir } from '../constants.js';
 import { flowGitCloneReplaceAndCommit } from '../git-clone-and-replace.js';
 
-$.verbose = true;
+export async function ciBuild(
+  opts:
+    | {
+        actionName: string;
+        inline: true;
+      }
+    | {
+        actionName: string;
+        gh: GithubCommonProps;
+        pullNumber: number;
+        releaseLabel: ReleaseLabel;
+        release: boolean;
+      }
+) {
+  const { actionName } = opts;
 
-interface Opts {
-  token: string;
-  repository: string;
-  pullNumber: number;
-  release: boolean;
-}
-
-async function main() {
-  const {
-    _,
-    promote: promoteFlag,
-    inline,
-    ...rest
-  } = minimist(process.argv.slice(2), {
-    boolean: ['promote', 'release', 'inline'],
-    string: ['token', 'repository', 'pullNumber']
-  });
-
-  const opts = promoteFlag
-    ? (Joi.attempt(
-        rest,
-        Joi.object({
-          token: Joi.string().required(),
-          repository: Joi.string().required(),
-          pullNumber: Joi.number().required(),
-          release: Joi.boolean().required()
-        }).required(),
-        {
-          allowUnknown: true
-        }
-      ) as Opts)
-    : undefined;
-
-  const actionName = _[0].split('/').reverse()[0];
   const mappedBinaries = await buildBinaries(actionName);
 
-  if (opts) {
-    await flow(actionName, opts, mappedBinaries);
-  } else if (inline) {
+  if ('inline' in opts) {
     console.log('Fixing action.yml inline');
     await fixActionYml(path.join(actionsDir, actionName), mappedBinaries);
-  }
-}
-
-async function flow(
-  actionName: string,
-  { token, repository, pullNumber, release }: Opts,
-  mappedBinaries: Record<string, string>
-) {
-  const gh = getOctokit(repository, token);
-
-  const versionLabel = await githubGetPrVersionLabel({
-    gh,
-    pullNumber
-  });
-  if (versionLabel == null) {
-    console.log('No version label found. Not proceeding with promote flow.');
     return;
   }
+
+  const { release, pullNumber, releaseLabel } = opts;
 
   const contentsDir = await copyActionFiles(actionName, mappedBinaries);
 
@@ -106,7 +69,7 @@ async function flow(
   const tags = await getGitTagsByGlob(tagPrefix + '*');
   const latestSemVer = getLatestTagSemVer(tags, tagPrefix);
 
-  const newSemVer = increaseSemver(latestSemVer, versionLabel);
+  const newSemVer = increaseSemver(latestSemVer, releaseLabel);
   const versionBranch = tagPrefix + semver.major(newSemVer);
   const newTag = tagPrefix + newSemVer;
   console.log(
@@ -125,4 +88,18 @@ async function flow(
   setOutput('version-branch', versionBranch);
 }
 
-void main();
+if (require.main === module) {
+  $.verbose = true;
+  const { _, inline } = minimist(process.argv.slice(2), {
+    boolean: ['inline']
+  });
+  if (!inline)
+    throw new Error(
+      'ci-build.ts can only be directly invoked if the --inline option is passed'
+    );
+  const actionName = _[0].split('/').reverse()[0];
+  void ciBuild({
+    inline,
+    actionName
+  });
+}

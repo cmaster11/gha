@@ -7,7 +7,7 @@ import {
   increaseSemver,
   semverSort,
   semverSortDesc,
-  VersionLabel
+  ReleaseLabel
 } from '../version.js';
 
 describe('version', () => {
@@ -32,57 +32,57 @@ describe('version', () => {
   describe('increaseSemver', () => {
     const tests: {
       tag: string;
-      versionLabel: VersionLabel;
+      releaseLabel: ReleaseLabel;
       preReleasePrefix?: string;
       usePrereleaseReleaseType?: boolean;
       expected: string;
     }[] = [
       {
         tag: '1.0.0',
-        versionLabel: VersionLabel.minor,
+        releaseLabel: ReleaseLabel.minor,
         preReleasePrefix: 'myprefix',
         expected: '1.1.0-myprefix.0'
       },
       {
         tag: '1.0.0',
-        versionLabel: VersionLabel.minor,
+        releaseLabel: ReleaseLabel.minor,
         preReleasePrefix: 'myprefix',
         usePrereleaseReleaseType: true,
         expected: '1.0.1-myprefix.0'
       },
       {
         tag: '1.0.0',
-        versionLabel: VersionLabel.minor,
+        releaseLabel: ReleaseLabel.minor,
         preReleasePrefix: 'my-prefix',
         expected: '1.1.0-my-prefix.0'
       },
       {
         tag: '1.1.0-myprefix.0',
-        versionLabel: VersionLabel.minor,
+        releaseLabel: ReleaseLabel.minor,
         preReleasePrefix: 'myprefix',
         expected: '1.2.0-myprefix.0'
       },
       {
         tag: '1.1.0-myprefix.0',
-        versionLabel: VersionLabel.minor,
+        releaseLabel: ReleaseLabel.minor,
         preReleasePrefix: 'myprefix2',
         expected: '1.2.0-myprefix2.0'
       },
       {
         tag: '1.1.0-myprefix.0',
-        versionLabel: VersionLabel.minor,
+        releaseLabel: ReleaseLabel.minor,
         expected: '1.1.0'
       },
       {
         tag: '1.1.0-myprefix.0',
-        versionLabel: VersionLabel.minor,
+        releaseLabel: ReleaseLabel.minor,
         preReleasePrefix: 'myprefix',
         usePrereleaseReleaseType: true,
         expected: '1.1.0-myprefix.1'
       },
       {
         tag: '1.1.0',
-        versionLabel: VersionLabel.minor,
+        releaseLabel: ReleaseLabel.minor,
         usePrereleaseReleaseType: true,
         expected: '1.1.1-0'
       }
@@ -91,7 +91,7 @@ describe('version', () => {
       expect(
         increaseSemver(
           t.tag,
-          t.versionLabel,
+          t.releaseLabel,
           t.preReleasePrefix,
           t.usePrereleaseReleaseType
         )

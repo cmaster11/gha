@@ -3,43 +3,18 @@
  */
 
 import 'zx/globals';
-import { getOctokit } from '../github-common.js';
-import Joi from 'joi';
+import type { GithubCommonProps } from '../github-common.js';
 import { getPRDevBranchGlob } from '../version.js';
 import { getGitRemoteBranchesByGlob } from '../git.js';
 import { inspect } from '../inspect.js';
 
-$.verbose = true;
-
-interface Opts {
-  token: string;
-  repository: string;
+export async function ciCleanup({
+  gh,
+  pullNumber
+}: {
+  gh: GithubCommonProps;
   pullNumber: number;
-}
-
-async function main() {
-  const { _, ...rest } = minimist(process.argv.slice(2), {
-    string: ['token', 'repository', 'pullNumber']
-  });
-
-  const opts = Joi.attempt(
-    rest,
-    Joi.object({
-      token: Joi.string().required(),
-      repository: Joi.string().required(),
-      pullNumber: Joi.number().required()
-    }).required(),
-    {
-      allowUnknown: true
-    }
-  ) as Opts;
-
-  await flow(opts);
-}
-
-async function flow({ token, repository, pullNumber }: Opts) {
-  const gh = getOctokit(repository, token);
-
+}) {
   // Fetch all remote branches
   await $`git fetch origin`;
 
@@ -78,5 +53,3 @@ async function flow({ token, repository, pullNumber }: Opts) {
     }
   }
 }
-
-void main();

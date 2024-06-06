@@ -3,51 +3,23 @@
  */
 
 import 'zx/globals';
-import { getOctokit } from '../github-common.js';
-import Joi from 'joi';
+import type { GithubCommonProps } from '../github-common.js';
 
-$.verbose = true;
-
-interface Opts {
-  token: string;
-  repository: string;
+export async function ciPostBuildTest({
+  gh,
+  actionName,
+  versionBranch,
+  headSHA,
+  headRef,
+  release
+}: {
+  gh: GithubCommonProps;
+  actionName: string;
   versionBranch: string;
   headRef: string;
   headSHA: string;
   release: boolean;
-}
-
-async function main() {
-  const { _, ...rest } = minimist(process.argv.slice(2), {
-    boolean: ['release'],
-    string: ['token', 'repository', 'versionBranch', 'headRef', 'headSHA']
-  });
-
-  const opts = Joi.attempt(
-    rest,
-    Joi.object({
-      token: Joi.string().required(),
-      repository: Joi.string().required(),
-      versionBranch: Joi.string().required(),
-      headRef: Joi.string().required(),
-      headSHA: Joi.string().required(),
-      release: Joi.boolean().required()
-    }).required(),
-    {
-      allowUnknown: true
-    }
-  ) as Opts;
-
-  const actionName = _[0].split('/').reverse()[0];
-  await flow(actionName, opts);
-}
-
-async function flow(
-  actionName: string,
-  { token, repository, versionBranch, release, headRef, headSHA }: Opts
-) {
-  const gh = getOctokit(repository, token);
-
+}) {
   const ref = release ? 'main' : headRef;
   const workflowName = `test-${actionName}.yml`;
 
@@ -91,5 +63,3 @@ async function flow(
     }
   });
 }
-
-void main();

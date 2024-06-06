@@ -3,7 +3,6 @@
  */
 
 import 'zx/globals';
-import Joi from 'joi';
 import { gitDiffLines } from '../git.js';
 import { getChangedFiles } from '../get-changed-directories.js';
 import { inspect } from 'node:util';
@@ -12,31 +11,11 @@ import { actionsDir } from '../constants.js';
 import path from 'node:path';
 import klaw from 'klaw';
 
-$.verbose = true;
-
-interface Opts {
-  baseSHA: string;
-}
-
-async function main() {
-  const { _, ...rest } = minimist(process.argv.slice(2), {
-    string: ['baseSHA']
-  });
-
-  const opts = Joi.attempt(
-    rest,
-    Joi.object({
-      baseSHA: Joi.string().required()
-    }).required(),
-    {
-      allowUnknown: true
-    }
-  ) as Opts;
-
+export async function ciGetChangesMatrix(baseSHA: string) {
   const changedActions = new Set<string>([
     ...(
       await getChangedFiles({
-        baseSHA: opts.baseSHA,
+        baseSHA: baseSHA,
         regex: /^\.github\/workflows\/test-action-.+\.yml$/,
         ignoreDeletions: true
       })
@@ -46,7 +25,7 @@ async function main() {
   ]);
 
   // If any JS-related files change, rebuild all JS actions
-  const diffLines = await gitDiffLines(opts.baseSHA);
+  const diffLines = await gitDiffLines(baseSHA);
   if (
     diffLines.find(([, p]) =>
       [
@@ -83,5 +62,3 @@ async function main() {
   );
   setOutput('matrix-empty', changedDirs.length === 0);
 }
-
-void main();
