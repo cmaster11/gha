@@ -44,6 +44,7 @@ export async function gitHubCreateOrUpdateComment(
       issue_number: pullNumber,
       body: body + '\n\n' + marker
     });
+    return;
   }
 
   await gh.octokit.rest.issues.createComment({
