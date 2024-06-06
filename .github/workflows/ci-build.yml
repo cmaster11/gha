@@ -71,15 +71,15 @@ jobs:
       - shell: bash
         run: npm run test
 
-  get-changed-dirs:
+  get-changed-actions:
     name: Get changes
     if: >
       github.event.action != 'closed' ||
       (github.event.action == 'closed' && github.event.pull_request.merged)
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.get-changed-dirs.outputs.matrix }}
-      matrix-empty: ${{ steps.get-changed-dirs.outputs.matrix-empty }}
+      matrix: ${{ steps.get-changed-actions.outputs.matrix }}
+      matrix-empty: ${{ steps.get-changed-actions.outputs.matrix-empty }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -93,26 +93,26 @@ jobs:
 
       - run: npx tsx ./lib/ci/ci-build.ts --inline action-ci-build
       - name: Get changes
-        id: get-changed-dirs
+        id: get-changed-actions
         uses: ./actions/action-ci-build
         with:
-          phase: get-changed-dirs
+          phase: get-changed-actions
           token: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     name: Build (${{ matrix.directory }})
     needs:
       - test
-      - get-changed-dirs
+      - get-changed-actions
       - get-release-label
     runs-on: ubuntu-latest
-    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-dirs.outputs.matrix-empty != 'true'
+    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-actions.outputs.matrix-empty != 'true'
     permissions:
       pull-requests: read
       contents: write
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.get-changed-dirs.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.get-changed-actions.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./actions/action-git-init-userinfo
@@ -146,18 +146,18 @@ jobs:
   post-build-test:
     name: Post-build (${{ matrix.directory }})
     needs:
-      - get-changed-dirs
+      - get-changed-actions
       - build
       - get-release-label
     runs-on: ubuntu-latest
-    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-dirs.outputs.matrix-empty != 'true'
+    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-actions.outputs.matrix-empty != 'true'
     permissions:
       pull-requests: read
       contents: write
       actions: write
       statuses: write
     strategy:
-      matrix: ${{ fromJSON(needs.get-changed-dirs.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.get-changed-actions.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
       - uses: cloudposse/github-action-matrix-outputs-read@v1

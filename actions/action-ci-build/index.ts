@@ -39,7 +39,7 @@ async function main() {
     case 'get-release-label': {
       return ciGetReleaseLabel(gh, pullNumber);
     }
-    case 'get-changed-dirs': {
+    case 'get-changed-actions': {
       return ciGetChangesMatrix(context.payload.pull_request!.base.sha);
     }
     case 'build': {

@@ -14,7 +14,6 @@ export async function buildBinaries(
   actionName: string
 ): Promise<Record<string, string>> {
   const actionDir = path.join(actionsDir, actionName);
-  await $`ls -al ${actionDir}`;
   const binDir = path.join(actionDir, 'bin');
 
   const binsToBuild: string[] = [];

@@ -50,7 +50,7 @@ export async function ciGetChangesMatrix(baseSHA: string) {
     }
   }
 
-  const changedDirs = Array.from(changedActions).map((a) => `actions/${a}`);
+  const changedDirs = Array.from(changedActions);
 
   console.log(`Changes: ${inspect(changedDirs)}`);
 
