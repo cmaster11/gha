@@ -4,7 +4,6 @@
 
 import path from 'node:path';
 
-const __dirname = import.meta.dirname;
-export const rootDir = path.join(__dirname, '..');
+export const rootDir = '.';
 export const actionsDir = path.join(rootDir, 'actions');
 export const workflowsDir = path.join(rootDir, '.github', 'workflows');

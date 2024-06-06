@@ -2,16 +2,16 @@
  * Copyright (c) 2024. Alberto Marchetti [ https://www.linkedin.com/in/albertomarchetti/ ]
  */
 
-import * as semver from 'semver';
 import type { ReleaseType } from 'semver';
+import * as semver from 'semver';
 
-export enum VersionLabel {
+export enum ReleaseLabel {
   patch = 'patch',
   minor = 'minor',
   major = 'major'
 }
 
-export enum NoReleaseVersionLabel {
+export enum NoReleaseReleaseLabel {
   'no-release' = 'no-release'
 }
 
@@ -31,20 +31,20 @@ export function getLatestTagSemVer(tags: string[], prefix: string): string {
 
 export function increaseSemver(
   tag: string,
-  versionLabel: VersionLabel,
+  releaseLabel: ReleaseLabel,
   preReleasePrefix?: string,
   usePrereleaseReleaseType?: boolean
 ): string {
-  let releaseType: ReleaseType = versionLabel;
+  let releaseType: ReleaseType = releaseLabel;
   if (usePrereleaseReleaseType) {
     releaseType = 'prerelease';
   } else if (preReleasePrefix) {
-    releaseType = ('pre' + versionLabel) as ReleaseType;
+    releaseType = ('pre' + releaseLabel) as ReleaseType;
   }
   const newVersion = semver.inc(tag, releaseType, false, preReleasePrefix);
   if (newVersion == null)
     throw new Error(
-      `Invalid semver increase request for tag ${tag} and version label ${versionLabel}`
+      `Invalid semver increase request for tag ${tag} and release label ${releaseLabel}`
     );
   return newVersion;
 }
@@ -61,4 +61,19 @@ export function getPRDevBranch(actionName: string, pullNumber: number) {
 export function getPRDevBranchGlob(pullNumber: number) {
   const branchSuffix = 'dev-' + getPRSuffix(pullNumber);
   return `action-*/${branchSuffix}`;
+}
+
+export function findReleaseLabel(
+  labels: string[]
+): ReleaseLabel | false | undefined {
+  if (labels.includes(NoReleaseReleaseLabel['no-release'])) {
+    console.log(`Found ${NoReleaseReleaseLabel['no-release']} label`);
+    return false;
+  }
+
+  if (labels.includes(ReleaseLabel.major)) return ReleaseLabel.major;
+  if (labels.includes(ReleaseLabel.minor)) return ReleaseLabel.minor;
+  if (labels.includes(ReleaseLabel.patch)) return ReleaseLabel.patch;
+
+  return;
 }

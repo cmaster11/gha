@@ -1,0 +1,75 @@
+name: Test action-ci-build
+on:
+  workflow_dispatch: { inputs: { ctx: {} } }
+  # Register the workflow so that it can be triggered
+  # via workflow_dispatch event
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/test-action-ci-build.yml
+
+jobs:
+  test:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: '${{ fromJSON(inputs.ctx).ref }}'
+
+      # Create a fake action
+      - run: |
+          mkdir -p actions/test-action
+          cd actions/test-action
+
+          npm init -y
+          npm install --save-dev @actions/github @actions/core
+          cat << EOF > action.yml
+          name: test-action
+          runs:
+            using: node20
+            main: index.ts
+          EOF
+          cat << EOF > index.ts
+          import { setOutput } from '@actions/core';
+          import { context } from '@actions/github';
+          console.log('Context', JSON.stringify(context));
+          setOutput('hey', 'Yeah!');
+          EOF
+
+      # Build the action
+      - id: action
+        uses: ./
+        with:
+          phase: test-action-ci-build
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull-number: ${{ fromJSON(inputs.ctx).pullNumber }}
+
+      # Dump the outputs
+      - run: |
+          echo "$JSON" | jq '.'
+        env:
+          JSON: ${{ toJSON(steps.action) }}
+
+      # Run the test action
+      - id: test-action
+        uses: ./actions/test-action
+
+      # Dump the outputs
+      - run: |
+          echo "$JSON" | jq '.'
+        env:
+          JSON: ${{ toJSON(steps.test-action) }}
+
+  # Notify GitHub about the result of the test
+  ci-after-test:
+    needs:
+      - test
+    if: always() && github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/ci-post-build-after-test.yml
+    permissions:
+      statuses: write
+    with:
+      ctx: ${{ inputs.ctx }}
+      needs-json: ${{ toJSON(needs) }}

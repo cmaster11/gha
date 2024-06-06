@@ -5,7 +5,7 @@
 import 'zx/globals';
 import Joi from 'joi';
 import { getOctokit } from '../../lib/github-common.js';
-import { githubGetPrVersionLabel } from '../../lib/github-get-pr-labels.js';
+import { githubGetPrReleaseLabel } from '../../lib/github-get-pr-labels.js';
 import { getInput, setOutput } from '@actions/core';
 
 $.verbose = true;
@@ -35,7 +35,7 @@ async function main() {
 
   const gh = getOctokit(opts.repository, opts.token);
 
-  const label = await githubGetPrVersionLabel({
+  const label = await githubGetPrReleaseLabel({
     gh,
     pullNumber: opts.pullNumber
   });

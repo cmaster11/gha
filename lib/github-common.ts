@@ -14,6 +14,14 @@ export interface GithubCommonProps {
 
 export function getOctokit(repository: string, token: string) {
   const [owner, repo] = repository.split('/');
+  return getOctokitWithOwnerAndRepo(owner, repo, token);
+}
+
+export function getOctokitWithOwnerAndRepo(
+  owner: string,
+  repo: string,
+  token: string
+) {
   const octokit = new Octokit({
     auth: token
   });

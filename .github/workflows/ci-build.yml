@@ -18,21 +18,20 @@ concurrency:
   cancel-in-progress: ${{ github.event.action != 'closed' }}
 
 jobs:
-  check-release-label:
-    name: Check release label
+  get-release-label:
+    name: Get release label
     if: >
       github.event.action != 'closed' ||
       (github.event.action == 'closed' && github.event.pull_request.merged)
     runs-on: ubuntu-latest
     outputs:
+      release-label: ${{ steps.get-release-label.outputs.release-label }}
       continue-release: ${{ steps.get-release-label.outputs.continue-release }}
     permissions:
       pull-requests: read
       contents: read
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version-file: package.json
@@ -40,13 +39,12 @@ jobs:
       - shell: bash
         run: npm ci
 
-      - name: Build action-get-release-label
-        shell: bash
-        run: npx tsx ./lib/bin/build.ts --inline action-get-release-label
+      - run: npx tsx ./lib/ci/ci-build.ts --inline action-ci-build
       - name: Get release label
         id: get-release-label
-        uses: ./actions/action-get-release-label
+        uses: ./actions/action-ci-build
         with:
+          phase: get-release-label
           token: ${{ secrets.GITHUB_TOKEN }}
 
   test:
@@ -57,8 +55,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - name: Check workflow files
+        run: |
+          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          ./actionlint -color
+        shell: bash
       - uses: actions/setup-node@v4
         with:
           node-version-file: package.json
@@ -70,15 +71,15 @@ jobs:
       - shell: bash
         run: npm run test
 
-  get-changes:
+  get-changed-actions:
     name: Get changes
     if: >
       github.event.action != 'closed' ||
       (github.event.action == 'closed' && github.event.pull_request.merged)
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.get-changed-dirs.outputs.matrix }}
-      matrix-empty: ${{ steps.get-changed-dirs.outputs.matrix-empty }}
+      matrix: ${{ steps.get-changed-actions.outputs.matrix }}
+      matrix-empty: ${{ steps.get-changed-actions.outputs.matrix-empty }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -90,30 +91,28 @@ jobs:
       - shell: bash
         run: npm ci
 
+      - run: npx tsx ./lib/ci/ci-build.ts --inline action-ci-build
       - name: Get changes
-        id: get-changed-dirs
-        shell: bash
-        run: >
-          npx tsx ./lib/bin/get-changes-matrix.ts
-          --baseSHA "$BASE_SHA"
-          "$MATRIX_DIRECTORY"
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        id: get-changed-actions
+        uses: ./actions/action-ci-build
+        with:
+          phase: get-changed-actions
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     name: Build (${{ matrix.directory }})
     needs:
       - test
-      - get-changes
-      - check-release-label
+      - get-changed-actions
+      - get-release-label
     runs-on: ubuntu-latest
-    if: needs.check-release-label.outputs.continue-release == 'true' && needs.get-changes.outputs.matrix-empty != 'true'
+    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-actions.outputs.matrix-empty != 'true'
     permissions:
       pull-requests: read
       contents: write
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.get-changes.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.get-changed-actions.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./actions/action-git-init-userinfo
@@ -124,22 +123,17 @@ jobs:
       - shell: bash
         run: npm ci
 
+      - run: npx tsx ./lib/ci/ci-build.ts --inline action-ci-build
       - name: Build
         id: build
-        shell: bash
-        run: >
-          npx tsx ./lib/bin/build.ts
-          --promote
-          --token "$TOKEN"
-          --repository "$GITHUB_REPOSITORY"
-          --pullNumber "$PR_NUMBER"
-          --release "$RELEASE"
-          "$MATRIX_DIRECTORY"
-        env:
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MATRIX_DIRECTORY: ${{ matrix.directory }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          RELEASE: ${{ github.event.action == 'closed' && github.event.pull_request.merged }}
+        uses: ./actions/action-ci-build
+        with:
+          phase: build
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+          release-label: ${{ needs.get-release-label.outputs.release-label }}
+          action-name: ${{ matrix.directory }}
+          release: ${{ github.event.action == 'closed' && github.event.pull_request.merged }}
 
       - uses: cloudposse/github-action-matrix-outputs-write@v1
         with:
@@ -152,18 +146,18 @@ jobs:
   post-build-test:
     name: Post-build (${{ matrix.directory }})
     needs:
-      - get-changes
+      - get-changed-actions
       - build
-      - check-release-label
+      - get-release-label
     runs-on: ubuntu-latest
-    if: needs.check-release-label.outputs.continue-release == 'true' && needs.get-changes.outputs.matrix-empty != 'true'
+    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-actions.outputs.matrix-empty != 'true'
     permissions:
       pull-requests: read
       contents: write
       actions: write
       statuses: write
     strategy:
-      matrix: ${{ fromJSON(needs.get-changes.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.get-changed-actions.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
       - uses: cloudposse/github-action-matrix-outputs-read@v1
@@ -180,23 +174,19 @@ jobs:
       - shell: bash
         run: npm ci
 
+      - run: npx tsx ./lib/ci/ci-build.ts --inline action-ci-build
       - name: Post build test
-        shell: bash
-        run: >
-          npx tsx ./lib/bin/post-build-test.ts
-          --token "$TOKEN"
-          --repository "$GITHUB_REPOSITORY"
-          --versionBranch "$VERSION_BRANCH"
-          --headRef "$GITHUB_HEAD_REF"
-          --headSHA "$HEAD_SHA"
-          --release "$RELEASE"
-          "$MATRIX_DIRECTORY"
-        env:
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-          MATRIX_DIRECTORY: ${{ matrix.directory }}
-          VERSION_BRANCH: ${{ fromJson(steps.read-build-output.outputs.result).version-branch[matrix.directory] }}
-          RELEASE: ${{ github.event.action == 'closed' && github.event.pull_request.merged }}
+        id: build
+        uses: ./actions/action-ci-build
+        with:
+          phase: post-build-test
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+          action-name: ${{ matrix.directory }}
+          version-branch: ${{ fromJson(steps.read-build-output.outputs.result).version-branch[matrix.directory] }}
+          head-ref: ${{ github.head_ref }}
+          head-sha: ${{ github.event.pull_request.head.sha || github.sha }}
+          release: ${{ github.event.action == 'closed' && github.event.pull_request.merged }}
 
   cleanup:
     runs-on: ubuntu-latest
@@ -213,13 +203,9 @@ jobs:
       - shell: bash
         run: npm ci
 
+      - run: npx tsx ./lib/ci/ci-build.ts --inline action-ci-build
       - name: Cleanup
-        shell: bash
-        run: >
-          npx tsx ./lib/bin/cleanup.ts
-          --token "$TOKEN"
-          --repository "$GITHUB_REPOSITORY"
-          --pullNumber "$PR_NUMBER"
-        env:
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+        uses: ./actions/action-ci-build
+        with:
+          phase: cleanup
+          token: ${{ secrets.GITHUB_TOKEN }}

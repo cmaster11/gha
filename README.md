@@ -7,6 +7,7 @@ system to version and release such Actions!
 
 <!-- GENERATE_ACTIONS BEGIN -->
 
+- [`action-ci-build`](./actions/action-ci-build): An internal helper for the ci-build.yml workflow
 - [`action-example`](./actions/action-example): This is just an example action.
 - [`action-get-changed-dirs`](./actions/action-get-changed-dirs): Uses git diff to find the list of changed directories, compared to a previous commit SHA.
 - [`action-get-release-label`](./actions/action-get-release-label): This actions looks for any release labels such as: patch, minor, major, no-release. It will fail it no labels are found.
@@ -38,13 +39,13 @@ flowchart
 
    subgraph ci-build.yml
       test["Job: test\nRuns CI tests"]
-      check-release-label["Job: check-release-label\nFind the release label\nassociated with the PR"]
-      get-changes["Job: get-changes\nDetect changed actions"]
+      get-release-label["Job: get-release-label\nFind the release label\nassociated with the PR"]
+      get-changed-dirs["Job: get-changed-dirs\nDetect changed actions"]
       build["Job: build\nBuilds all the changed actions"]
       cleanup["Job: cleanup\nIf the PR has been closed,\ndeletes all dev branches\ncreated during the PR's\nlifetime"]
       test --> build
-      get-changes -- Generates the build matrix --> build
-      check-release-label --> build
+      get-changed-dirs -- Generates the build matrix --> build
+      get-release-label --> build
       post-build-test["Job: post-build-test\nTriggers testing jobs via\nworkflow_dispatch"]
       build -- " Releases the changed\nactions on their branches\n(dev or versioned) " --> post-build-test
 

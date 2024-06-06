@@ -1,0 +1,29 @@
+name: ci-build.yml helper
+description: An internal helper for the ci-build.yml workflow
+
+inputs:
+  phase:
+    required: true
+  token:
+    required: true
+  action-name: {}
+  release: {}
+  release-label: {}
+
+  # Post build test
+  version-branch: {}
+  head-ref: {}
+  head-sha: {}
+
+outputs:
+  release-label: {}
+  continue-release: {}
+
+  matrix: {}
+  matrix-empty: {}
+
+  version-branch: {}
+
+runs:
+  using: node20
+  main: index.ts

@@ -4,15 +4,13 @@
 
 import 'zx/globals';
 import path from 'node:path';
-import { actionsDir } from '../constants.js';
+import { actionsDir, rootDir } from '../constants.js';
 import { parse } from 'yaml';
 import * as prettier from 'prettier';
 
-const __dirname = import.meta.dirname;
-
 $.verbose = true;
 
-const readmePath = path.join(__dirname, '../../README.md');
+const readmePath = path.join(rootDir, 'README.md');
 let readmeContent = await fs.readFile(readmePath, 'utf-8');
 
 // List all actions

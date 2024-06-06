@@ -4,7 +4,11 @@
 
 import type { GithubCommonProps } from './github-common.js';
 import { $enum } from 'ts-enum-util';
-import { NoReleaseVersionLabel, VersionLabel } from './version.js';
+import {
+  findReleaseLabel,
+  NoReleaseReleaseLabel,
+  ReleaseLabel
+} from './version.js';
 
 export interface GitHubGetPrLabelsOpts {
   gh: GithubCommonProps;
@@ -25,30 +29,26 @@ export async function githubGetPrLabels(
   return pr.data.labels.map((l) => l.name);
 }
 
-export async function githubGetPrVersionLabel(
+export async function githubGetPrReleaseLabel(
   opts: GitHubGetPrLabelsOpts,
   throwIfNoneFound = true
-): Promise<VersionLabel | undefined> {
+): Promise<ReleaseLabel | undefined> {
   const labels = await githubGetPrLabels(opts);
-  if (labels.includes(NoReleaseVersionLabel['no-release'])) {
-    console.log(`Found ${NoReleaseVersionLabel['no-release']} label`);
+  const label = findReleaseLabel(labels);
+  if (label === false) {
     return;
   }
 
-  if (labels.includes(VersionLabel.major)) return VersionLabel.major;
-  if (labels.includes(VersionLabel.minor)) return VersionLabel.minor;
-  if (labels.includes(VersionLabel.patch)) return VersionLabel.patch;
-
-  if (throwIfNoneFound)
+  if (label == null && throwIfNoneFound)
     throw new Error(
-      `No version labels found. The PR needs to contain at least one of the following labels: ` +
+      `No release labels found. The PR needs to contain at least one of the following labels: ` +
         [
-          $enum(VersionLabel).getValues(),
-          $enum(NoReleaseVersionLabel).getValues()
+          $enum(ReleaseLabel).getValues(),
+          $enum(NoReleaseReleaseLabel).getValues()
         ]
           .flat()
           .join(', ')
     );
 
-  return;
+  return label;
 }

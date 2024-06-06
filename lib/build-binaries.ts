@@ -2,12 +2,10 @@
  * Copyright (c) 2024. Alberto Marchetti [ https://www.linkedin.com/in/albertomarchetti/ ]
  */
 
-import * as esbuild from 'esbuild';
 import path from 'node:path';
 import { actionsDir } from './constants.js';
 import { inspect } from './inspect.js';
-
-const __dirname = import.meta.dirname;
+import { esBuild } from './esbuild.js';
 
 // Builds the various binaries for the action and returns a map
 // containing the mapped paths of the compiled files (src -> dest)
@@ -48,19 +46,14 @@ export async function buildBinaries(
     console.log(`Building ${bin} to ${outFile}`);
     const outFileDir = path.dirname(outFile);
     await fs.mkdirp(outFileDir);
-    await esbuild.build({
-      entryPoints: [fullPath],
-      bundle: true,
-      keepNames: true,
-      sourcemap: 'inline',
-      outfile: outFile,
-      platform: 'node',
-      format: 'esm',
-      inject: [path.join(__dirname, 'cjs-shim.ts')]
+
+    await esBuild({
+      entryPoint: fullPath,
+      outFile
     });
 
     const unpatchedBuild = await fs.readFile(outFile, 'utf-8');
-    const patchedBuild = '#!/usr/bin/env node\n' + unpatchedBuild;
+    const patchedBuild = '#!/usr/ci/env node\n' + unpatchedBuild;
     await fs.writeFile(outFile, patchedBuild);
     await fs.chmod(outFile, 0o755);
 
