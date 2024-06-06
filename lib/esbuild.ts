@@ -28,14 +28,14 @@ export async function esBuild({
 
   const tmpShim = tmpfile('cjs-shim.js', cjsShim);
 
-  await $`${esBuildBinary} ${[
+  await $`${esBuildBinary} ${entryPoint} ${[
     '--bundle',
     `--outfile=${outFile}`,
     `--platform=node`,
     `--keep-names`,
-    `--source-map=inline`,
+    `--sourcemap=inline`,
     `--format=esm`,
-    `--inject=${tmpShim}`
+    `--inject:${tmpShim}`
   ]}`;
 }
 
