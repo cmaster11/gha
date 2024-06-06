@@ -182,6 +182,7 @@ jobs:
           phase: post-build-test
           token: ${{ secrets.GITHUB_TOKEN }}
 
+          action-name: ${{ matrix.directory }}
           version-branch: ${{ fromJson(steps.read-build-output.outputs.result).version-branch[matrix.directory] }}
           head-ref: ${{ github.head_ref }}
           head-sha: ${{ github.event.pull_request.head.sha || github.sha }}
