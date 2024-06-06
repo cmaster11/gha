@@ -4,6 +4,8 @@
 import 'zx/globals';
 import { getInput, setOutput } from '@actions/core';
 
+// BUMP 0
+
 $.verbose = true;
 
 const greeting = getInput('greeting', { required: true });
