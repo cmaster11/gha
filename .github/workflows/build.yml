@@ -137,6 +137,7 @@ jobs:
       pull-requests: read
       contents: write
     steps:
+      - uses: actions/checkout@v4
       - name: Cleanup
         uses: cmaster11/gha@action-ci-build/v0
         with:
