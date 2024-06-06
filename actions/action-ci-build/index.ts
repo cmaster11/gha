@@ -72,6 +72,12 @@ async function main() {
     case 'cleanup': {
       return ciCleanup({ gh, pullNumber });
     }
+    case 'test-action-ci-build': {
+      return ciBuild({
+        actionName: 'test-action-ci-build',
+        inline: true
+      });
+    }
     default:
       throw new Error(`Invalid CI build phase: ${phase}`);
   }
