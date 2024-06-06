@@ -4,7 +4,6 @@
 import 'zx/globals';
 import { getBooleanInput, getInput, setOutput } from '@actions/core';
 import { context } from '@actions/github';
-import { inspect } from '../../lib/inspect.js';
 import { ciGetChangesMatrix } from '../../lib/ci/ci-get-changes-matrix.js';
 import type { GithubCommonProps } from '../../lib/github-common.js';
 import { getOctokitWithOwnerAndRepo } from '../../lib/github-common.js';
@@ -26,9 +25,11 @@ async function main() {
 
   let pullNumber = context.payload.pull_request?.number;
   if (pullNumber == null) {
+    console.log(
+      'Null pull_number from context, using inputs one. Context: ${inspect(context)}'
+    );
     const input = parseInt(getInput('pull-number', { required: true }));
-    if (isNaN(input))
-      throw new Error(`Bad PR number ${input}. Context: ${inspect(context)}`);
+    if (isNaN(input)) throw new Error(`Bad PR number ${input}`);
     pullNumber = input;
   }
 
@@ -66,6 +67,7 @@ async function main() {
       return ciPostBuildTest({
         gh,
         actionName,
+        pullNumber,
         release,
         versionBranch,
         headSHA,

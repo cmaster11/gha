@@ -8,6 +8,7 @@ import type { GithubCommonProps } from '../github-common.js';
 export async function ciPostBuildTest({
   gh,
   actionName,
+  pullNumber,
   versionBranch,
   headSHA,
   headRef,
@@ -15,6 +16,7 @@ export async function ciPostBuildTest({
 }: {
   gh: GithubCommonProps;
   actionName: string;
+  pullNumber: number;
   versionBranch: string;
   headRef: string;
   headSHA: string;
@@ -58,7 +60,8 @@ export async function ciPostBuildTest({
     inputs: {
       ctx: JSON.stringify({
         ref: versionBranch,
-        statusContext
+        statusContext,
+        pullNumber
       })
     }
   });

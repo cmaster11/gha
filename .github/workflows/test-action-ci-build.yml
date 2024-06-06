@@ -38,6 +38,7 @@ jobs:
         with:
           phase: test-action-ci-build
           token: ${{ secrets.GITHUB_TOKEN }}
+          pull-number: ${{ fromJSON(inputs.ctx).pullNumber }}
 
       # Dump the outputs
       - run: |
