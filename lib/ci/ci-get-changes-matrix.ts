@@ -80,7 +80,8 @@ export async function ciGetChangesMatrix({
       '### [cmaster11/gha] Changed actions',
       ...(changedDirs.length == 0
         ? ['No changes detected']
-        : changedDirs.map((a) => `- \`${a}\``))
+        : changedDirs.map((a) => `- \`${a}\``)
+      ).join('\n')
     ].join('\n\n');
     await gitHubCreateOrUpdateComment(
       gh,
