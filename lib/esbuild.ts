@@ -5,6 +5,7 @@
 import 'zx/globals';
 import path from 'node:path';
 import { tmpfile } from 'zx';
+import { fileURLToPath } from 'node:url';
 
 export async function esBuild({
   entryPoint,
@@ -21,7 +22,10 @@ export async function esBuild({
     'esbuild'
   );
   // Binary in the context of the built action
-  const esBuildBinaryAction = path.join('dist', 'esbuild');
+  const esBuildBinaryAction = path.join(
+    path.dirname(fileURLToPath(import.meta.url)),
+    'esbuild'
+  );
   const esBuildBinary = (await fs.exists(esBuildBinaryNodeModules))
     ? esBuildBinaryNodeModules
     : esBuildBinaryAction;
