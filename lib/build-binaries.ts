@@ -57,7 +57,8 @@ export async function buildBinaries(
       outfile: outFile,
       platform: 'node',
       format: 'esm',
-      inject: [tmpShim]
+      inject: [tmpShim],
+      external: ['esbuild']
     });
 
     const unpatchedBuild = await fs.readFile(outFile, 'utf-8');
