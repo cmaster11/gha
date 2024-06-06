@@ -24,9 +24,12 @@ async function main() {
     cwd: process.cwd()
   });
 
-  const pullNumber = context.payload.pull_request?.number;
+  let pullNumber = context.payload.pull_request?.number;
   if (pullNumber == null) {
-    throw new Error(`Missing PR number: ${inspect(context)}`);
+    const input = parseInt(getInput('pull-number', { required: true }));
+    if (isNaN(input))
+      throw new Error(`Bad PR number ${input}. Context: ${inspect(context)}`);
+    pullNumber = input;
   }
 
   const gh = getOctokitWithOwnerAndRepo(
