@@ -21,13 +21,17 @@ jobs:
       # Create a fake action
       - run: |
           mkdir -p actions/test-action-ci-build
-          cat << EOF > actions/test-action-ci-build/action.yml
+          cd actions/test-action-ci-build
+
+          npm init -y
+          npm install --save-dev @actions/github
+          cat << EOF > action.yml
           name: test-action-ci-build
           runs:
             using: node20
             main: index.ts
           EOF
-          cat << EOF > actions/test-action-ci-build/index.ts
+          cat << EOF > index.ts
           import { context } from '@actions/github';
           console.log('Context', JSON.stringify(context));
           EOF

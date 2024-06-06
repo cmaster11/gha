@@ -13,6 +13,7 @@ import type { ReleaseLabel } from '../../lib/version.js';
 import { findReleaseLabel } from '../../lib/version.js';
 import { ciPostBuildTest } from '../../lib/ci/ci-post-build-test.js';
 import { ciCleanup } from '../../lib/ci/ci-cleanup.js';
+import { inspect } from '../../lib/inspect.js';
 
 async function main() {
   const phase = getInput('phase', { required: true });
@@ -26,7 +27,7 @@ async function main() {
   let pullNumber = context.payload.pull_request?.number;
   if (pullNumber == null) {
     console.log(
-      'Null pull_number from context, using inputs one. Context: ${inspect(context)}'
+      `Null pull_number from context, using inputs one. Context: ${inspect(context)}`
     );
     const input = parseInt(getInput('pull-number', { required: true }));
     if (isNaN(input)) throw new Error(`Bad PR number ${input}`);
