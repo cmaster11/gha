@@ -32,6 +32,9 @@ jobs:
 
   get-changed-actions:
     name: Get changes
+    permissions:
+      contents: read
+      pull-requests: write
     if: >
       github.event.action != 'closed' ||
       (github.event.action == 'closed' && github.event.pull_request.merged)
