@@ -5,6 +5,15 @@
 import path from 'node:path';
 import { actionsDir } from './constants.js';
 import { parse, stringify } from 'yaml';
+import Joi from 'joi';
+
+interface ActionConfig {
+  copy?: Record<string, string>;
+}
+
+const ActionConfigSchema = Joi.object({
+  copy: Joi.object({}).unknown(true).meta({ unknownType: Joi.string() })
+});
 
 export async function fixActionYml(
   actionDir: string,
@@ -53,15 +62,43 @@ export async function copyActionFiles(
 
   const actionDir = path.join(actionsDir, actionName);
 
+  const actionConfig = await getActionConfig(
+    path.join(actionDir, 'config.yml')
+  );
+
   // Copy over all relevant action files
   const filesToCopy = ['action.yml', 'README.md', 'dist'];
   for (const file of filesToCopy) {
     if (await fs.exists(path.join(actionDir, file))) {
-      await fs.copy(path.join(actionDir, file), path.join(tmpDir, file));
+      const dest = path.join(tmpDir, file);
+      console.log(`Copying default file ${file} to ${dest}`);
+      await fs.copy(path.join(actionDir, file), dest);
     }
+  }
+
+  for (const copyKey in actionConfig.copy) {
+    const src = (await fs.exists(path.join(actionDir, copyKey)))
+      ? path.join(actionDir, copyKey)
+      : copyKey;
+    const dest = path.join(tmpDir, actionConfig.copy[copyKey]);
+    console.log(`Copying config-defined file ${src} to ${dest}`);
+    await fs.copy(src, dest);
   }
 
   await fixActionYml(tmpDir, mappedBinaries);
 
   return tmpDir;
+}
+
+export async function getActionConfig(
+  actionConfigFile: string
+): Promise<ActionConfig> {
+  if (!(await fs.exists(actionConfigFile))) {
+    return {};
+  }
+
+  return Joi.attempt(
+    parse(await fs.readFile(actionConfigFile, 'utf-8')),
+    ActionConfigSchema
+  );
 }
