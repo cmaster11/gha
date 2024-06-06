@@ -6,6 +6,7 @@ import * as esbuild from 'esbuild';
 import path from 'node:path';
 import { actionsDir } from './constants.js';
 import { inspect } from './inspect.js';
+import { tmpfile } from 'zx';
 
 // Builds the various binaries for the action and returns a map
 // containing the mapped paths of the compiled files (src -> dest)
@@ -37,6 +38,8 @@ export async function buildBinaries(
   const distDir = path.join(actionDir, 'dist');
   await fs.mkdirp(distDir);
 
+  const tmpShim = tmpfile('cjs-shim.js', cjsShim);
+
   const mappedBinaries: Record<string, string> = {};
   for (const bin of binsToBuild) {
     const fullPath = path.join(actionDir, bin);
@@ -53,7 +56,8 @@ export async function buildBinaries(
       sourcemap: 'inline',
       outfile: outFile,
       platform: 'node',
-      format: 'esm'
+      format: 'esm',
+      inject: [tmpShim]
     });
 
     const unpatchedBuild = await fs.readFile(outFile, 'utf-8');
@@ -67,3 +71,13 @@ export async function buildBinaries(
   console.log(`Built binaries: ${inspect(mappedBinaries)}`);
   return mappedBinaries;
 }
+
+const cjsShim = `
+import { createRequire } from 'node:module';
+import path from 'node:path';
+import url from 'node:url';
+
+globalThis.require = createRequire(import.meta.url);
+globalThis.__filename = url.fileURLToPath(import.meta.url);
+globalThis.__dirname = path.dirname(__filename);
+`;
