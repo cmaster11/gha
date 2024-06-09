@@ -39,7 +39,7 @@ jobs:
       - shell: bash
         run: npm ci
 
-      - run: npx tsx ./lib/ci/ci-build.ts --inline action-ci-build
+      - run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build
       - name: Get release label
         id: get-release-label
         uses: ./actions/action-ci-build
@@ -71,7 +71,7 @@ jobs:
       - shell: bash
         run: npm run test
 
-  get-changed-actions:
+  get-changed-elements:
     name: Get changes
     if: >
       github.event.action != 'closed' ||
@@ -81,8 +81,8 @@ jobs:
       contents: read
       pull-requests: write
     outputs:
-      matrix: ${{ steps.get-changed-actions.outputs.matrix }}
-      matrix-empty: ${{ steps.get-changed-actions.outputs.matrix-empty }}
+      matrix: ${{ steps.get-changed-elements.outputs.matrix }}
+      matrix-empty: ${{ steps.get-changed-elements.outputs.matrix-empty }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -94,28 +94,28 @@ jobs:
       - shell: bash
         run: npm ci
 
-      - run: npx tsx ./lib/ci/ci-build.ts --inline action-ci-build
+      - run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build
       - name: Get changes
-        id: get-changed-actions
+        id: get-changed-elements
         uses: ./actions/action-ci-build
         with:
-          phase: get-changed-actions
+          phase: get-changed-elements
           token: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     name: Build (${{ matrix.directory }})
     needs:
       - test
-      - get-changed-actions
+      - get-changed-elements
       - get-release-label
     runs-on: ubuntu-latest
-    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-actions.outputs.matrix-empty != 'true'
+    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-elements.outputs.matrix-empty != 'true'
     permissions:
       pull-requests: read
       contents: write
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.get-changed-actions.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.get-changed-elements.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./actions/action-git-init-userinfo
@@ -126,12 +126,12 @@ jobs:
       - shell: bash
         run: npm ci
 
-      - run: npx tsx ./lib/ci/ci-build.ts --inline action-ci-build
+      - run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build
       - name: Build
         id: build
         uses: ./actions/action-ci-build
         with:
-          phase: build
+          phase: build-actions
           token: ${{ secrets.GITHUB_TOKEN }}
 
           release-label: ${{ needs.get-release-label.outputs.release-label }}
@@ -149,18 +149,18 @@ jobs:
   post-build-test:
     name: Post-build (${{ matrix.directory }})
     needs:
-      - get-changed-actions
+      - get-changed-elements
       - build
       - get-release-label
     runs-on: ubuntu-latest
-    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-actions.outputs.matrix-empty != 'true'
+    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-elements.outputs.matrix-empty != 'true'
     permissions:
       pull-requests: read
       contents: write
       actions: write
       statuses: write
     strategy:
-      matrix: ${{ fromJSON(needs.get-changed-actions.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.get-changed-elements.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
       - uses: cloudposse/github-action-matrix-outputs-read@v1
@@ -177,7 +177,7 @@ jobs:
       - shell: bash
         run: npm ci
 
-      - run: npx tsx ./lib/ci/ci-build.ts --inline action-ci-build
+      - run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build
       - name: Post build test
         id: build
         uses: ./actions/action-ci-build
@@ -207,7 +207,7 @@ jobs:
       - shell: bash
         run: npm ci
 
-      - run: npx tsx ./lib/ci/ci-build.ts --inline action-ci-build
+      - run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build
       - name: Cleanup
         uses: ./actions/action-ci-build
         with:

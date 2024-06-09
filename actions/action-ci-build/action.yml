@@ -1,5 +1,5 @@
 name: ci-build.yml helper
-description: An internal helper for the ci-build.yml workflow
+description: An internal helper for the ci-build.yml workflow.
 
 inputs:
   phase:

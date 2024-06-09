@@ -2,10 +2,10 @@ name: Test workflow-create-release
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - .github/workflows/test-workflow-create-release.yaml # self
-      - .github/workflows/workflow-create-release.yaml
+      - .github/workflows/test-workflow-create-release.yml # self
+      - .github/workflows/workflow-create-release.yml
       - __testing__/workflow-create-release
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
     permissions:
       contents: write
     needs: create-artifact
-    uses: ./.github/workflows/workflow-create-release.yaml
+    uses: ./.github/workflows/workflow-create-release.yml
     with:
       artifact-name: test-release-dist
       release-branch: test-workflow-create-release-release

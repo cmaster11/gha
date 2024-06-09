@@ -8,7 +8,7 @@ import { ciGetChangesMatrix } from '../../lib/ci/ci-get-changes-matrix.js';
 import type { GithubCommonProps } from '../../lib/github-common.js';
 import { getOctokitWithOwnerAndRepo } from '../../lib/github-common.js';
 import { githubGetPrReleaseLabel } from '../../lib/github-get-pr-labels.js';
-import { ciBuild } from '../../lib/ci/ci-build.js';
+import { ciBuildActions } from '../../lib/ci/ci-build-actions.js';
 import type { ReleaseLabel } from '../../lib/version.js';
 import { findReleaseLabel } from '../../lib/version.js';
 import { ciPostBuildTest } from '../../lib/ci/ci-post-build-test.js';
@@ -46,18 +46,18 @@ async function main() {
     case 'get-release-label': {
       return ciGetReleaseLabel(gh, pullNumber);
     }
-    case 'get-changed-actions': {
+    case 'get-changed-elements': {
       return ciGetChangesMatrix({
         gh,
         pullNumber,
         baseSHA: context.payload.pull_request!.base.sha
       });
     }
-    case 'build': {
+    case 'build-actions': {
       const actionName = getInput('action-name', { required: true });
       const release = getBooleanInput('release');
       const releaseLabel = getReleaseLabel();
-      return ciBuild({
+      return ciBuildActions({
         gh,
         pullNumber,
         actionName,
@@ -85,7 +85,7 @@ async function main() {
       return ciCleanup({ gh, pullNumber });
     }
     case 'test-action-ci-build': {
-      return ciBuild({
+      return ciBuildActions({
         actionName: 'test-action',
         inline: true
       });

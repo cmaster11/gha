@@ -20,7 +20,7 @@ import { actionsDir } from '../constants.js';
 import { flowGitCloneReplaceAndCommit } from '../git-clone-and-replace.js';
 import { isScriptInvokedDirectly } from '../esm.js';
 
-export async function ciBuild(
+export async function ciBuildActions(
   opts:
     | {
         actionName: string;
@@ -95,7 +95,7 @@ if (isScriptInvokedDirectly(import.meta)) {
   });
   if (inline) {
     const actionName = _[0].split('/').reverse()[0];
-    void ciBuild({
+    void ciBuildActions({
       inline,
       actionName
     });
