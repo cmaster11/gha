@@ -19,8 +19,10 @@ outputs:
   release-label: {}
   continue-release: {}
 
-  matrix: {}
-  matrix-empty: {}
+  matrix-actions: {}
+  matrix-actions-empty: {}
+  matrix-workflows: {}
+  matrix-workflows-empty: {}
 
   version-branch: {}
 

@@ -81,8 +81,10 @@ jobs:
       contents: read
       pull-requests: write
     outputs:
-      matrix: ${{ steps.get-changed-elements.outputs.matrix }}
-      matrix-empty: ${{ steps.get-changed-elements.outputs.matrix-empty }}
+      matrix-actions: ${{ steps.get-changed-elements.outputs.matrix-actions }}
+      matrix-actions-empty: ${{ steps.get-changed-elements.outputs.matrix-actions-empty }}
+      matrix-workflows: ${{ steps.get-changed-elements.outputs.matrix-workflows }}
+      matrix-workflows-empty: ${{ steps.get-changed-elements.outputs.matrix-workflows-empty }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -102,20 +104,20 @@ jobs:
           phase: get-changed-elements
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  build:
+  build-actions:
     name: Build (${{ matrix.directory }})
     needs:
       - test
       - get-changed-elements
       - get-release-label
     runs-on: ubuntu-latest
-    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-elements.outputs.matrix-empty != 'true'
+    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-elements.outputs.matrix-actions-empty != 'true'
     permissions:
       pull-requests: read
       contents: write
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.get-changed-elements.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.get-changed-elements.outputs.matrix-actions) }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./actions/action-git-init-userinfo
@@ -150,17 +152,17 @@ jobs:
     name: Post-build (${{ matrix.directory }})
     needs:
       - get-changed-elements
-      - build
+      - build-actions
       - get-release-label
     runs-on: ubuntu-latest
-    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-elements.outputs.matrix-empty != 'true'
+    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-elements.outputs.matrix-actions-empty != 'true'
     permissions:
       pull-requests: read
       contents: write
       actions: write
       statuses: write
     strategy:
-      matrix: ${{ fromJSON(needs.get-changed-elements.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.get-changed-elements.outputs.matrix-actions) }}
     steps:
       - uses: actions/checkout@v4
       - uses: cloudposse/github-action-matrix-outputs-read@v1
