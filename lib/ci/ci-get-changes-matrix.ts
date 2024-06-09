@@ -99,8 +99,6 @@ export async function ciGetChangesMatrix({
     })
   );
   setOutput('matrix-workflows-empty', changedWorkflows.length === 0);
-
-  return changedActions;
 }
 
 async function getChangedActions({

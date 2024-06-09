@@ -20,18 +20,27 @@ export async function getGitRemoteBranchesByGlob(
 }
 
 export async function gitDiffLines(baseSHA: string) {
-  const lineRegex = /^(\w+)\s+(\S.+)$/;
-
   return (await $`git diff --name-status ${baseSHA}`).stdout
     .split('\n')
     .map((line) => line.trim())
     .filter((line) => line !== '')
-    .map((line) => lineRegex.exec(line))
+    .map((line) => {
+      return /^(R\w*)\s+(?:\S.+)\s+(\S.+)|^(\w+)\s+(\S.+)$/.exec(line);
+    })
     .filter((arr) => arr != null)
-    .map((arr) => [
-      // Git status
-      arr![1],
-      // Path
-      arr![2]
-    ]);
+    .map((arr) =>
+      arr![1]
+        ? [
+            // Git status
+            arr![1],
+            // Path
+            arr![2]
+          ]
+        : [
+            // Git status
+            arr![3],
+            // Path
+            arr![4]
+          ]
+    );
 }
