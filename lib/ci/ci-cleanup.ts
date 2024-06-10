@@ -4,7 +4,7 @@
 
 import 'zx/globals';
 import type { GithubCommonProps } from '../github-common.js';
-import { getPRDevBranchGlob } from '../version.js';
+import { getPRDevBranchGlobs } from '../version.js';
 import { getGitRemoteBranchesByGlob } from '../git.js';
 import { inspect } from '../inspect.js';
 
@@ -19,8 +19,12 @@ export async function ciCleanup({
   await $`git fetch origin`;
 
   // Delete any dev branches created via the PR
-  const versionBranchGlob = getPRDevBranchGlob(pullNumber);
-  const branches = await getGitRemoteBranchesByGlob(versionBranchGlob);
+  const versionBranchGlob = getPRDevBranchGlobs(pullNumber);
+  const branches = (
+    await Promise.all(
+      versionBranchGlob.map((g) => getGitRemoteBranchesByGlob(g))
+    )
+  ).flat();
   console.log(`Found remote dev branches: ${inspect(branches)}`);
 
   for (const versionBranch of branches) {
