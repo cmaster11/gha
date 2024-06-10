@@ -185,7 +185,7 @@ async function getChangedWorkflows({
     ...(
       await getChangedFiles({
         baseSHA,
-        regex: /^\.github\/workflows\/(test-)?workflow-.+\.yml$/,
+        regex: /^\.github\/workflows\/(test-)?workflow-[^.]+\.yml$/,
         ignoreDeletions: true
       })
     ).map((d) => {
