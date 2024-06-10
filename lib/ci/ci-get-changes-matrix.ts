@@ -157,8 +157,9 @@ async function getChangedActions({
     for (const actionName of allActions) {
       const actionDir = path.join(actionsDir, actionName);
       for await (const file of klaw(actionDir, {
-        filter: (f) => /\.m?[tj]s/.test(f)
+        filter: (f) => /\.m?[tj]s$/.test(f)
       })) {
+        if (file.stats.isDirectory()) continue;
         console.log(`Found changed JS file ${file.path}`);
         changedActions.add(actionName);
         break;
