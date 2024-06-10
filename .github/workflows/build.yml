@@ -17,7 +17,6 @@ jobs:
       pull-requests: read
       contents: read
     steps:
-      - uses: actions/checkout@v4
       - name: Get release label
         id: get-release-label
         uses: cmaster11/gha@action-ci-build/v0

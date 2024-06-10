@@ -32,6 +32,7 @@ for (const jobKey in workflow.jobs) {
     const step = job.steps[i];
 
     switch (jobKey) {
+      case 'get-release-label':
       case 'post-build-test-actions':
       case 'post-build-test-workflows':
         if (step.uses && step.uses.startsWith('actions/checkout@')) {
