@@ -30,7 +30,7 @@ jobs:
           phase: get-release-label
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  get-changed-actions:
+  get-changed-elements:
     name: Get changes
     permissions:
       contents: read
@@ -40,32 +40,34 @@ jobs:
       (github.event.action == 'closed' && github.event.pull_request.merged)
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.get-changed-actions.outputs.matrix }}
-      matrix-empty: ${{ steps.get-changed-actions.outputs.matrix-empty }}
+      matrix-actions: ${{ steps.get-changed-elements.outputs.matrix-actions }}
+      matrix-actions-empty: ${{ steps.get-changed-elements.outputs.matrix-actions-empty }}
+      matrix-workflows: ${{ steps.get-changed-elements.outputs.matrix-workflows }}
+      matrix-workflows-empty: ${{ steps.get-changed-elements.outputs.matrix-workflows-empty }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Get changes
-        id: get-changed-actions
+        id: get-changed-elements
         uses: cmaster11/gha@action-ci-build/v0
         with:
-          phase: get-changed-actions
+          phase: get-changed-elements
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  build:
-    name: Build (${{ matrix.directory }})
+  build-actions:
+    name: Build action (${{ matrix.directory }})
     needs:
-      - get-changed-actions
+      - get-changed-elements
       - get-release-label
     runs-on: ubuntu-latest
-    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-actions.outputs.matrix-empty != 'true'
+    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-elements.outputs.matrix-actions-empty != 'true'
     permissions:
       pull-requests: read
       contents: write
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.get-changed-actions.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.get-changed-elements.outputs.matrix-actions) }}
     steps:
       - uses: actions/checkout@v4
       - uses: cmaster11/gha@action-git-init-userinfo/v0
@@ -80,7 +82,7 @@ jobs:
         id: build
         uses: cmaster11/gha@action-ci-build/v0
         with:
-          phase: build
+          phase: build-actions
           token: ${{ secrets.GITHUB_TOKEN }}
 
           release-label: ${{ needs.get-release-label.outputs.release-label }}
@@ -96,20 +98,20 @@ jobs:
 
   # Trigger any test workflows after everything has been built
   post-build-test:
-    name: Post-build (${{ matrix.directory }})
+    name: Post-build action (${{ matrix.directory }})
     needs:
-      - get-changed-actions
-      - build
+      - get-changed-elements
+      - build-actions
       - get-release-label
     runs-on: ubuntu-latest
-    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-actions.outputs.matrix-empty != 'true'
+    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-elements.outputs.matrix-actions-empty != 'true'
     permissions:
       pull-requests: read
       contents: write
       actions: write
       statuses: write
     strategy:
-      matrix: ${{ fromJSON(needs.get-changed-actions.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.get-changed-elements.outputs.matrix-actions) }}
     steps:
       - uses: cloudposse/github-action-matrix-outputs-read@v1
         id: read-build-output

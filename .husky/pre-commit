@@ -11,3 +11,4 @@ else
 fi
 
 npm run gen:docs
+git add README.md

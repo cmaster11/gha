@@ -8,12 +8,14 @@ import { ciGetChangesMatrix } from '../../lib/ci/ci-get-changes-matrix.js';
 import type { GithubCommonProps } from '../../lib/github-common.js';
 import { getOctokitWithOwnerAndRepo } from '../../lib/github-common.js';
 import { githubGetPrReleaseLabel } from '../../lib/github-get-pr-labels.js';
-import { ciBuild } from '../../lib/ci/ci-build.js';
+import { ciBuildActions } from '../../lib/ci/ci-build-actions.js';
 import type { ReleaseLabel } from '../../lib/version.js';
 import { findReleaseLabel } from '../../lib/version.js';
-import { ciPostBuildTest } from '../../lib/ci/ci-post-build-test.js';
+import { ciPostBuildTestActions } from '../../lib/ci/ci-post-build-test-actions.js';
 import { ciCleanup } from '../../lib/ci/ci-cleanup.js';
 import { inspect } from '../../lib/inspect.js';
+import { ciBuildWorkflows } from '../../lib/ci/ci-build-workflows.js';
+import { ciPostBuildTestWorkflows } from '../../lib/ci/ci-post-build-test-workflows.js';
 
 async function main() {
   const phase = getInput('phase', { required: true });
@@ -46,18 +48,18 @@ async function main() {
     case 'get-release-label': {
       return ciGetReleaseLabel(gh, pullNumber);
     }
-    case 'get-changed-actions': {
+    case 'get-changed-elements': {
       return ciGetChangesMatrix({
         gh,
         pullNumber,
         baseSHA: context.payload.pull_request!.base.sha
       });
     }
-    case 'build': {
+    case 'build-actions': {
       const actionName = getInput('action-name', { required: true });
       const release = getBooleanInput('release');
       const releaseLabel = getReleaseLabel();
-      return ciBuild({
+      return ciBuildActions({
         gh,
         pullNumber,
         actionName,
@@ -65,15 +67,43 @@ async function main() {
         release
       });
     }
-    case 'post-build-test': {
+    case 'build-workflows': {
+      const workflowName = getInput('workflow-name', { required: true });
+      const release = getBooleanInput('release');
+      const releaseLabel = getReleaseLabel();
+      return ciBuildWorkflows({
+        gh,
+        pullNumber,
+        workflowName,
+        releaseLabel,
+        release
+      });
+    }
+    case 'post-build-test-actions': {
       const actionName = getInput('action-name', { required: true });
       const release = getBooleanInput('release');
       const versionBranch = getInput('version-branch', { required: true });
       const headSHA = getInput('head-sha', { required: true });
       const headRef = getInput('head-ref', { required: true });
-      return ciPostBuildTest({
+      return ciPostBuildTestActions({
         gh,
         actionName,
+        pullNumber,
+        release,
+        versionBranch,
+        headSHA,
+        headRef
+      });
+    }
+    case 'post-build-test-workflows': {
+      const workflowName = getInput('workflow-name', { required: true });
+      const release = getBooleanInput('release');
+      const versionBranch = getInput('version-branch', { required: true });
+      const headSHA = getInput('head-sha', { required: true });
+      const headRef = getInput('head-ref', { required: true });
+      return ciPostBuildTestWorkflows({
+        gh,
+        workflowName,
         pullNumber,
         release,
         versionBranch,
@@ -85,7 +115,7 @@ async function main() {
       return ciCleanup({ gh, pullNumber });
     }
     case 'test-action-ci-build': {
-      return ciBuild({
+      return ciBuildActions({
         actionName: 'test-action',
         inline: true
       });

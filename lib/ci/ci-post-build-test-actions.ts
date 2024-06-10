@@ -5,7 +5,7 @@
 import 'zx/globals';
 import type { GithubCommonProps } from '../github-common.js';
 
-export async function ciPostBuildTest({
+export async function ciPostBuildTestActions({
   gh,
   actionName,
   pullNumber,
@@ -37,7 +37,7 @@ export async function ciPostBuildTest({
     err: any
   ) {
     if (err.response.status === 404) {
-      // No workflow to trigger
+      console.log('No workflow to trigger could be found, exiting');
       return;
     }
     throw err;

@@ -1,5 +1,5 @@
 name: ci-build.yml helper
-description: An internal helper for the ci-build.yml workflow
+description: An internal helper for the ci-build.yml workflow.
 
 inputs:
   phase:
@@ -7,6 +7,7 @@ inputs:
   token:
     required: true
   action-name: {}
+  workflow-name: {}
   release: {}
   release-label: {}
 
@@ -19,8 +20,10 @@ outputs:
   release-label: {}
   continue-release: {}
 
-  matrix: {}
-  matrix-empty: {}
+  matrix-actions: {}
+  matrix-actions-empty: {}
+  matrix-workflows: {}
+  matrix-workflows-empty: {}
 
   version-branch: {}
 

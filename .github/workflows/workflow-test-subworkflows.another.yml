@@ -1,0 +1,19 @@
+name: A sub workflow
+
+on:
+  workflow_call:
+    outputs:
+      whoami:
+        value: ${{ jobs.run.outputs.whoami }}
+
+jobs:
+  run:
+    name: Run the test sub workflow
+    runs-on: ubuntu-latest
+    outputs:
+      whoami: ${{ steps.set-outputs.outputs.whoami }}
+    steps:
+      - run: echo "Hello from a sub-workflow"
+      - id: set-outputs
+        run: |
+          echo "whoami=A sub workflow" >> "$GITHUB_OUTPUT"
