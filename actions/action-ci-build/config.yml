@@ -1,2 +1,0 @@
-copy:
-  node_modules/esbuild/bin/esbuild: dist/esbuild
