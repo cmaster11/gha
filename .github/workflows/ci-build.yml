@@ -105,7 +105,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   build-actions:
-    name: Build (${{ matrix.directory }})
+    name: Build action (${{ matrix.directory }})
     needs:
       - test
       - get-changed-elements
@@ -147,9 +147,52 @@ jobs:
           outputs: |-
             version-branch: ${{ steps.build.outputs.version-branch }}
 
+  build-workflows:
+    name: Build workflow (${{ matrix.directory }})
+    needs:
+      - test
+      - get-changed-elements
+      - get-release-label
+    runs-on: ubuntu-latest
+    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-elements.outputs.matrix-workflows-empty != 'true'
+    permissions:
+      pull-requests: read
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.get-changed-elements.outputs.matrix-workflows) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./actions/action-git-init-userinfo
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: npm
+      - shell: bash
+        run: npm ci
+
+      - run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build
+      - name: Build
+        id: build
+        uses: ./actions/action-ci-build
+        with:
+          phase: build-workflows
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+          release-label: ${{ needs.get-release-label.outputs.release-label }}
+          workflow-name: ${{ matrix.directory }}
+          release: ${{ github.event.action == 'closed' && github.event.pull_request.merged }}
+
+      - uses: cloudposse/github-action-matrix-outputs-write@v1
+        with:
+          matrix-step-name: build
+          matrix-key: ${{ matrix.directory }}
+          outputs: |-
+            version-branch: ${{ steps.build.outputs.version-branch }}
+
   # Trigger any test workflows after everything has been built
-  post-build-test:
-    name: Post-build (${{ matrix.directory }})
+  post-build-test-actions:
+    name: Post-build test action (${{ matrix.directory }})
     needs:
       - get-changed-elements
       - build-actions
@@ -184,10 +227,58 @@ jobs:
         id: build
         uses: ./actions/action-ci-build
         with:
-          phase: post-build-test
+          phase: post-build-test-actions
           token: ${{ secrets.GITHUB_TOKEN }}
 
           action-name: ${{ matrix.directory }}
+          version-branch: ${{ fromJson(steps.read-build-output.outputs.result).version-branch[matrix.directory] }}
+          head-ref: ${{ github.head_ref }}
+          head-sha: ${{ github.event.pull_request.head.sha || github.sha }}
+          release: ${{ github.event.action == 'closed' && github.event.pull_request.merged }}
+
+  post-build-test-workflows:
+    name: Post-build test workflow (${{ matrix.directory }})
+    needs:
+      - get-changed-elements
+      # This needs to run after all actions have been built, in case we're testing
+      # workflows that use any of the modified actions
+      - build-actions
+      - build-workflows
+      - get-release-label
+    runs-on: ubuntu-latest
+    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-elements.outputs.matrix-workflows-empty != 'true'
+    permissions:
+      pull-requests: read
+      contents: write
+      actions: write
+      statuses: write
+    strategy:
+      matrix: ${{ fromJSON(needs.get-changed-elements.outputs.matrix-workflows) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cloudposse/github-action-matrix-outputs-read@v1
+        id: read-build-output
+        with:
+          matrix-step-name: build
+      - run: echo "$JSON" | jq
+        env:
+          JSON: ${{ steps.read-build-output.outputs.result }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: npm
+      - shell: bash
+        run: npm ci
+
+      - run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build
+      - name: Post build test workflows
+        id: build
+        uses: ./actions/action-ci-build
+        with:
+          phase: post-build-test-workflows
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+          workflow-name: ${{ matrix.directory }}
           version-branch: ${{ fromJson(steps.read-build-output.outputs.result).version-branch[matrix.directory] }}
           head-ref: ${{ github.head_ref }}
           head-sha: ${{ github.event.pull_request.head.sha || github.sha }}

@@ -41,13 +41,13 @@ flowchart
       test["Job: test\nRuns CI tests"]
       get-release-label["Job: get-release-label\nFind the release label\nassociated with the PR"]
       get-changed-dirs["Job: get-changed-dirs\nDetect changed actions"]
-      build["Job: build\nBuilds all the changed actions"]
+      build-actions["Job: build\nBuilds all the changed actions"]
       cleanup["Job: cleanup\nIf the PR has been closed,\ndeletes all dev branches\ncreated during the PR's\nlifetime"]
-      test --> build
-      get-changed-dirs -- Generates the build matrix --> build
-      get-release-label --> build
+      test --> build-actions
+      get-changed-dirs -- Generates the build matrix --> build-actions
+      get-release-label --> build-actions
       post-build-test["Job: post-build-test\nTriggers testing jobs via\nworkflow_dispatch"]
-      build -- " Releases the changed\nactions on their branches\n(dev or versioned) " --> post-build-test
+      build-actions -- " Releases the changed\nactions on their branches\n(dev or versioned) " --> post-build-test
 
    end
 

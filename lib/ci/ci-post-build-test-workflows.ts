@@ -5,9 +5,9 @@
 import 'zx/globals';
 import type { GithubCommonProps } from '../github-common.js';
 
-export async function ciPostBuildTest({
+export async function ciPostBuildTestWorkflows({
   gh,
-  actionName,
+  workflowName,
   pullNumber,
   versionBranch,
   headSHA,
@@ -15,7 +15,7 @@ export async function ciPostBuildTest({
   release
 }: {
   gh: GithubCommonProps;
-  actionName: string;
+  workflowName: string;
   pullNumber: number;
   versionBranch: string;
   headRef: string;
@@ -23,14 +23,14 @@ export async function ciPostBuildTest({
   release: boolean;
 }) {
   const ref = release ? 'main' : headRef;
-  const workflowName = `test-${actionName}.yml`;
+  const testWorkflowName = `test-${workflowName}.yml`;
 
   // Check if there is a workflow to trigger
   try {
     await gh.octokit.rest.repos.getContent({
       ...gh.repoProps,
       ref: headSHA,
-      path: `.github/workflows/${workflowName}`
+      path: `.github/workflows/${testWorkflowName}`
     });
   } catch (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,7 +44,7 @@ export async function ciPostBuildTest({
   }
 
   // Create the status check for the upcoming test workflow
-  const statusContext = `CI Test: ${actionName}`;
+  const statusContext = `CI Test: ${workflowName}`;
   await gh.octokit.rest.repos.createCommitStatus({
     ...gh.repoProps,
     context: statusContext,
