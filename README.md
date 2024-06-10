@@ -20,6 +20,7 @@ system to version them all.
 <!-- GENERATE_WORKFLOWS BEGIN -->
 
 - [`workflow-create-release`](./.github/workflows/workflow-create-release.yml): Creates a release from an artifact into a standalone branch
+- [`workflow-test-subworkflows`](./.github/workflows/workflow-test-subworkflows.yml): A test workflow, used to test sub-workflows
 - [`workflow-test`](./.github/workflows/workflow-test.yml): A test workflow
 <!-- GENERATE_WORKFLOWS END -->
 
@@ -40,9 +41,25 @@ jobs:
       - uses: cmaster11/gha@action-test/v1
 ```
 
+### Additional files
+
+Any file stored in the action folder will be moved to the root of the repository in the release branch, which means
+that if the action folder contains a `README.md` file, it will become the main README of the repo.
+
+### Pure NodeJs actions
+
+Create an `index.ts` file in the action folder and use the following configuration for the `action.yml` file:
+
+```yaml
+runs:
+  using: node20
+  main: index.ts
+```
+
 ## Development (workflows)
 
-1. Create a new workflow in the `.github/workflows` folder, making sure its name starts with `workflow-` (e.g. `workflow-test`).
+1. Create a new workflow in the `.github/workflows` folder, making sure its name starts with `workflow-` (
+   e.g. `workflow-test`).
 2. Create PR and assign a release label (`patch`, `minor`, `major`).
    1. Note that **versions start from 0**, which means that, if you want to release a `v1`, you will need to use
       a `major` label in the PR.
@@ -55,7 +72,34 @@ jobs:
     uses: cmaster11/gha/.github/workflows/workflow-test.yml@workflow-test/v1
 ```
 
-### Pipeline
+### Additional files
+
+Assuming your workflow's name is `workflow-test.yml`:
+
+#### README
+
+If a file such as `workflow-test.README.md` is found, it will be moved to the root of the repository in the release
+branch and renamed to `README.md`, which means it will become the main README of the repo.
+
+#### Sub-workflows
+
+Any other workflows contained in the `.github/workflows` folder whose name starts with the main workflow's name and
+continues after a `.` will be also released together with the main workflow.
+
+E.g., You could have another workflow such as `workflow-test.another.yml`.
+
+This makes it possible to have a main workflow that triggers any amount of dependent ones without having to worry about
+versioning.
+
+You can then reuse these sub-workflows in your main one with:
+
+```yaml
+jobs:
+  parse:
+    uses: ./.github/workflows/workflow-test.another.yml
+```
+
+## Build pipeline
 
 ```mermaid
 flowchart
@@ -104,14 +148,4 @@ flowchart
     post-build-test-actions --> test-action-example.yml
     post-build-test-actions --> test-action-another.yml
     post-build-test-workflows --> test-workflow-test.yml
-```
-
-### Pure NodeJs actions
-
-Create an `index.ts` file in the action folder and use the following configuration for the `action.yml` file:
-
-```yaml
-runs:
-  using: node20
-  main: index.ts
 ```
