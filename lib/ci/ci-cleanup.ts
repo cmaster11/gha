@@ -15,9 +15,6 @@ export async function ciCleanup({
   gh: GithubCommonProps;
   pullNumber: number;
 }) {
-  // Fetch all remote branches
-  await $`git fetch origin`;
-
   // Delete any dev branches created via the PR
   const versionBranchGlob = getPRDevBranchGlobs(pullNumber);
   const branches = (

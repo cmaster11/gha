@@ -223,7 +223,7 @@ jobs:
         run: npm ci
 
       - run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build
-      - name: Post build test
+      - name: Post build test actions
         id: build
         uses: ./actions/action-ci-build
         with:
@@ -293,6 +293,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version-file: package.json

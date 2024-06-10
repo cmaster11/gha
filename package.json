@@ -21,6 +21,7 @@
     "lint:eslint": "eslint .",
     "lint:eslint:fix": "npm run lint:eslint -- --fix",
     "gen:docs": "npx tsx lib/ci/gen-docs.ts",
+    "gen:workflows": "npx tsx lib/ci/gen-workflows.ts",
     "prepare": "husky && npx replace-in-file '#!/usr/bin/env sh' '#!/usr/bin/env bash' '.husky/_/h' --quiet && npx replace-in-file 'sh -e' 'bash -e' '.husky/_/h' --quiet"
   },
   "devDependencies": {
@@ -33,6 +34,7 @@
     "@types/klaw": "^3.0.6",
     "@types/node": "^20.14.2",
     "@types/semver": "^7.5.8",
+    "@types/traverse": "^0.6.36",
     "cross-env": "^7.0.3",
     "esbuild": "^0.21.4",
     "eslint": "^8.57.0",
@@ -44,6 +46,7 @@
     "klaw": "^4.1.0",
     "prettier": "^3.3.1",
     "semver": "^7.6.2",
+    "traverse": "^0.6.9",
     "ts-enum-util": "^4.1.0",
     "ts-jest": "^29.1.4",
     "ts-node": "^10.9.2",

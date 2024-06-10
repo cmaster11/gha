@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
+#
+# Copyright (c) 2024. Alberto Marchetti [ https://www.linkedin.com/in/albertomarchetti/ ]
+#
+
+set -euo pipefail
 
 #
 # Copyright (c) 2024. Alberto Marchetti [ https://www.linkedin.com/in/albertomarchetti/ ]
 #
 
-if command -v actionlint >/dev/null 2>&1; then
-    bash .husky/scripts/actionlint.sh
-else
-    echo "actionlint not found"
-fi
+actionlint
 
 npm run gen:docs
 git add README.md
+
+npm run gen:workflows
+git add .github/workflows/*
