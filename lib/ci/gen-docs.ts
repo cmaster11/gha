@@ -52,8 +52,8 @@ for (const action of allActions) {
 // List all workflows
 const workflowLinks: string[] = [];
 
-const allWorkflows = (await fs.readdir(workflowsDir)).filter(
-  (f) => /^workflow-[^.]+\.yml$/
+const allWorkflows = (await fs.readdir(workflowsDir)).filter((f) =>
+  /^workflow-[^.]+\.yml$/.test(f)
 );
 for (const workflow of allWorkflows) {
   let desc: string;

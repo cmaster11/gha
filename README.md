@@ -19,15 +19,6 @@ system to version and release such Actions!
 
 <!-- GENERATE_WORKFLOWS BEGIN -->
 
-- [`build`](./.github/workflows/build.yml): Build the actions
-- [`ci-build`](./.github/workflows/ci-build.yml): CI - Build the actions
-- [`ci-post-build-after-test`](./.github/workflows/ci-post-build-after-test.yml): CI - After test / Finalize status checks
-- [`test-action-ci-build`](./.github/workflows/test-action-ci-build.yml): Test action-ci-build
-- [`test-action-example`](./.github/workflows/test-action-example.yml): Test action-example
-- [`test-action-get-changed-dirs`](./.github/workflows/test-action-get-changed-dirs.yml): Test action-get-changed-dirs
-- [`test-action-get-release-label`](./.github/workflows/test-action-get-release-label.yml): Test action-get-release-label
-- [`test-action-test`](./.github/workflows/test-action-test.yml): Test action-test
-- [`test-workflow-create-release`](./.github/workflows/test-workflow-create-release.yml): Test workflow-create-release
 - [`workflow-create-release`](./.github/workflows/workflow-create-release.yml): Creates a release from an artifact into a standalone branch
 - [`workflow-test`](./.github/workflows/workflow-test.yml): A test workflow
 <!-- GENERATE_WORKFLOWS END -->
