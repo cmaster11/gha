@@ -23,14 +23,14 @@ export async function ciPostBuildTestWorkflows({
   release: boolean;
 }) {
   const ref = release ? 'main' : headRef;
-  const testWorkflowName = `test-${workflowName}`;
+  const testWorkflowName = `test-${workflowName}.yml`;
 
   // Check if there is a workflow to trigger
   try {
     await gh.octokit.rest.repos.getContent({
       ...gh.repoProps,
       ref: headSHA,
-      path: `.github/workflows/${testWorkflowName}.yml`
+      path: `.github/workflows/${testWorkflowName}`
     });
   } catch (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
