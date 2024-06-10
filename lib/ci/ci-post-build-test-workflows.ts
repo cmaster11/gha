@@ -23,21 +23,21 @@ export async function ciPostBuildTestWorkflows({
   release: boolean;
 }) {
   const ref = release ? 'main' : headRef;
-  const testWorkflowName = `test-${workflowName}.yml`;
+  const testWorkflowName = `test-${workflowName}`;
 
   // Check if there is a workflow to trigger
   try {
     await gh.octokit.rest.repos.getContent({
       ...gh.repoProps,
       ref: headSHA,
-      path: `.github/workflows/${testWorkflowName}`
+      path: `.github/workflows/${testWorkflowName}.yml`
     });
   } catch (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     err: any
   ) {
     if (err.response.status === 404) {
-      // No workflow to trigger
+      console.log('No workflow to trigger could be found, exiting');
       return;
     }
     throw err;
@@ -55,7 +55,7 @@ export async function ciPostBuildTestWorkflows({
   // Trigger the test workflow
   await gh.octokit.rest.actions.createWorkflowDispatch({
     ...gh.repoProps,
-    workflow_id: workflowName,
+    workflow_id: testWorkflowName,
     ref,
     inputs: {
       ctx: JSON.stringify({

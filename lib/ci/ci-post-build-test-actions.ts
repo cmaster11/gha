@@ -37,7 +37,7 @@ export async function ciPostBuildTestActions({
     err: any
   ) {
     if (err.response.status === 404) {
-      // No workflow to trigger
+      console.log('No workflow to trigger could be found, exiting');
       return;
     }
     throw err;
