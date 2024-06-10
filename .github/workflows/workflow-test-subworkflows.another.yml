@@ -8,7 +8,7 @@ on:
 
 jobs:
   run:
-    name: Run the test action
+    name: Run the test sub workflow
     runs-on: ubuntu-latest
     outputs:
       whoami: ${{ steps.set-outputs.outputs.whoami }}
