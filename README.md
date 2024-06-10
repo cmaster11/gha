@@ -1,7 +1,7 @@
 # GitHub Actions and reusable workflows
 
-The `cmaster11/gha` repository is a container of various GitHub Actions. It provides also a build
-system to version and release such Actions!
+The `cmaster11/gha` repository contains various GitHub Actions, reusable workflows, and a build
+system to version them all.
 
 ## Actions
 
@@ -23,11 +23,12 @@ system to version and release such Actions!
 - [`workflow-test`](./.github/workflows/workflow-test.yml): A test workflow
 <!-- GENERATE_WORKFLOWS END -->
 
-## Development
+## Development (actions)
 
 1. Create a new action in the `actions` folder (e.g. `action-test`).
 2. Create PR and assign a release label (`patch`, `minor`, `major`).
-   1. Note that **versions start from 0**, which means that, if you want to release a `v1`, you will need to use a `major` label in the PR.
+   1. Note that **versions start from 0**, which means that, if you want to release a `v1`, you will need to use
+      a `major` label in the PR.
 3. On PR merge, the action will be built and released to its own version branch (e.g. `action-test/v1`).
 4. You can then use the action in a GitHub Actions workflow with:
 
@@ -39,44 +40,70 @@ jobs:
       - uses: cmaster11/gha@action-test/v1
 ```
 
+## Development (workflows)
+
+1. Create a new workflow in the `.github/workflows` folder, making sure its name starts with `workflow-` (e.g. `workflow-test`).
+2. Create PR and assign a release label (`patch`, `minor`, `major`).
+   1. Note that **versions start from 0**, which means that, if you want to release a `v1`, you will need to use
+      a `major` label in the PR.
+3. On PR merge, the workflow will be released to its own version branch (e.g. `workflow-test/v1`).
+4. You can then use the workflows in a GitHub Actions workflow with:
+
+```yaml
+jobs:
+  my-job:
+    uses: cmaster11/gha/.github/workflows/workflow-test.yml@workflow-test/v1
+```
+
 ### Pipeline
 
 ```mermaid
 flowchart
-   commit["Commit on a PR-branch"]
+    commit["Commit on a PR-branch"]
 
-   subgraph ci-build.yml
-      test["Job: test\nRuns CI tests"]
-      get-release-label["Job: get-release-label\nFind the release label\nassociated with the PR"]
-      get-changed-dirs["Job: get-changed-dirs\nDetect changed actions"]
-      build-actions["Job: build\nBuilds all the changed actions"]
-      cleanup["Job: cleanup\nIf the PR has been closed,\ndeletes all dev branches\ncreated during the PR's\nlifetime"]
-      test --> build-actions
-      get-changed-dirs -- Generates the build matrix --> build-actions
-      get-release-label --> build-actions
-      post-build-test["Job: post-build-test\nTriggers testing jobs via\nworkflow_dispatch"]
-      build-actions -- " Releases the changed\nactions on their branches\n(dev or versioned) " --> post-build-test
+    subgraph ci-build.yml
+        test["Job: test\nRuns CI tests"]
+        get-release-label["Job: get-release-label\nFind the release label\nassociated with the PR"]
+        get-changed-dirs["Job: get-changed-dirs\nDetect changed actions"]
+        subgraph build-phase
+            build-actions["Job: build-actions\nBuilds all the changed actions"]
+            build-workflows["Job: build-workflows\nBuilds all the changed workflows"]
+        end
+        cleanup["Job: cleanup\nIf the PR has been closed,\ndeletes all dev branches\ncreated during the PR's\nlifetime"]
+        test --> build-phase
+        get-changed-dirs -- Generates the build matrix --> build-phase
+        get-release-label --> build-phase
+        post-build-test-actions["Job: post-build-test-actions\nTriggers testing jobs via\nworkflow_dispatch"]
+        post-build-test-workflows["Job: post-build-test-workflows\nTriggers testing jobs via\nworkflow_dispatch"]
+        build-actions -- " Releases the changed\nactions on their branches\n(dev or versioned) " --> post-build-test-actions
+        build-workflows -- " Releases the changed\nworkflows on their branches\n(dev or versioned) " --> post-build-test-workflows
 
-   end
+    end
 
-   commit --> ci-build.yml
+    commit --> ci-build.yml
 
-   subgraph ci-post-build-after-test.yml
-      finalize-check["Job: finalize-check\nNotifies GitHub about the result of the test"]
-   end
+    subgraph ci-post-build-after-test.yml
+        finalize-check["Job: finalize-check\nNotifies GitHub about the result of the test"]
+    end
 
-   subgraph test-action-example.yml
-      test-action-example["Job: test\nTests the action"]
-   end
+    subgraph test-action-example.yml
+        test-action-example["Job: test\nTests the action"]
+    end
 
-   subgraph test-action-another.yml
-      test-action-another["Job: test\nTests the action"]
-   end
+    subgraph test-action-another.yml
+        test-action-another["Job: test\nTests the action"]
+    end
 
-   test-action-example --> ci-post-build-after-test.yml
-   test-action-another --> ci-post-build-after-test.yml
-   post-build-test --> test-action-example.yml
-   post-build-test --> test-action-another.yml
+    subgraph test-workflow-test.yml
+        test-workflow-test["Job: test\nTests the workflow"]
+    end
+
+    test-action-example --> ci-post-build-after-test.yml
+    test-action-another --> ci-post-build-after-test.yml
+    test-workflow-test --> ci-post-build-after-test.yml
+    post-build-test-actions --> test-action-example.yml
+    post-build-test-actions --> test-action-another.yml
+    post-build-test-workflows --> test-workflow-test.yml
 ```
 
 ### Pure NodeJs actions

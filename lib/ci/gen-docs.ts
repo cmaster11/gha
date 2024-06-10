@@ -61,8 +61,10 @@ for (const workflow of allWorkflows) {
 
   // If the workflow comes with a README.md file, then use the first sentence of the README
   // as description, otherwise refer to the workflow.yml description field
-  const readmeFile = path.join(workflowsDir, `${workflowName}.README.md`);
-  if (await fs.exists(readmeFile)) {
+  const readmeFileName = `${workflowName}.README.md`;
+  const readmeFile = path.join(workflowsDir, readmeFileName);
+  const readmeFileExists = await fs.exists(readmeFile);
+  if (readmeFileExists) {
     const content = await fs.readFile(readmeFile, 'utf-8');
     desc = content
       .replace(/^# .+$/m, '')
@@ -80,9 +82,8 @@ for (const workflow of allWorkflows) {
     if (desc == null)
       throw new Error(`The workflow ${workflow} is missing the name field.`);
   }
-
   workflowLinks.push(
-    `- [\`${workflowName}\`](./.github/workflows/${workflow}): ${desc.trim()}`
+    `- [\`${workflowName}\`](./.github/workflows/${readmeFileExists ? readmeFileName : workflow}): ${desc.trim()}`
   );
 }
 
