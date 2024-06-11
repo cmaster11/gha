@@ -15,9 +15,6 @@ const workflow = parse(
   await fs.readFile(path.join(workflowsDir, 'ci-build.yml'), 'utf-8')
 );
 
-workflow.name = 'Build Github Actions and reusable workflows';
-workflow.on = { workflow_call: {} };
-
 const actionsMap: Record<string, string> = {
   './actions/action-git-init-userinfo': 'action-git-init-userinfo/v0',
   './actions/action-ci-build': 'action-ci-build/v0'

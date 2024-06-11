@@ -1,0 +1,19 @@
+name: CI - Build on PR
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
+      # Triggers the workflow when labels change in the PR
+      - labeled
+
+jobs:
+  build:
+    uses: ./.github/workflows/ci-build.yml
+    with:
+      test-command: npm run test:ci

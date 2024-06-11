@@ -12,7 +12,7 @@
   "type": "module",
   "scripts": {
     "check": "tsc --noEmit",
-    "test:ci": "jest",
+    "test:ci": "npx tsx lib/ci/ci-test.ts",
     "test": "jest -u",
     "lint": "npm run check && npm run lint:prettier && npm run lint:eslint",
     "lint:fix": "npm run lint:prettier:fix && npm run lint:eslint:fix && npm run lint",

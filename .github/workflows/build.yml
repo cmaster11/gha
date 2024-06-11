@@ -1,6 +1,15 @@
 name: Build Github Actions and reusable workflows
 on:
-  workflow_call: {}
+  workflow_call:
+    inputs:
+      lint-command:
+        description: The command used to run lint tests.
+        default: npm run lint
+        type: string
+      test-command:
+        description: The command used to run tests.
+        default: npm run test
+        type: string
 concurrency:
   group: ${{ (github.event.action == 'closed' && github.event.pull_request.merged) && 'release' || format('pr-{0}', github.event.pull_request.number) }}
   cancel-in-progress: ${{ github.event.action != 'closed' }}
@@ -42,9 +51,13 @@ jobs:
       - shell: bash
         run: npm ci
       - shell: bash
-        run: npm run lint
+        run: $LINT_COMMAND
+        env:
+          TEST_COMMAND: ${{ inputs.lint-command }}
       - shell: bash
-        run: npm run test
+        run: $TEST_COMMAND
+        env:
+          TEST_COMMAND: ${{ inputs.test-command }}
   get-changed-elements:
     name: Get changes
     if: |
