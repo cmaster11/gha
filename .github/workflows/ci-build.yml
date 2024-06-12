@@ -4,7 +4,7 @@ on:
     inputs:
       skip-test:
         description: >
-          If true, do not run the test job. Useful when you require custom testing jobs 
+          If true, do not run the test job. Useful when you require custom testing jobs
           to run before whole actions/workflow build pipeline.
         type: boolean
         default: false
@@ -64,7 +64,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check workflow files
         run: |
-          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash) latest /usr/bin
+          TMP="$(mktemp -d)"
+          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash) latest "$TMP"
+          echo "$TMP" >> "$GITHUB_PATH"
         shell: bash
       - uses: actions/setup-node@v4
         with:
