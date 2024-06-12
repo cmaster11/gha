@@ -2,6 +2,12 @@ name: Build Github Actions and reusable workflows
 on:
   workflow_call:
     inputs:
+      skip-test:
+        description: >
+          If true, do not run the test job. Useful when you require custom testing jobs 
+          to run before whole actions/workflow build pipeline.
+        type: boolean
+        default: false
       lint-command:
         description: The command used to run lint tests.
         default: npm run lint
@@ -49,15 +55,16 @@ jobs:
   test:
     name: Test (JS)
     if: >
-      github.event.action != 'closed' ||
-      (github.event.action == 'closed' && github.event.pull_request.merged)
+      inputs.skip-test != true && (
+        github.event.action != 'closed' ||
+        (github.event.action == 'closed' && github.event.pull_request.merged)
+      )
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Check workflow files
         run: |
-          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-          ./actionlint -color
+          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash) latest /usr/bin
         shell: bash
       - uses: actions/setup-node@v4
         with:

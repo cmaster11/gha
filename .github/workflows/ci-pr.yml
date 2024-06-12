@@ -16,9 +16,22 @@ jobs:
   build:
     uses: ./.github/workflows/ci-build.yml
     permissions:
-      pull-requests: write
+      # Required to create new version branches
       contents: write
+      # Required to publish comments on the PR
+      pull-requests: write
+      # Required to trigger test workflows via workflow_dispatch
       actions: write
+      # Required to create commit statuses to mark the
+      # execution of test workflows
       statuses: write
     with:
+      # You can customize various commands
       test-command: npm run test:ci
+
+      # If you want to disable linting
+      # lint-command: echo NOOP
+
+      # Or you can completely disable testing, in case you want to run your
+      # own test suites before running the actions/workflows build pipeline.
+      # skip-test: true
