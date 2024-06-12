@@ -19,6 +19,7 @@ system to version them all.
 
 <!-- GENERATE_WORKFLOWS BEGIN -->
 
+- [`wf-after-test`](./.github/workflows/wf-after-test.yml): CI - After test / Finalize status checks
 - [`wf-build`](./.github/workflows/wf-build.yml): Build Github Actions and reusable workflows
 - [`wf-create-release`](./.github/workflows/wf-create-release.yml): Creates a release from an artifact into a standalone branch
 - [`wf-test-subworkflows`](./.github/workflows/wf-test-subworkflows.yml): A test workflow, used to test sub-workflows

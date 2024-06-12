@@ -1,4 +1,4 @@
-name: Test workflow-test-subworkflows
+name: Test wf-test-subworkflows
 
 on:
   workflow_dispatch: { inputs: { ctx: {} } }
@@ -19,7 +19,7 @@ jobs:
     needs:
       - test
     if: always() && github.event_name == 'workflow_dispatch'
-    uses: ./.github/workflows/ci-post-build-after-test.yml
+    uses: ./.github/workflows/wf-after-test.yml
     permissions:
       statuses: write
     with:
