@@ -1,4 +1,4 @@
-name: A test workflow (extended file name)
+name: A test workflow
 
 on:
   workflow_call:

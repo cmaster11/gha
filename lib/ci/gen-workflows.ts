@@ -10,7 +10,7 @@ import * as prettier from 'prettier';
 
 $.verbose = true;
 
-// Build the build.yml workflow from the ci-build.yml one
+// Build the wf-build.yml workflow from the ci-build.yml one
 const workflow = parse(
   await fs.readFile(path.join(workflowsDir, 'ci-build.yml'), 'utf-8')
 );
@@ -78,7 +78,7 @@ for (const jobKey in workflow.jobs) {
 let content = stringify(workflow, { lineWidth: 0 });
 content = await prettier.format(content, { parser: 'yaml' });
 
-const outFileName = 'build.yml';
+const outFileName = 'wf-build.yml';
 const outFilePath = path.join(workflowsDir, outFileName);
 await fs.writeFile(outFilePath, content);
 await $`actionlint ${outFilePath}`;

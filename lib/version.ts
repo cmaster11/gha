@@ -60,7 +60,11 @@ export function getPRDevBranch(actionName: string, pullNumber: number) {
 
 export function getPRDevBranchGlobs(pullNumber: number): string[] {
   const branchSuffix = getPRSuffix(pullNumber);
-  return [`action-*/${branchSuffix}`, `workflow-*/${branchSuffix}`];
+  return [
+    `action-*/${branchSuffix}`,
+    `workflow-*/${branchSuffix}`,
+    `wf-*/${branchSuffix}`
+  ];
 }
 
 export function findReleaseLabel(

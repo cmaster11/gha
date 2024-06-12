@@ -19,9 +19,11 @@ system to version them all.
 
 <!-- GENERATE_WORKFLOWS BEGIN -->
 
-- [`workflow-create-release`](./.github/workflows/workflow-create-release.yml): Creates a release from an artifact into a standalone branch
-- [`workflow-test-subworkflows`](./.github/workflows/workflow-test-subworkflows.yml): A test workflow, used to test sub-workflows
-- [`workflow-test`](./.github/workflows/workflow-test.yml): A test workflow
+- [`wf-build`](./.github/workflows/wf-build.yml): Build Github Actions and reusable workflows
+- [`wf-create-release`](./.github/workflows/wf-create-release.yml): Creates a release from an artifact into a standalone branch
+- [`wf-test-subworkflows`](./.github/workflows/wf-test-subworkflows.yml): A test workflow, used to test sub-workflows
+- [`wf-test`](./.github/workflows/wf-test.yml): A test workflow
+- [`workflow-test`](./.github/workflows/workflow-test.yml): A test workflow (extended file name)
 <!-- GENERATE_WORKFLOWS END -->
 
 ## Development (actions)
@@ -58,27 +60,27 @@ runs:
 
 ## Development (workflows)
 
-1. Create a new workflow in the `.github/workflows` folder, making sure its name starts with `workflow-` (
-   e.g. `workflow-test`).
+1. Create a new workflow in the `.github/workflows` folder, making sure its name starts either with `wf-` or `workflow-` (
+   e.g. `wf-test` or `workflow-test`).
 2. Create PR and assign a release label (`patch`, `minor`, `major`).
    1. Note that **versions start from 0**, which means that, if you want to release a `v1`, you will need to use
       a `major` label in the PR.
-3. On PR merge, the workflow will be released to its own version branch (e.g. `workflow-test/v1`).
+3. On PR merge, the workflow will be released to its own version branch (e.g. `wf-test/v1` or `workflow-test/v1`).
 4. You can then use the workflows in a GitHub Actions workflow with:
 
 ```yaml
 jobs:
   my-job:
-    uses: cmaster11/gha/.github/workflows/workflow-test.yml@workflow-test/v1
+    uses: cmaster11/gha/.github/workflows/wf-test.yml@wf-test/v1
 ```
 
 ### Additional files
 
-Assuming your workflow's name is `workflow-test.yml`:
+Assuming your workflow's name is `wf-test.yml`:
 
 #### README
 
-If a file such as `workflow-test.README.md` is found, it will be moved to the root of the repository in the release
+If a file such as `wf-test.README.md` is found, it will be moved to the root of the repository in the release
 branch and renamed to `README.md`, which means it will become the main README of the repo.
 
 #### Sub-workflows
@@ -86,7 +88,7 @@ branch and renamed to `README.md`, which means it will become the main README of
 Any other workflows contained in the `.github/workflows` folder whose name starts with the main workflow's name and
 continues after a `.` will be also released together with the main workflow.
 
-E.g., You could have another workflow such as `workflow-test.another.yml`.
+E.g., You could have another workflow such as `wf-test.another.yml`.
 
 This makes it possible to have a main workflow that triggers any amount of dependent ones without having to worry about
 versioning.
@@ -96,7 +98,7 @@ You can then reuse these sub-workflows in your main one with:
 ```yaml
 jobs:
   parse:
-    uses: ./.github/workflows/workflow-test.another.yml
+    uses: ./.github/workflows/wf-test.another.yml
 ```
 
 ## Build pipeline
@@ -138,14 +140,14 @@ flowchart
         test-action-another["Job: test\nTests the action"]
     end
 
-    subgraph test-workflow-test.yml
-        test-workflow-test["Job: test\nTests the workflow"]
+    subgraph test-wf-test.yml
+        test-wf-test["Job: test\nTests the workflow"]
     end
 
     test-action-example --> ci-post-build-after-test.yml
     test-action-another --> ci-post-build-after-test.yml
-    test-workflow-test --> ci-post-build-after-test.yml
+    test-wf-test --> ci-post-build-after-test.yml
     post-build-test-actions --> test-action-example.yml
     post-build-test-actions --> test-action-another.yml
-    post-build-test-workflows --> test-workflow-test.yml
+    post-build-test-workflows --> test-wf-test.yml
 ```

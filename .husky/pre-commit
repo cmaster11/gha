@@ -11,8 +11,6 @@ set -euo pipefail
 
 actionlint
 
-npm run gen:docs
+npm run gen
 git add README.md
-
-npm run gen:workflows
 git add .github/workflows/*

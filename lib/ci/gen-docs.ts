@@ -7,6 +7,7 @@ import path from 'node:path';
 import { actionsDir, rootDir, workflowsDir } from '../constants.js';
 import { parse } from 'yaml';
 import * as prettier from 'prettier';
+import { getGitHubWorkflows } from '../github-workflows.js';
 
 $.verbose = true;
 
@@ -52,9 +53,7 @@ for (const action of allActions) {
 // List all workflows
 const workflowLinks: string[] = [];
 
-const allWorkflows = (await fs.readdir(workflowsDir)).filter((f) =>
-  /^workflow-[^.]+\.yml$/.test(f)
-);
+const allWorkflows = await getGitHubWorkflows(true);
 for (const workflow of allWorkflows) {
   let desc: string;
   const workflowName = workflow.replace(/\.yml$/, '');

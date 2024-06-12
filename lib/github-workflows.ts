@@ -18,9 +18,13 @@ interface GithubWorkflow {
   jobs?: Record<string, GithubWorkflowJob>;
 }
 
-export async function getGitHubWorkflows(): Promise<string[]> {
+export async function getGitHubWorkflows(
+  skipSubWorkflows = false
+): Promise<string[]> {
   return (await fs.readdir(workflowsDir)).filter((f) =>
-    /^workflow-.+\.yml$/.test(f)
+    skipSubWorkflows
+      ? /^(workflow|wf)-[^./]+\.yml$/.test(f)
+      : /^(workflow|wf)-[^/]+\.yml$/.test(f)
   );
 }
 

@@ -22,6 +22,7 @@
     "lint:eslint:fix": "npm run lint:eslint -- --fix",
     "gen:docs": "npx tsx lib/ci/gen-docs.ts",
     "gen:workflows": "npx tsx lib/ci/gen-workflows.ts",
+    "gen": "npm run gen:workflows && npm run gen:docs",
     "prepare": "husky && npx replace-in-file '#!/usr/bin/env sh' '#!/usr/bin/env bash' '.husky/_/h' --quiet && npx replace-in-file 'sh -e' 'bash -e' '.husky/_/h' --quiet"
   },
   "devDependencies": {
