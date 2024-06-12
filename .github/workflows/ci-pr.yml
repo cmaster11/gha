@@ -15,5 +15,10 @@ on:
 jobs:
   build:
     uses: ./.github/workflows/ci-build.yml
+    permissions:
+      pull-requests: write
+      contents: write
+      actions: write
+      statuses: write
     with:
       test-command: npm run test:ci
