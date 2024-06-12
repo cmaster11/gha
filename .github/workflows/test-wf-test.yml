@@ -15,7 +15,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/wf-test.yml
 
-  ci-after-test:
+  wf-after-test:
     needs:
       - test
     if: always() && github.event_name == 'workflow_dispatch'

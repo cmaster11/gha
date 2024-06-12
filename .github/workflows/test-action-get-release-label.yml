@@ -32,7 +32,7 @@ jobs:
           JSON: ${{ toJSON(steps.action) }}
 
   # Notify GitHub about the result of the test
-  ci-after-test:
+  wf-after-test:
     needs:
       - test
     if: always() && github.event_name == 'workflow_dispatch'

@@ -31,10 +31,10 @@ jobs:
     uses: ./.github/workflows/wf-create-release.yml
     with:
       artifact-name: test-release-dist
-      release-branch: test-workflow-create-release-release
-      release-tag-prefix: test-workflow-create-release-release
+      release-branch: test-wf-create-release-release
+      release-tag-prefix: test-wf-create-release-release
 
-  ci-after-test:
+  wf-after-test:
     needs:
       - create-artifact
       - create-release

@@ -56,7 +56,7 @@ export async function ciPostBuildTestWorkflows({
   await gh.octokit.rest.actions.createWorkflowDispatch({
     ...gh.repoProps,
     workflow_id: testWorkflowName,
-    ref,
+    ref: headSHA,
     inputs: {
       ctx: JSON.stringify({
         ref: versionBranch,
