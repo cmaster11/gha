@@ -17,11 +17,9 @@ jobs:
 
   wf-after-test:
     needs:
+      # List here all the other jobs
       - test
     if: always() && github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/wf-after-test.yml
-    permissions:
-      statuses: write
-    with:
-      ctx: ${{ inputs.ctx }}
-      needs-json: ${{ toJSON(needs) }}
+    permissions: { statuses: write }
+    with: { ctx: '${{ inputs.ctx }}', needs-json: '${{ toJSON(needs) }}' }
