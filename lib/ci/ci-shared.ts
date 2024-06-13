@@ -7,7 +7,6 @@ import type { GithubCommonProps } from '../github-common.js';
 export const ciTestCatchAllWorkflowName = 'ci-test-catch-all.yml';
 
 export interface TestPayload {
-  testWorkflowName: string;
   sha: string;
   ref: string;
   statusContext: string;
@@ -41,7 +40,6 @@ export async function createCommitStatusAndTriggerTestWorkflow({
 
   // Trigger the test workflow
   const payload: TestPayload = {
-    testWorkflowName,
     ref: versionBranch,
     sha: headSHA,
     statusContext,
@@ -52,6 +50,7 @@ export async function createCommitStatusAndTriggerTestWorkflow({
     workflow_id: ciTestCatchAllWorkflowName,
     ref,
     inputs: {
+      'workflow-name': testWorkflowName,
       'test-ctx': JSON.stringify(payload)
     }
   });
