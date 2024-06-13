@@ -14,15 +14,23 @@ export interface TestPayload {
   pullNumber: number;
 }
 
-export async function createCommitStatusAndTriggerTestWorkflow(
-  gh: GithubCommonProps,
-  statusContext: string,
-  testWorkflowName: string,
-  headSHA: string,
-  versionBranch: string,
-  pullNumber: number,
-  ref: string
-) {
+export async function createCommitStatusAndTriggerTestWorkflow({
+  gh,
+  statusContext,
+  testWorkflowName,
+  headSHA,
+  versionBranch,
+  pullNumber,
+  ref
+}: {
+  gh: GithubCommonProps;
+  statusContext: string;
+  testWorkflowName: string;
+  headSHA: string;
+  versionBranch: string;
+  pullNumber: number;
+  ref: string;
+}) {
   // Create the status check for the upcoming test workflow
   await gh.octokit.rest.repos.createCommitStatus({
     ...gh.repoProps,

@@ -46,7 +46,7 @@ export async function ciPostBuildTestWorkflows({
 
   // Create the status check for the upcoming test workflow
   const statusContext = `CI Test: ${workflowName}`;
-  await createCommitStatusAndTriggerTestWorkflow(
+  await createCommitStatusAndTriggerTestWorkflow({
     gh,
     statusContext,
     headSHA,
@@ -54,5 +54,5 @@ export async function ciPostBuildTestWorkflows({
     versionBranch,
     pullNumber,
     ref
-  );
+  });
 }
