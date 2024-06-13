@@ -22,7 +22,7 @@ const jobs: Record<string, {}> = Object.fromEntries(
     return [
       workflowName,
       {
-        if: `inputs.workflow-name == '${workflowName}'`,
+        if: `github.event_name == 'workflow_dispatch' && inputs.workflow-name == '${workflowName}'`,
         uses: `./.github/workflows/${w}`,
         with: { 'test-ctx': '${{ inputs.test-ctx }}' }
       }
@@ -31,6 +31,7 @@ const jobs: Record<string, {}> = Object.fromEntries(
 );
 
 jobs['ci-post-test'] = {
+  if: `github.event_name == 'workflow_dispatch'`,
   needs: Object.keys(jobs),
   'runs-on': 'ubuntu-latest',
   permissions: {
@@ -65,6 +66,10 @@ const workflow = {
           type: 'string'
         }
       }
+    },
+    pull_request: {
+      branches: ['main'],
+      paths: [`.github/workflows/${ciTestCatchAllWorkflowName}`]
     }
   },
   jobs
@@ -75,4 +80,3 @@ content = await prettier.format(content, { parser: 'yaml' });
 
 const outFilePath = path.join(workflowsDir, ciTestCatchAllWorkflowName);
 await fs.writeFile(outFilePath, content);
-await $`actionlint ${outFilePath}`;
