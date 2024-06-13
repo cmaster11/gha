@@ -1,18 +1,10 @@
 name: Test wf-create-release
 
 on:
-  workflow_dispatch: { inputs: { ctx: {} } }
-  # Register the workflow so that it can be triggered
-  # via workflow_dispatch event
-  pull_request:
-    branches:
-      - main
-    paths:
-      - .github/workflows/test-wf-create-release.yml
+  workflow_call: { inputs: { test-ctx: { type: string } } }
 
 jobs:
   create-artifact:
-    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,7 +16,6 @@ jobs:
           if-no-files-found: error
 
   create-release:
-    if: github.event_name == 'workflow_dispatch'
     permissions:
       contents: write
     needs: create-artifact
@@ -33,15 +24,3 @@ jobs:
       artifact-name: test-release-dist
       release-branch: test-wf-create-release-release
       release-tag-prefix: test-wf-create-release-release
-
-  wf-after-test:
-    needs:
-      - create-artifact
-      - create-release
-    if: always() && github.event_name == 'workflow_dispatch'
-    uses: ./.github/workflows/wf-after-test.yml
-    permissions:
-      statuses: write
-    with:
-      ctx: ${{ inputs.ctx }}
-      needs-json: ${{ toJSON(needs) }}

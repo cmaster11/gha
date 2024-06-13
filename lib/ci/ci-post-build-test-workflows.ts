@@ -4,6 +4,7 @@
 
 import 'zx/globals';
 import type { GithubCommonProps } from '../github-common.js';
+import { createCommitStatusAndTriggerTestWorkflow } from './ci-shared.js';
 
 export async function ciPostBuildTestWorkflows({
   gh,
@@ -45,24 +46,13 @@ export async function ciPostBuildTestWorkflows({
 
   // Create the status check for the upcoming test workflow
   const statusContext = `CI Test: ${workflowName}`;
-  await gh.octokit.rest.repos.createCommitStatus({
-    ...gh.repoProps,
-    context: statusContext,
-    state: 'pending',
-    sha: headSHA
-  });
-
-  // Trigger the test workflow
-  await gh.octokit.rest.actions.createWorkflowDispatch({
-    ...gh.repoProps,
-    workflow_id: testWorkflowName,
-    ref,
-    inputs: {
-      ctx: JSON.stringify({
-        ref: versionBranch,
-        statusContext,
-        pullNumber
-      })
-    }
-  });
+  await createCommitStatusAndTriggerTestWorkflow(
+    gh,
+    statusContext,
+    headSHA,
+    testWorkflowName,
+    versionBranch,
+    pullNumber,
+    ref
+  );
 }

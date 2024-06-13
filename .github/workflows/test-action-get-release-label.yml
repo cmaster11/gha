@@ -1,16 +1,9 @@
 name: Test action-get-release-label
 on:
-  workflow_dispatch: { inputs: { ctx: {} } }
-  # Register the workflow so that it can be triggered
-  # via workflow_dispatch event
-  pull_request:
-    branches:
-      - main
-    paths:
-      - .github/workflows/test-action-get-release-label.yml
+  workflow_call: { inputs: { test-ctx: { type: string } } }
+
 jobs:
   test:
-    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-22.04
     permissions:
       pull-requests: read
@@ -18,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: '${{ fromJSON(inputs.ctx).ref }}'
+          ref: '${{ fromJSON(inputs.test-ctx).ref }}'
 
       - id: action
         uses: ./
@@ -30,15 +23,3 @@ jobs:
           echo "$JSON" | jq '.'
         env:
           JSON: ${{ toJSON(steps.action) }}
-
-  # Notify GitHub about the result of the test
-  wf-after-test:
-    needs:
-      - test
-    if: always() && github.event_name == 'workflow_dispatch'
-    uses: ./.github/workflows/wf-after-test.yml
-    permissions:
-      statuses: write
-    with:
-      ctx: ${{ inputs.ctx }}
-      needs-json: ${{ toJSON(needs) }}

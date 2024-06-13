@@ -4,6 +4,7 @@
 
 import 'zx/globals';
 import type { GithubCommonProps } from '../github-common.js';
+import { createCommitStatusAndTriggerTestWorkflow } from './ci-shared.js';
 
 export async function ciPostBuildTestActions({
   gh,
@@ -23,14 +24,14 @@ export async function ciPostBuildTestActions({
   release: boolean;
 }) {
   const ref = release ? 'main' : headRef;
-  const workflowName = `test-${actionName}.yml`;
+  const testWorkflowName = `test-${actionName}.yml`;
 
   // Check if there is a workflow to trigger
   try {
     await gh.octokit.rest.repos.getContent({
       ...gh.repoProps,
       ref: headSHA,
-      path: `.github/workflows/${workflowName}`
+      path: `.github/workflows/${testWorkflowName}`
     });
   } catch (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -43,26 +44,14 @@ export async function ciPostBuildTestActions({
     throw err;
   }
 
-  // Create the status check for the upcoming test workflow
   const statusContext = `CI Test: ${actionName}`;
-  await gh.octokit.rest.repos.createCommitStatus({
-    ...gh.repoProps,
-    context: statusContext,
-    state: 'pending',
-    sha: headSHA
-  });
-
-  // Trigger the test workflow
-  await gh.octokit.rest.actions.createWorkflowDispatch({
-    ...gh.repoProps,
-    workflow_id: workflowName,
-    ref,
-    inputs: {
-      ctx: JSON.stringify({
-        ref: versionBranch,
-        statusContext,
-        pullNumber
-      })
-    }
-  });
+  await createCommitStatusAndTriggerTestWorkflow(
+    gh,
+    statusContext,
+    headSHA,
+    testWorkflowName,
+    versionBranch,
+    pullNumber,
+    ref
+  );
 }

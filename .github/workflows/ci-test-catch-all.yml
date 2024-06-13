@@ -1,0 +1,79 @@
+name: Run test workflows
+on:
+  workflow_dispatch:
+    inputs:
+      workflow-name:
+        description: The name of the test workflow to run
+        required: true
+        type: string
+      test-ctx:
+        description: The context for the test workflow
+        required: true
+        type: string
+jobs:
+  test-action-ci-build:
+    if: inputs.workflow-name == 'test-action-ci-build'
+    uses: ./.github/workflows/test-action-ci-build.yml
+    with:
+      test-ctx: ${{ inputs.test-ctx }}
+  test-action-example:
+    if: inputs.workflow-name == 'test-action-example'
+    uses: ./.github/workflows/test-action-example.yml
+    with:
+      test-ctx: ${{ inputs.test-ctx }}
+  test-action-get-changed-dirs:
+    if: inputs.workflow-name == 'test-action-get-changed-dirs'
+    uses: ./.github/workflows/test-action-get-changed-dirs.yml
+    with:
+      test-ctx: ${{ inputs.test-ctx }}
+  test-action-get-release-label:
+    if: inputs.workflow-name == 'test-action-get-release-label'
+    uses: ./.github/workflows/test-action-get-release-label.yml
+    with:
+      test-ctx: ${{ inputs.test-ctx }}
+  test-action-test:
+    if: inputs.workflow-name == 'test-action-test'
+    uses: ./.github/workflows/test-action-test.yml
+    with:
+      test-ctx: ${{ inputs.test-ctx }}
+  test-wf-create-release:
+    if: inputs.workflow-name == 'test-wf-create-release'
+    uses: ./.github/workflows/test-wf-create-release.yml
+    with:
+      test-ctx: ${{ inputs.test-ctx }}
+  test-wf-test-subworkflows:
+    if: inputs.workflow-name == 'test-wf-test-subworkflows'
+    uses: ./.github/workflows/test-wf-test-subworkflows.yml
+    with:
+      test-ctx: ${{ inputs.test-ctx }}
+  test-wf-test:
+    if: inputs.workflow-name == 'test-wf-test'
+    uses: ./.github/workflows/test-wf-test.yml
+    with:
+      test-ctx: ${{ inputs.test-ctx }}
+  test-workflow-test:
+    if: inputs.workflow-name == 'test-workflow-test'
+    uses: ./.github/workflows/test-workflow-test.yml
+    with:
+      test-ctx: ${{ inputs.test-ctx }}
+  ci-post-test:
+    needs:
+      - test-action-ci-build
+      - test-action-example
+      - test-action-get-changed-dirs
+      - test-action-get-release-label
+      - test-action-test
+      - test-wf-create-release
+      - test-wf-test-subworkflows
+      - test-wf-test
+      - test-workflow-test
+    runs-on: ubuntu-latest
+    permissions:
+      statuses: write
+    steps:
+      - uses: ./actions/action-ci-build
+        with:
+          phase: post-test
+          token: ${{ secrets.GITHUB_TOKEN }}
+          needs-json: ${{ toJSON(needs) }}
+          test-ctx: ${{ inputs.test-ctx }}

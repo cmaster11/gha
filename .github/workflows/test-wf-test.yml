@@ -1,27 +1,8 @@
 name: Test wf-test
 
 on:
-  workflow_dispatch: { inputs: { ctx: {} } }
-  # Register the workflow so that it can be triggered
-  # via workflow_dispatch event
-  pull_request:
-    branches:
-      - main
-    paths:
-      - .github/workflows/test-wf-test.yml
+  workflow_call: { inputs: { test-ctx: { type: string } } }
 
 jobs:
   test:
-    if: github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/wf-test.yml
-
-  wf-after-test:
-    needs:
-      - test
-    if: always() && github.event_name == 'workflow_dispatch'
-    uses: ./.github/workflows/wf-after-test.yml
-    permissions:
-      statuses: write
-    with:
-      ctx: ${{ inputs.ctx }}
-      needs-json: ${{ toJSON(needs) }}

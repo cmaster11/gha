@@ -16,6 +16,8 @@ import { ciCleanup } from '../../lib/ci/ci-cleanup.js';
 import { inspect } from '../../lib/inspect.js';
 import { ciBuildWorkflows } from '../../lib/ci/ci-build-workflows.js';
 import { ciPostBuildTestWorkflows } from '../../lib/ci/ci-post-build-test-workflows.js';
+import type { TestPayload } from '../../lib/ci/ci-shared.js';
+import { ciPostTest } from '../../lib/ci/ci-post-test.js';
 
 async function main() {
   const phase = getInput('phase', { required: true });
@@ -28,14 +30,23 @@ async function main() {
     })}`
   );
 
+  const testPayloadString = getInput('test-ctx');
+  const testPayload: TestPayload | undefined = testPayloadString
+    ? JSON.parse(testPayloadString)
+    : undefined;
+
   let pullNumber = context.payload.pull_request?.number;
   if (pullNumber == null) {
-    console.log(
-      `Null pull_number from context, using inputs one. Context: ${inspect(context)}`
-    );
+    console.log(`Null pull_number from context, using inputs one.`);
     const input = parseInt(getInput('pull-number', { required: true }));
-    if (isNaN(input)) throw new Error(`Bad PR number ${input}`);
-    pullNumber = input;
+    if (!isNaN(input)) {
+      pullNumber = input;
+    } else if (testPayload) {
+      pullNumber = testPayload.pullNumber;
+    }
+  }
+  if (pullNumber == null) {
+    throw new Error(`Could not fund PR number`);
   }
 
   const gh = getOctokitWithOwnerAndRepo(
@@ -109,6 +120,16 @@ async function main() {
         versionBranch,
         headSHA,
         headRef
+      });
+    }
+    case 'post-test': {
+      const needs = JSON.parse(getInput('needs-json', { required: true }));
+      if (testPayload == null) throw new Error('Missing test-ctx input');
+      return ciPostTest({
+        gh,
+        payload: testPayload,
+        needs,
+        runId: context.runId
       });
     }
     case 'cleanup': {
