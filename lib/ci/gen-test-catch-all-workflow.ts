@@ -71,7 +71,7 @@ for (const workflowFile of allTestWorkflows) {
   }
 
   jobs[workflowName] = {
-    if: `github.event_name == 'workflow_dispatch' && inputs.workflow-name == '${workflowName}'`,
+    if: `github.event_name == 'workflow_dispatch' && inputs.workflow-name == '${workflowFile}'`,
     uses: `./.github/workflows/${workflowFile}`,
     secrets: 'inherit',
     ...(hasPermissions ? { permissions } : {}),
