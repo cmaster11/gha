@@ -38,7 +38,7 @@ async function main() {
   let pullNumber = context.payload.pull_request?.number;
   if (pullNumber == null) {
     console.log(`Null pull_number from context, using inputs one.`);
-    const input = parseInt(getInput('pull-number', { required: true }));
+    const input = parseInt(getInput('pull-number'));
     if (!isNaN(input)) {
       pullNumber = input;
     } else if (testPayload) {
