@@ -30,7 +30,7 @@ export async function ciGenTestCatchAllWorkflow({
   // If there are any changes, commit them and then trigger
   // the new build workflow
   await $`git add ${workflowsDir}/${ciTestCatchAllWorkflowName}`;
-  await $`git commit -m "[cmaster11/gha] Auto-gen test-catch-all workflow"`;
+  await $`git commit -n -m "[cmaster11/gha] Auto-gen test-catch-all workflow"`;
   await $`git push`;
 
   const body = [
