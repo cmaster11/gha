@@ -45,22 +45,9 @@ for (const workflowFile of allTestWorkflows) {
   let hasPermissions = Object.keys(permissions).length > 0;
   if (hasPermissions) {
     // Make sure we always have at least the default read permissions for all jobs
-    // https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs
-    const keys = [
-      'actions',
-      'checks',
-      'contents',
-      'deployments',
-      // 'id-token',
-      'issues',
-      'discussions',
-      'packages',
-      'pages',
-      'pull-requests',
-      'repository-projects',
-      'security-events',
-      'statuses'
-    ];
+    // https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
+
+    const keys = ['contents', 'packages'];
     for (const key of keys) {
       permissions[key] ??= 'read';
     }
@@ -80,7 +67,7 @@ for (const workflowFile of allTestWorkflows) {
 }
 
 jobs['ci-post-test'] = {
-  if: `github.event_name == 'workflow_dispatch'`,
+  if: `always() && github.event_name == 'workflow_dispatch'`,
   needs: Object.keys(jobs),
   'runs-on': 'ubuntu-latest',
   permissions: {
