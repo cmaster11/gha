@@ -19,6 +19,9 @@ inputs:
   test-ctx: {}
 
 outputs:
+  # gen-test-catch-all-workflow
+  had-changes: {}
+
   release-label: {}
   continue-release: {}
 

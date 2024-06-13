@@ -19,6 +19,24 @@ concurrency:
   group: ${{ (github.event.action == 'closed' && github.event.pull_request.merged) && 'release' || format('pr-{0}', github.event.pull_request.number) }}
   cancel-in-progress: ${{ github.event.action != 'closed' }}
 jobs:
+  gen-test-catch-all-workflow:
+    name: Generate test workflows
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    outputs:
+      had-changes: ${{ steps.gen-test-catch-all-workflow.outputs.had-changes }}
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cmaster11/gha@action-git-init-userinfo/v0
+      - name: Generate test workflows
+        id: gen-test-catch-all-workflow
+        uses: cmaster11/gha@action-ci-build/v0
+        with:
+          phase: gen-test-catch-all-workflow
+          token: ${{ secrets.GITHUB_TOKEN }}
   get-release-label:
     name: Get release label
     if: |
@@ -93,11 +111,16 @@ jobs:
   build-actions:
     name: Build action (${{ matrix.directory }})
     needs:
+      - gen-test-catch-all-workflow
       - test
       - get-changed-elements
       - get-release-label
     runs-on: ubuntu-latest
-    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-elements.outputs.matrix-actions-empty != 'true'
+    if: |
+      needs.gen-test-catch-all-workflow.outputs.had-changes != 'true' && (
+        needs.get-release-label.outputs.continue-release == 'true' && 
+        needs.get-changed-elements.outputs.matrix-actions-empty != 'true'
+      )
     permissions:
       pull-requests: read
       contents: write
@@ -124,11 +147,16 @@ jobs:
   build-workflows:
     name: Build workflow (${{ matrix.directory }})
     needs:
+      - gen-test-catch-all-workflow
       - test
       - get-changed-elements
       - get-release-label
     runs-on: ubuntu-latest
-    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-elements.outputs.matrix-workflows-empty != 'true'
+    if: |
+      needs.gen-test-catch-all-workflow.outputs.had-changes != 'true' && (
+        needs.get-release-label.outputs.continue-release == 'true' && 
+        needs.get-changed-elements.outputs.matrix-workflows-empty != 'true'
+      )
     permissions:
       pull-requests: read
       contents: write
@@ -155,11 +183,16 @@ jobs:
   post-build-test-actions:
     name: Post-build test action (${{ matrix.directory }})
     needs:
+      - gen-test-catch-all-workflow
       - get-changed-elements
       - build-actions
       - get-release-label
     runs-on: ubuntu-latest
-    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-elements.outputs.matrix-actions-empty != 'true'
+    if: |
+      needs.gen-test-catch-all-workflow.outputs.had-changes != 'true' && (
+        needs.get-release-label.outputs.continue-release == 'true' && 
+        needs.get-changed-elements.outputs.matrix-actions-empty != 'true'
+      )
     permissions:
       pull-requests: read
       contents: write
@@ -184,17 +217,22 @@ jobs:
           action-name: ${{ matrix.directory }}
           version-branch: ${{ fromJson(steps.read-build-output.outputs.result).version-branch[matrix.directory] }}
           head-ref: ${{ github.head_ref }}
-          head-sha: ${{ github.event.pull_request.head.sha || github.sha }}
+          head-sha: ${{ github.event.pull_request.head.sha }}
           release: ${{ github.event.action == 'closed' && github.event.pull_request.merged }}
   post-build-test-workflows:
     name: Post-build test workflow (${{ matrix.directory }})
     needs:
+      - gen-test-catch-all-workflow
       - get-changed-elements
       - build-actions
       - build-workflows
       - get-release-label
     runs-on: ubuntu-latest
-    if: needs.get-release-label.outputs.continue-release == 'true' && needs.get-changed-elements.outputs.matrix-workflows-empty != 'true'
+    if: |
+      needs.gen-test-catch-all-workflow.outputs.had-changes != 'true' && (
+        needs.get-release-label.outputs.continue-release == 'true' && 
+        needs.get-changed-elements.outputs.matrix-workflows-empty != 'true'
+      )
     permissions:
       pull-requests: read
       contents: write
@@ -219,7 +257,7 @@ jobs:
           workflow-name: ${{ matrix.directory }}
           version-branch: ${{ fromJson(steps.read-build-output.outputs.result).version-branch[matrix.directory] }}
           head-ref: ${{ github.head_ref }}
-          head-sha: ${{ github.event.pull_request.head.sha || github.sha }}
+          head-sha: ${{ github.event.pull_request.head.sha }}
           release: ${{ github.event.action == 'closed' && github.event.pull_request.merged }}
   cleanup:
     name: Cleanup

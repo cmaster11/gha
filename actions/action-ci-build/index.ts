@@ -18,6 +18,7 @@ import { ciBuildWorkflows } from '../../lib/ci/ci-build-workflows.js';
 import { ciPostBuildTestWorkflows } from '../../lib/ci/ci-post-build-test-workflows.js';
 import type { TestPayload } from '../../lib/ci/ci-shared.js';
 import { ciPostTest } from '../../lib/ci/ci-post-test.js';
+import { ciGenTestCatchAllWorkflow } from '../../lib/ci/ci-gen-test-catch-all-workflow.js';
 
 async function main() {
   const phase = getInput('phase', { required: true });
@@ -56,8 +57,19 @@ async function main() {
   );
 
   switch (phase) {
+    case 'gen-test-catch-all-workflow': {
+      const remapped = getBooleanInput('remapped', { required: true });
+      const triggeringActor =
+        process.env.GITHUB_TRIGGERING_ACTOR ?? context.actor;
+      return ciGenTestCatchAllWorkflow({
+        gh,
+        pullNumber,
+        triggeringActor,
+        remapped
+      });
+    }
     case 'get-release-label': {
-      return ciGetReleaseLabel(gh, pullNumber);
+      return ciGetReleaseLabel({ gh, pullNumber });
     }
     case 'get-changed-elements': {
       return ciGetChangesMatrix({
@@ -154,7 +166,13 @@ function getReleaseLabel(): ReleaseLabel {
   return releaseLabel;
 }
 
-async function ciGetReleaseLabel(gh: GithubCommonProps, pullNumber: number) {
+async function ciGetReleaseLabel({
+  gh,
+  pullNumber
+}: {
+  gh: GithubCommonProps;
+  pullNumber: number;
+}) {
   const label = await githubGetPrReleaseLabel({
     gh,
     pullNumber
