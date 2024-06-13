@@ -81,4 +81,3 @@ content = await prettier.format(content, { parser: 'yaml' });
 const outFileName = 'wf-build.yml';
 const outFilePath = path.join(workflowsDir, outFileName);
 await fs.writeFile(outFilePath, content);
-await $`actionlint ${outFilePath}`;

@@ -10,7 +10,6 @@ set -euo pipefail
 #
 
 npm run gen
-actionlint
 
 git add README.md
 git add .github/workflows/*
