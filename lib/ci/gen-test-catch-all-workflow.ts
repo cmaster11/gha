@@ -51,7 +51,7 @@ for (const workflowFile of allTestWorkflows) {
       'checks',
       'contents',
       'deployments',
-      'id-token',
+      // 'id-token',
       'issues',
       'discussions',
       'packages',
