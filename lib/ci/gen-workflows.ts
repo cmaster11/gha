@@ -7,6 +7,7 @@ import path from 'node:path';
 import { workflowsDir } from '../constants.js';
 import { parse, stringify } from 'yaml';
 import * as prettier from 'prettier';
+import { actionsRemapping } from './ci-shared.js';
 
 $.verbose = true;
 
@@ -14,11 +15,6 @@ $.verbose = true;
 const workflow = parse(
   await fs.readFile(path.join(workflowsDir, 'ci-build.yml'), 'utf-8')
 );
-
-const actionsMap: Record<string, string> = {
-  './actions/action-git-init-userinfo': 'action-git-init-userinfo/v0',
-  './actions/action-ci-build': 'action-ci-build/v0'
-};
 
 for (const jobKey in workflow.jobs) {
   const job = workflow.jobs[jobKey];
@@ -61,8 +57,10 @@ for (const jobKey in workflow.jobs) {
       }
     }
 
-    if (step.uses && step.uses in actionsMap) {
-      step.uses = 'cmaster11/gha@' + actionsMap[step.uses];
+    if (step.uses && step.uses in actionsRemapping) {
+      step.uses =
+        'cmaster11/gha@' +
+        actionsRemapping[step.uses as keyof typeof actionsRemapping];
     }
   }
 

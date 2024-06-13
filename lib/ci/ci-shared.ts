@@ -6,6 +6,11 @@ import type { GithubCommonProps } from '../github-common.js';
 
 export const ciTestCatchAllWorkflowName = 'ci-test-catch-all.yml';
 
+export const actionsRemapping = {
+  './actions/action-git-init-userinfo': 'action-git-init-userinfo/v0',
+  './actions/action-ci-build': 'action-ci-build/v0'
+};
+
 export interface TestPayload {
   sha: string;
   ref: string;

@@ -88,7 +88,16 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       statuses: write
+      contents: read
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: npm
+      - shell: bash
+        run: npm ci
+      - run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build
       - uses: ./actions/action-ci-build
         with:
           phase: post-test

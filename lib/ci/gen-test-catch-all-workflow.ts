@@ -7,12 +7,17 @@ import path from 'node:path';
 import { workflowsDir } from '../constants.js';
 import { parse, stringify } from 'yaml';
 import * as prettier from 'prettier';
-import { ciTestCatchAllWorkflowName } from './ci-shared.js';
+import { actionsRemapping, ciTestCatchAllWorkflowName } from './ci-shared.js';
 import traverse from 'traverse';
 import { util } from 'prettier';
 import hasSpaces = util.hasSpaces;
+import { minimist } from 'zx';
 
 $.verbose = true;
+
+const { remapped } = minimist(process.argv.slice(2), {
+  boolean: ['remapped']
+});
 
 // Build the wf-build.yml workflow from the ci-build.yml one
 const allTestWorkflows = (await fs.readdir(workflowsDir)).filter((w) =>
@@ -70,12 +75,40 @@ jobs['ci-post-test'] = {
   if: `always() && github.event_name == 'workflow_dispatch'`,
   needs: Object.keys(jobs),
   'runs-on': 'ubuntu-latest',
-  permissions: {
-    statuses: 'write'
-  },
+  permissions: remapped
+    ? {
+        statuses: 'write'
+      }
+    : {
+        statuses: 'write',
+        contents: 'read'
+      },
   steps: [
+    ...(remapped
+      ? []
+      : [
+          {
+            uses: 'actions/checkout@v4'
+          },
+          {
+            uses: 'actions/setup-node@v4',
+            with: {
+              'node-version-file': 'package.json',
+              cache: 'npm'
+            }
+          },
+          {
+            shell: 'bash',
+            run: 'npm ci'
+          },
+          {
+            run: 'npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build'
+          }
+        ]),
     {
-      uses: `./actions/action-ci-build`,
+      uses: remapped
+        ? actionsRemapping['./actions/action-ci-build']
+        : `./actions/action-ci-build`,
       with: {
         phase: 'post-test',
         token: '${{ secrets.GITHUB_TOKEN }}',
