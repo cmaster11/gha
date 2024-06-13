@@ -11,6 +11,9 @@ inputs:
   release: {}
   release-label: {}
 
+  # gen-test-catch-all-workflow
+  remapped: {}
+
   # Post build test
   version-branch: {}
   head-ref: {}
