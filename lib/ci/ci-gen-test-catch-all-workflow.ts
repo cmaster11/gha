@@ -31,6 +31,10 @@ export async function ciGenTestCatchAllWorkflow({
 
   const branch = headRef.replace(/^refs\/heads\//, '');
 
+  // Use the custom token
+  await $`git config --unset "http.https://github.com/.extraheader"`;
+  await $`git remote set-url origin "https://x-access-token:${gh.token}@github.com/${gh.repoProps.owner}/${gh.repoProps.repo}.git/"`;
+
   // If there are any changes, commit them and then trigger
   // the new build workflow
   await $`git add ${workflowsDir}/${ciTestCatchAllWorkflowName}`;
