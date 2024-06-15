@@ -60,7 +60,8 @@ runs:
 
 ## Development (workflows)
 
-1. Create a new workflow in the `.github/workflows` folder, making sure its name starts either with `wf-` or `workflow-` (
+1. Create a new workflow in the `.github/workflows` folder, making sure its name starts either with `wf-`
+   or `workflow-` (
    e.g. `wf-test` or `workflow-test`).
 2. Create PR and assign a release label (`patch`, `minor`, `major`).
    1. Note that **versions start from 0**, which means that, if you want to release a `v1`, you will need to use
@@ -102,6 +103,8 @@ jobs:
 ```
 
 ## Build pipeline
+
+<!-- NOTE: the diagram is stored in `./ARCHITECTURE.mermaid` -->
 
 <!-- GENERATE_ARCHITECTURE BEGIN -->
 
