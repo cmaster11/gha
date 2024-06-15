@@ -4,23 +4,15 @@
 
 import 'zx/globals';
 import { genTestCatchAllWorkflow } from '../gen-test-catch-all-workflow.js';
-import type { GithubCommonProps } from '../github-common.js';
 import { ciTestCatchAllWorkflowName } from './ci-shared.js';
 import { setOutput } from '@actions/core';
 import { workflowsDir } from '../constants.js';
-import { gitHubCreateOrUpdateComment } from '../github-comments.js';
 
 export async function ciGenTestCatchAllWorkflow({
-  gh,
   headRef,
-  pullNumber,
-  triggeringActor,
   remapped
 }: {
-  gh: GithubCommonProps;
   headRef: string;
-  triggeringActor: string;
-  pullNumber: number;
   remapped: boolean;
 }) {
   const changed = await genTestCatchAllWorkflow(remapped);
@@ -36,24 +28,4 @@ export async function ciGenTestCatchAllWorkflow({
   await $`git add ${workflowsDir}/${ciTestCatchAllWorkflowName}`;
   await $`git commit -n -m "[cmaster11/gha] Auto-gen test-catch-all workflow"`;
   await $`git push origin HEAD:${branch}`;
-
-  const body = [
-    '### [cmaster11/gha]',
-    [
-      `@${triggeringActor} Your test-catch-all workflow has been regenerated.`,
-      `Please create another commit to re-trigger the cmaster11/gha build workflow.`
-    ].join('\n'),
-    `Suggestion: `,
-    '```shell\n' +
-      `
-git pull && git commit --allow-empty -m "Trigger Build" && git push
-`.trim() +
-      '\n```'
-  ].join('\n\n');
-  await gitHubCreateOrUpdateComment(
-    gh,
-    pullNumber,
-    `${ciGenTestCatchAllWorkflow.name}-${new Date().getTime()}`,
-    body
-  );
 }

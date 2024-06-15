@@ -60,13 +60,8 @@ async function main() {
     case 'gen-test-catch-all-workflow': {
       const headRef = getInput('head-ref', { required: true });
       const remapped = getBooleanInput('remapped', { required: true });
-      const triggeringActor =
-        process.env.GITHUB_TRIGGERING_ACTOR ?? context.actor;
       return ciGenTestCatchAllWorkflow({
-        gh,
         headRef,
-        pullNumber,
-        triggeringActor,
         remapped
       });
     }
