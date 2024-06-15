@@ -80,6 +80,7 @@ jobs:
       - test-action-example
       - test-action-get-changed-dirs
       - test-action-get-release-label
+      - test-action-test
       - test-wf-create-release
       - test-wf-test-subworkflows
       - test-wf-test
