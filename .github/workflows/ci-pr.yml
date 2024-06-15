@@ -35,3 +35,8 @@ jobs:
       # Or you can completely disable testing, in case you want to run your
       # own test suites before running the actions/workflows build pipeline.
       # skip-test: true
+
+    secrets:
+      # Provide a PAT to enable auto-generation of the
+      # catch-all test workflow
+      token-push-workflows: CI_BUILD_TOKEN_WORKFLOWS

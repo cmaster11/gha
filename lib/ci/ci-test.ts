@@ -4,6 +4,8 @@
 
 import 'zx/globals';
 
+$.verbose = true;
+
 await $`bash .husky/pre-commit`;
 
 const exitCode =

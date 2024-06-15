@@ -9,25 +9,42 @@ on:
         default: false
       lint-command:
         description: The command used to run lint tests.
+        required: false
         default: npm run lint
         type: string
       test-command:
         description: The command used to run tests.
+        required: false
         default: npm run test
         type: string
+    secrets:
+      token-push-workflows:
+        description: |
+          A PAT that allows the build workflow to commit and push generated workflows. This token needs to have the `contents: write` and `workflows: write` permissions and needs to belong either to a user or to a GitHub app.
+        required: false
 concurrency:
   group: ${{ (github.event.action == 'closed' && github.event.pull_request.merged) && 'release' || format('pr-{0}', github.event.pull_request.number) }}
   cancel-in-progress: ${{ github.event.action != 'closed' }}
 jobs:
-  gen-test-catch-all-workflow:
-    name: Generate test workflows
+  gen-test-catch-all-workflow-check-secret:
+    name: Check if a secret has been provided for gen-test-catch-all-workflow
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     outputs:
+      has-secret: ${{ steps.check.outputs.has-secret }}
+    steps:
+      - id: check
+        run: echo "has-secret=$HAS_SECRET" >> "$GITHUB_OUTPUT"
+        env:
+          HAS_SECRET: ${{ secrets.token-push-workflows != '' }}
+  gen-test-catch-all-workflow:
+    name: Generate test workflows
+    needs:
+      - gen-test-catch-all-workflow-check-secret
+    if: github.event.action != 'closed' && needs.gen-test-catch-all-workflow-check-secret.outputs.has-secret == 'true'
+    runs-on: ubuntu-latest
+    outputs:
       had-changes: ${{ steps.gen-test-catch-all-workflow.outputs.had-changes }}
-    permissions:
-      contents: write
-      actions: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,7 +55,7 @@ jobs:
         uses: cmaster11/gha@action-ci-build/v0
         with:
           phase: gen-test-catch-all-workflow
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.token-push-workflows }}
           remapped: true
           head-ref: ${{ github.head_ref }}
   get-release-label:
