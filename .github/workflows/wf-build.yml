@@ -38,6 +38,7 @@ jobs:
           phase: gen-test-catch-all-workflow
           token: ${{ secrets.GITHUB_TOKEN }}
           remapped: true
+          head-ref: ${{ github.head_ref }}
   get-release-label:
     name: Get release label
     if: |

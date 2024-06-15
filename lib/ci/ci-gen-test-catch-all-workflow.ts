@@ -12,11 +12,13 @@ import { gitHubCreateOrUpdateComment } from '../github-comments.js';
 
 export async function ciGenTestCatchAllWorkflow({
   gh,
+  headRef,
   pullNumber,
   triggeringActor,
   remapped
 }: {
   gh: GithubCommonProps;
+  headRef: string;
   triggeringActor: string;
   pullNumber: number;
   remapped: boolean;
@@ -27,11 +29,13 @@ export async function ciGenTestCatchAllWorkflow({
     return;
   }
 
+  const branch = headRef.replace(/^refs\/heads\//, '');
+
   // If there are any changes, commit them and then trigger
   // the new build workflow
   await $`git add ${workflowsDir}/${ciTestCatchAllWorkflowName}`;
   await $`git commit -n -m "[cmaster11/gha] Auto-gen test-catch-all workflow"`;
-  await $`git push`;
+  await $`git push origin HEAD:${branch}`;
 
   const body = [
     '### [cmaster11/gha]',
