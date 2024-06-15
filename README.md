@@ -105,49 +105,52 @@ jobs:
 
 ```mermaid
 flowchart
-    commit["Commit on a PR-branch"]
+   commit["Commit on a PR-branch"]
 
-    subgraph ci-build.yml
-        test["Job: test\nRuns CI tests"]
-        get-release-label["Job: get-release-label\nFind the release label\nassociated with the PR"]
-        get-changed-dirs["Job: get-changed-dirs\nDetect changed actions"]
-        subgraph build-phase
-            build-actions["Job: build-actions\nBuilds all the changed actions"]
-            build-workflows["Job: build-workflows\nBuilds all the changed workflows"]
-        end
-        cleanup["Job: cleanup\nIf the PR has been closed,\ndeletes all dev branches\ncreated during the PR's\nlifetime"]
-        test --> build-phase
-        get-changed-dirs -- Generates the build matrix --> build-phase
-        get-release-label --> build-phase
-        post-build-test-actions["Job: post-build-test-actions\nTriggers testing jobs via\nworkflow_dispatch"]
-        post-build-test-workflows["Job: post-build-test-workflows\nTriggers testing jobs via\nworkflow_dispatch"]
-        build-actions -- " Releases the changed\nactions on their branches\n(dev or versioned) " --> post-build-test-actions
-        build-workflows -- " Releases the changed\nworkflows on their branches\n(dev or versioned) " --> post-build-test-workflows
+   subgraph ci-build.yml
+      get-release-label["Job: get-release-label\nFind the release label\nassociated with the PR"]
+      get-changed-dirs["Job: get-changed-dirs\nDetect changed actions\nand workflows"]
+      test["Job: test\nRuns CI tests"]
+      gen-test-catch-all-workflow["Job: gen-test-catch-all-workflow\nAutomatically generates\na workflow to run\nall test workflows"]
+      subgraph build-phase
+         build-actions["Job: build-actions\nBuilds all the changed actions"]
+         build-workflows["Job: build-workflows\nBuilds all the changed workflows"]
+      end
+      cleanup["Job: cleanup\nIf the PR has been closed,\ndeletes all dev branches\ncreated during the PR's\nlifetime"]
+      gen-test-catch-all-workflow --> build-phase
+      test --> build-phase
+      get-changed-dirs -- Generates the build matrix --> build-phase
+      get-release-label --> build-phase
+      post-build-test-actions["Job: post-build-test-actions\nTriggers testing jobs via\nworkflow_dispatch"]
+      post-build-test-workflows["Job: post-build-test-workflows\nTriggers testing jobs via\nworkflow_dispatch"]
+      build-actions -- " Releases the changed\nactions on their branches\n(dev or versioned) " --> post-build-test-actions
+      build-workflows -- " Releases the changed\nworkflows on their branches\n(dev or versioned) " --> post-build-test-workflows
+      test <-. " Tests will fail if\nsome files still need\nto be generated " .-> gen-test-catch-all-workflow
+   end
 
-    end
+   gen-test-catch-all-workflow -- " Creates a new commit\ncontaining the generated\ncatch-all test workflow\nand re-trigger the\nwhole pipeline when\nfiles have changes " --> github-new-commit["GitHub"]
+   commit --> ci-build.yml
 
-    commit --> ci-build.yml
+   subgraph ci-post-build-after-test.yml
+      finalize-check["Job: finalize-check\nNotifies GitHub about the result of the test"]
+   end
 
-    subgraph ci-post-build-after-test.yml
-        finalize-check["Job: finalize-check\nNotifies GitHub about the result of the test"]
-    end
+   subgraph test-action-example.yml
+      test-action-example["Job: test\nTests the action"]
+   end
 
-    subgraph test-action-example.yml
-        test-action-example["Job: test\nTests the action"]
-    end
+   subgraph test-action-another.yml
+      test-action-another["Job: test\nTests the action"]
+   end
 
-    subgraph test-action-another.yml
-        test-action-another["Job: test\nTests the action"]
-    end
+   subgraph test-wf-test.yml
+      test-wf-test["Job: test\nTests the workflow"]
+   end
 
-    subgraph test-wf-test.yml
-        test-wf-test["Job: test\nTests the workflow"]
-    end
-
-    test-action-example --> ci-post-build-after-test.yml
-    test-action-another --> ci-post-build-after-test.yml
-    test-wf-test --> ci-post-build-after-test.yml
-    post-build-test-actions --> test-action-example.yml
-    post-build-test-actions --> test-action-another.yml
-    post-build-test-workflows --> test-wf-test.yml
+   test-action-example --> ci-post-build-after-test.yml
+   test-action-another --> ci-post-build-after-test.yml
+   test-wf-test --> ci-post-build-after-test.yml
+   post-build-test-actions --> test-action-example.yml
+   post-build-test-actions --> test-action-another.yml
+   post-build-test-workflows --> test-wf-test.yml
 ```
