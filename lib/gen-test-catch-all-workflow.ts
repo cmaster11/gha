@@ -123,7 +123,8 @@ export async function genTestCatchAllWorkflow(
 
   const workflow = {
     name: 'Run test workflows',
-    'run-name': 'Run test workflow for ${{ inputs.workflow-name }}',
+    'run-name':
+      "${{ inputs.workflow-name != '' && format('Run test workflow for {0}', inputs.workflow-name) || '' }}",
     on: {
       workflow_dispatch: {
         inputs: {
