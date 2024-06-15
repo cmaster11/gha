@@ -49,13 +49,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
+          token: ${{ secrets.token-push-workflows }}
       - uses: cmaster11/gha@action-git-init-userinfo/v0
       - name: Generate test workflows
         id: gen-test-catch-all-workflow
         uses: cmaster11/gha@action-ci-build/v0
         with:
           phase: gen-test-catch-all-workflow
-          token: ${{ secrets.token-push-workflows }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           remapped: true
           head-ref: ${{ github.head_ref }}
   get-release-label:
