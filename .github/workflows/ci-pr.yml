@@ -39,4 +39,4 @@ jobs:
     secrets:
       # Provide a PAT to enable auto-generation of the
       # catch-all test workflow
-      token-push-workflows: CI_BUILD_TOKEN_WORKFLOWS
+      token-push-workflows: ${{ secrets.CI_BUILD_TOKEN_WORKFLOWS }}
