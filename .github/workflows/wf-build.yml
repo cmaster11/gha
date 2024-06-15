@@ -30,6 +30,8 @@ jobs:
       actions: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       - uses: cmaster11/gha@action-git-init-userinfo/v0
       - name: Generate test workflows
         id: gen-test-catch-all-workflow
