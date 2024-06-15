@@ -100,6 +100,13 @@ readmeContent =
   '\n<!-- GENERATE_WORKFLOWS END -->' +
   readmeContent.split('<!-- GENERATE_WORKFLOWS END -->')[1];
 
+readmeContent =
+  readmeContent.split('<!-- GENERATE_ARCHITECTURE BEGIN -->')[0] +
+  '<!-- GENERATE_ARCHITECTURE BEGIN -->\n```mermaid\n' +
+  (await fs.readFile(path.join(rootDir, 'ARCHITECTURE.mermaid'), 'utf-8')) +
+  '\n```\n<!-- GENERATE_ARCHITECTURE END -->' +
+  readmeContent.split('<!-- GENERATE_ARCHITECTURE END -->')[1];
+
 readmeContent = await prettier.format(readmeContent, { parser: 'markdown' });
 
 await fs.writeFile(readmePath, readmeContent);
