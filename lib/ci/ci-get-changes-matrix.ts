@@ -186,16 +186,16 @@ async function getChangedWorkflows({
     ...(
       await getChangedFiles({
         baseSHA,
-        regex: /^\.github\/workflows\/(test-)?workflow-[^.]+\.yml$/,
+        regex: /^\.github\/workflows\/(test-)?(?:workflow|wf)-[^.]+\.yml$/,
         ignoreDeletions: true
       })
     ).map((d) => {
       const newValue = d.replace(
-        /^\.github\/workflows\/(?:test-)?(workflow-.+)\.yml$/,
+        /^\.github\/workflows\/(?:test-)?((?:workflow|wf)-.+)\.yml$/,
         '$1'
       );
       console.log(
-        `Found changed workflow ${newValue} because of changed workflow${/\/test-workflow/.test(d) ? ' test' : ''} file`
+        `Found changed workflow ${newValue} because of changed workflow${/\/test-/.test(d) ? ' test' : ''} file`
       );
       return newValue;
     })

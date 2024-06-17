@@ -1,0 +1,49 @@
+name: CI - Build on PR
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
+      # Triggers the workflow when labels change in the PR
+      - labeled
+
+jobs:
+  build:
+    uses: ./.github/workflows/ci-build.yml
+    permissions:
+      # Required to create new version branches
+      contents: write
+      # Required to publish comments on the PR
+      pull-requests: write
+      # Required to trigger test workflows via workflow_dispatch
+      actions: write
+      # Required to create commit statuses to mark the
+      # execution of test workflows
+      statuses: write
+
+    secrets:
+      # You need to provide a PAT to enable auto-generation of the
+      # catch-all test workflow. This can be a PAT of a GitHub app,
+      # generated dynamically for every run in a previous job, or a user PAT.
+      #
+      # This token needs to have the `contents: write` and `workflows: write` permissions.
+      #
+      # If using a user PAT, I recommend creating a fine-grained token scoped only
+      # to your GHA repository with only the contents/workflows `write` permissions.
+      token-push-workflows: ${{ secrets.CI_BUILD_TOKEN_WORKFLOWS }}
+
+    with:
+      # You can customize various commands
+      test-command: npm run test:ci
+
+      # If you want to disable linting
+      # lint-command: echo NOOP
+
+      # Or you can completely disable testing, in case you want to run your
+      # own test suites before running the actions/workflows build pipeline.
+      # skip-test: true

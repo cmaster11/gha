@@ -1,8 +1,8 @@
-name: Test workflow-test
+name: Test wf-test
 
 on:
   workflow_call: { inputs: { test-ctx: { type: string } } }
 
 jobs:
   test:
-    uses: ./.github/workflows/workflow-test.yml
+    uses: ./.github/workflows/wf-test.yml

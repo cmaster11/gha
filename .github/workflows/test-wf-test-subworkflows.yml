@@ -1,0 +1,8 @@
+name: Test wf-test-subworkflows
+
+on:
+  workflow_call: { inputs: { test-ctx: { type: string } } }
+
+jobs:
+  test:
+    uses: ./.github/workflows/wf-test-subworkflows.yml

@@ -1,22 +1,14 @@
 name: Test action-ci-build
 on:
-  workflow_dispatch: { inputs: { ctx: {} } }
-  # Register the workflow so that it can be triggered
-  # via workflow_dispatch event
-  pull_request:
-    branches:
-      - main
-    paths:
-      - .github/workflows/test-action-ci-build.yml
+  workflow_call: { inputs: { test-ctx: { type: string } } }
 
 jobs:
   test:
-    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: '${{ fromJSON(inputs.ctx).ref }}'
+          ref: '${{ fromJSON(inputs.test-ctx).ref }}'
 
       # Create a fake action
       - run: |
@@ -44,7 +36,7 @@ jobs:
         with:
           phase: test-action-ci-build
           token: ${{ secrets.GITHUB_TOKEN }}
-          pull-number: ${{ fromJSON(inputs.ctx).pullNumber }}
+          pull-number: ${{ fromJSON(inputs.test-ctx).pullNumber }}
 
       # Dump the outputs
       - run: |
@@ -61,15 +53,3 @@ jobs:
           echo "$JSON" | jq '.'
         env:
           JSON: ${{ toJSON(steps.test-action) }}
-
-  # Notify GitHub about the result of the test
-  ci-after-test:
-    needs:
-      - test
-    if: always() && github.event_name == 'workflow_dispatch'
-    uses: ./.github/workflows/ci-post-build-after-test.yml
-    permissions:
-      statuses: write
-    with:
-      ctx: ${{ inputs.ctx }}
-      needs-json: ${{ toJSON(needs) }}

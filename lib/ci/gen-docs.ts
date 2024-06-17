@@ -7,6 +7,7 @@ import path from 'node:path';
 import { actionsDir, rootDir, workflowsDir } from '../constants.js';
 import { parse } from 'yaml';
 import * as prettier from 'prettier';
+import { getGitHubWorkflows } from '../github-workflows.js';
 
 $.verbose = true;
 
@@ -52,9 +53,7 @@ for (const action of allActions) {
 // List all workflows
 const workflowLinks: string[] = [];
 
-const allWorkflows = (await fs.readdir(workflowsDir)).filter((f) =>
-  /^workflow-[^.]+\.yml$/.test(f)
-);
+const allWorkflows = await getGitHubWorkflows(true);
 for (const workflow of allWorkflows) {
   let desc: string;
   const workflowName = workflow.replace(/\.yml$/, '');
@@ -100,6 +99,13 @@ readmeContent =
   workflowLinks.join('\n') +
   '\n<!-- GENERATE_WORKFLOWS END -->' +
   readmeContent.split('<!-- GENERATE_WORKFLOWS END -->')[1];
+
+readmeContent =
+  readmeContent.split('<!-- GENERATE_ARCHITECTURE BEGIN -->')[0] +
+  '<!-- GENERATE_ARCHITECTURE BEGIN -->\n```mermaid\n' +
+  (await fs.readFile(path.join(rootDir, 'ARCHITECTURE.mermaid'), 'utf-8')) +
+  '\n```\n<!-- GENERATE_ARCHITECTURE END -->' +
+  readmeContent.split('<!-- GENERATE_ARCHITECTURE END -->')[1];
 
 readmeContent = await prettier.format(readmeContent, { parser: 'markdown' });
 

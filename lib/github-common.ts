@@ -5,6 +5,7 @@
 import { Octokit } from '@octokit/rest';
 
 export interface GithubCommonProps {
+  token: string;
   octokit: Octokit;
   repoProps: {
     owner: string;
@@ -26,6 +27,7 @@ export function getOctokitWithOwnerAndRepo(
     auth: token
   });
   const gh: GithubCommonProps = {
+    token,
     octokit,
     repoProps: {
       owner,

@@ -5,7 +5,7 @@ on:
 
 jobs:
   run-subworkflow:
-    uses: ./.github/workflows/workflow-test-subworkflows.another.yml
+    uses: ./.github/workflows/wf-test-subworkflows.another.yml
 
   echo:
     runs-on: ubuntu-latest
