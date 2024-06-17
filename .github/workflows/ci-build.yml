@@ -308,7 +308,8 @@ jobs:
       - get-changed-elements
       # This needs to run after all actions have been built, in case we're testing
       # workflows that use any of the modified actions
-      - build-actions
+      # TODO: Enable once action->wf dependencies are a thing
+      #      - build-actions
       - build-workflows
       - get-release-label
     runs-on: ubuntu-latest

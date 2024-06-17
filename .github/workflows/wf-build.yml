@@ -233,7 +233,6 @@ jobs:
     needs:
       - gen-test-catch-all-workflow
       - get-changed-elements
-      - build-actions
       - build-workflows
       - get-release-label
     runs-on: ubuntu-latest
