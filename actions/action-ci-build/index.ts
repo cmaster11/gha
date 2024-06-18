@@ -71,10 +71,15 @@ async function main() {
       return ciGetReleaseLabel({ gh, pullNumber });
     }
     case 'get-changed-elements': {
+      const changesPathsJs = getInput('changes-paths-js')
+        .split('\n')
+        .map((p) => p.trim())
+        .filter((p) => p != '');
       return ciGetChangesMatrix({
         gh,
         pullNumber,
-        baseSHA: context.payload.pull_request!.base.sha
+        baseSHA: context.payload.pull_request!.base.sha,
+        changesPathsJs
       });
     }
     case 'build-actions': {

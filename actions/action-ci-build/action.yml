@@ -10,6 +10,7 @@ inputs:
   workflow-name: {}
   release: {}
   release-label: {}
+  changes-paths-js: {}
 
   # gen-test-catch-all-workflow
   remapped: {}

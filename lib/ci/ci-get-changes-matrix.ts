@@ -17,15 +17,18 @@ import type { GithubCommonProps } from '../github-common.js';
 import { gitHubCreateOrUpdateComment } from '../github-comments.js';
 import { getGitHubWorkflowsUsingAction } from '../github-workflows.js';
 import { getPRSuffix } from '../version.js';
+import micromatch from 'micromatch';
 
 export async function ciGetChangesMatrix({
   gh,
   pullNumber,
-  baseSHA
+  baseSHA,
+  changesPathsJs
 }: {
   gh: GithubCommonProps;
   pullNumber: number;
   baseSHA: string;
+  changesPathsJs: string[];
 }) {
   // Fetch all remote branches
   await $`git fetch origin`;
@@ -34,7 +37,8 @@ export async function ciGetChangesMatrix({
   Find out all changes actions and then any workflows
    */
   const changedActions = await getChangedActions({
-    baseSHA
+    baseSHA,
+    changesPathsJs
   });
 
   // Find all the latest version branches for each changed action
@@ -102,9 +106,11 @@ export async function ciGetChangesMatrix({
 }
 
 async function getChangedActions({
-  baseSHA
+  baseSHA,
+  changesPathsJs
 }: {
   baseSHA: string;
+  changesPathsJs: string[];
 }): Promise<string[]> {
   const changedActions = new Set<string>([
     ...(
@@ -140,29 +146,31 @@ async function getChangedActions({
       })
   ]);
 
-  // If any JS-related files change, rebuild all JS actions
-  const diffLines = await gitDiffLines(baseSHA);
-  if (
-    diffLines.find(([, p]) =>
-      [
-        'package.json',
-        'package-lock.json',
-        /^lib\//,
-        'jest.config.mjs',
-        'tsconfig.json'
-      ].some((m) => (m instanceof RegExp ? m.test(p) : m == p))
-    ) != null
-  ) {
-    const allActions = await fs.readdir(actionsDir);
-    for (const actionName of allActions) {
-      const actionDir = path.join(actionsDir, actionName);
-      for await (const file of klaw(actionDir, {
-        filter: (f) => /\.m?[tj]s$/.test(f)
-      })) {
-        if (file.stats.isDirectory()) continue;
-        console.log(`Found changed JS file ${file.path}`);
-        changedActions.add(actionName);
-        break;
+  if (changesPathsJs.length > 0) {
+    // If any JS-related files change, rebuild all JS actions
+    const diffLines = await gitDiffLines(baseSHA);
+
+    if (
+      micromatch(
+        diffLines.map(([, p]) => p),
+        changesPathsJs
+      ).length > 0
+    ) {
+      const allActions = await fs.readdir(actionsDir);
+      for (const actionName of allActions) {
+        const actionDir = path.join(actionsDir, actionName);
+        for await (const file of klaw(actionDir, {
+          filter: (f) => /\.m?[tj]s$/.test(f)
+        })) {
+          if (file.stats.isDirectory()) {
+            continue;
+          }
+          console.log(
+            `Found changed JS file because of global JS changes ${file.path}`
+          );
+          changedActions.add(actionName);
+          break;
+        }
       }
     }
   }
