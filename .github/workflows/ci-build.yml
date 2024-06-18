@@ -24,7 +24,7 @@ on:
           when you don't want to expose a token with `workflows` permission to dependabot and 
           other collaborators.
         type: boolean
-        default: ${{ github.actor != 'dependabot[bot]' }}
+        default: ${{ github.actor == 'dependabot[bot]' }}
     secrets:
       token-push-workflows:
         description: >
