@@ -149,13 +149,16 @@ async function getChangedActions({
   if (changesPathsJs.length > 0) {
     // If any JS-related files change, rebuild all JS actions
     const diffLines = await gitDiffLines(baseSHA);
+    const jsMatches = micromatch(
+      diffLines.map(([, p]) => p),
+      changesPathsJs
+    );
 
-    if (
-      micromatch(
-        diffLines.map(([, p]) => p),
-        changesPathsJs
-      ).length > 0
-    ) {
+    if (jsMatches.length > 0) {
+      console.log(
+        `Found global JS changes: ${inspect(jsMatches, { depth: null })}`
+      );
+
       const allActions = await fs.readdir(actionsDir);
       for (const actionName of allActions) {
         const actionDir = path.join(actionsDir, actionName);
@@ -166,7 +169,7 @@ async function getChangedActions({
             continue;
           }
           console.log(
-            `Found changed JS file because of global JS changes ${file.path}`
+            `Found changed JS file ${file.path} because of global JS changes`
           );
           changedActions.add(actionName);
           break;
