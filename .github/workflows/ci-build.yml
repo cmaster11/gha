@@ -8,16 +8,19 @@ on:
           to run before whole actions/workflow build pipeline.
         type: boolean
         default: false
+
       lint-command:
         description: The command used to run lint tests.
         required: false
         default: npm run lint
         type: string
+
       test-command:
         description: The command used to run tests.
         required: false
         default: npm run test
         type: string
+
       skip-gen-test-catch-all-workflow:
         description: >
           If true, skip the `gen-test-catch-all-workflow` job. This can be useful for example
@@ -170,6 +173,7 @@ jobs:
       - get-release-label
     runs-on: ubuntu-latest
     if: >
+      !failure() && !cancelled() &&
       (
         needs.gen-test-catch-all-workflow.result == 'skipped' ||
         needs.gen-test-catch-all-workflow.outputs.had-changes != 'true'
@@ -222,6 +226,7 @@ jobs:
       - get-release-label
     runs-on: ubuntu-latest
     if: >
+      !failure() && !cancelled() &&
       (
         needs.gen-test-catch-all-workflow.result == 'skipped' ||
         needs.gen-test-catch-all-workflow.outputs.had-changes != 'true'
@@ -275,6 +280,7 @@ jobs:
       - get-release-label
     runs-on: ubuntu-latest
     if: >
+      !failure() && !cancelled() &&
       (
         needs.gen-test-catch-all-workflow.result == 'skipped' ||
         needs.gen-test-catch-all-workflow.outputs.had-changes != 'true'
@@ -333,6 +339,7 @@ jobs:
       - get-release-label
     runs-on: ubuntu-latest
     if: >
+      !failure() && !cancelled() &&
       (
         needs.gen-test-catch-all-workflow.result == 'skipped' ||
         needs.gen-test-catch-all-workflow.outputs.had-changes != 'true'

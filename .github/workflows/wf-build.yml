@@ -131,7 +131,7 @@ jobs:
       - get-release-label
     runs-on: ubuntu-latest
     if: |
-      (
+      !failure() && !cancelled() && (
         needs.gen-test-catch-all-workflow.result == 'skipped' ||
         needs.gen-test-catch-all-workflow.outputs.had-changes != 'true'
       ) && (
@@ -170,7 +170,7 @@ jobs:
       - get-release-label
     runs-on: ubuntu-latest
     if: |
-      (
+      !failure() && !cancelled() && (
         needs.gen-test-catch-all-workflow.result == 'skipped' ||
         needs.gen-test-catch-all-workflow.outputs.had-changes != 'true'
       ) && (
@@ -209,7 +209,7 @@ jobs:
       - get-release-label
     runs-on: ubuntu-latest
     if: |
-      (
+      !failure() && !cancelled() && (
         needs.gen-test-catch-all-workflow.result == 'skipped' ||
         needs.gen-test-catch-all-workflow.outputs.had-changes != 'true'
       ) && (
@@ -251,7 +251,7 @@ jobs:
       - get-release-label
     runs-on: ubuntu-latest
     if: |
-      (
+      !failure() && !cancelled() && (
         needs.gen-test-catch-all-workflow.result == 'skipped' ||
         needs.gen-test-catch-all-workflow.outputs.had-changes != 'true'
       ) && (
