@@ -4,13 +4,12 @@
 
 import 'zx/globals';
 import { buildBinaries } from '../build-binaries.js';
-import { copyActionFiles, fixActionYml } from '../copy-action-files.js';
+import { copyActionFiles } from '../copy-action-files.js';
 import type { GithubCommonProps } from '../github-common.js';
 import type { ReleaseLabel } from '../version.js';
-import path from 'node:path';
-import { actionsDir } from '../constants.js';
 import { isScriptInvokedDirectly } from '../esm.js';
 import { releaseVersionBranch } from '../release-version-branch.js';
+import { setOutput } from '@actions/core';
 
 export async function ciBuildActions(
   opts:
@@ -29,11 +28,11 @@ export async function ciBuildActions(
   const { actionName } = opts;
 
   const mappedBinaries = await buildBinaries(actionName);
-  const contentsDir = await copyActionFiles(actionName, mappedBinaries);
+  const outDir = await copyActionFiles(actionName, mappedBinaries);
+
+  setOutput('out-dir', outDir);
 
   if ('inline' in opts) {
-    console.log('Fixing action.yml inline');
-    await fixActionYml(path.join(actionsDir, actionName), mappedBinaries);
     return;
   }
 
@@ -43,7 +42,7 @@ export async function ciBuildActions(
     release,
     actionName,
     pullNumber,
-    contentsDir,
+    outDir,
     releaseLabel
   );
 }

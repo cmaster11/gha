@@ -58,10 +58,10 @@ jobs:
       - shell: bash
         run: npm ci
 
-      - run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build
+      - { id: ci-build-inline, run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build }
       - name: Generate test workflows
         id: gen-test-catch-all-workflow
-        uses: ./actions/action-ci-build
+        uses: ${{ steps.ci-build-inline.outputs.out-dir }}
         with:
           phase: gen-test-catch-all-workflow
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -89,10 +89,10 @@ jobs:
       - shell: bash
         run: npm ci
 
-      - run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build
+      - { id: ci-build-inline, run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build }
       - name: Get release label
         id: get-release-label
-        uses: ./actions/action-ci-build
+        uses: ${{ steps.ci-build-inline.outputs.out-dir }}
         with:
           phase: get-release-label
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -153,10 +153,10 @@ jobs:
       - shell: bash
         run: npm ci
 
-      - run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build
+      - { id: ci-build-inline, run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build }
       - name: Get changes
         id: get-changed-elements
-        uses: ./actions/action-ci-build
+        uses: ${{ steps.ci-build-inline.outputs.out-dir }}
         with:
           phase: get-changed-elements
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -190,10 +190,10 @@ jobs:
       - shell: bash
         run: npm ci
 
-      - run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build
+      - { id: ci-build-inline, run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build }
       - name: Build
         id: build
-        uses: ./actions/action-ci-build
+        uses: ${{ steps.ci-build-inline.outputs.out-dir }}
         with:
           phase: build-actions
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -238,10 +238,10 @@ jobs:
       - shell: bash
         run: npm ci
 
-      - run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build
+      - { id: ci-build-inline, run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build }
       - name: Build
         id: build
-        uses: ./actions/action-ci-build
+        uses: ${{ steps.ci-build-inline.outputs.out-dir }}
         with:
           phase: build-workflows
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -294,10 +294,10 @@ jobs:
       - shell: bash
         run: npm ci
 
-      - run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build
+      - { id: ci-build-inline, run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build }
       - name: Post build test actions
         id: build
-        uses: ./actions/action-ci-build
+        uses: ${{ steps.ci-build-inline.outputs.out-dir }}
         with:
           phase: post-build-test-actions
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -348,10 +348,10 @@ jobs:
       - shell: bash
         run: npm ci
 
-      - run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build
+      - { id: ci-build-inline, run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build }
       - name: Post build test workflows
         id: build
-        uses: ./actions/action-ci-build
+        uses: ${{ steps.ci-build-inline.outputs.out-dir }}
         with:
           phase: post-build-test-workflows
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -380,9 +380,9 @@ jobs:
       - shell: bash
         run: npm ci
 
-      - run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build
+      - { id: ci-build-inline, run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build }
       - name: Cleanup
-        uses: ./actions/action-ci-build
+        uses: ${{ steps.ci-build-inline.outputs.out-dir }}
         with:
           phase: cleanup
           token: ${{ secrets.GITHUB_TOKEN }}
