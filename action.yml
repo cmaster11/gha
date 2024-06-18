@@ -9,10 +9,14 @@ inputs:
   workflow-name: {}
   release: {}
   release-label: {}
+  remapped: {}
   version-branch: {}
   head-ref: {}
   head-sha: {}
+  needs-json: {}
+  test-ctx: {}
 outputs:
+  had-changes: {}
   release-label: {}
   continue-release: {}
   matrix-actions: {}
