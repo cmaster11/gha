@@ -7,36 +7,19 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
+          path: checkout/action-ci-build
           ref: '${{ fromJSON(inputs.test-ctx).ref }}'
-
-      # Create a fake action
-      - run: |
-          mkdir -p actions/test-action
-          cd actions/test-action
-
-          npm init -y
-          npm install --save-dev @actions/github @actions/core
-          cat << EOF > action.yml
-          name: test-action
-          runs:
-            using: node20
-            main: index.ts
-          EOF
-          cat << EOF > index.ts
-          import { setOutput } from '@actions/core';
-          import { context } from '@actions/github';
-          console.log('Context', JSON.stringify(context));
-          setOutput('hey', 'Yeah!');
-          EOF
 
       # Build the action
       - id: action
-        uses: ./
+        uses: ./checkout/action-ci-build
         with:
           phase: test-action-ci-build
           token: ${{ secrets.GITHUB_TOKEN }}
           pull-number: ${{ fromJSON(inputs.test-ctx).pullNumber }}
+          working-directory: __testing__/action-ci-build
 
       # Dump the outputs
       - run: |
@@ -46,7 +29,7 @@ jobs:
 
       # Run the test action
       - id: test-action
-        uses: ./actions/test-action
+        uses: ./__testing__/action-ci-build/actions/test-action
 
       # Dump the outputs
       - run: |

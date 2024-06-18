@@ -1,0 +1,5 @@
+name: test-action
+description: Test action for test-action-ci-build.yml
+runs:
+  using: node20
+  main: index.ts

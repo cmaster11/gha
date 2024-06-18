@@ -23,6 +23,8 @@ import { ciGenTestCatchAllWorkflow } from '../../lib/ci/ci-gen-test-catch-all-wo
 async function main() {
   const phase = getInput('phase', { required: true });
   const token = getInput('token', { required: true });
+  const workingDirectory = getInput('working-directory');
+  if (workingDirectory != '') cd(workingDirectory);
 
   console.log(
     `Running ci-build: ${inspect({
