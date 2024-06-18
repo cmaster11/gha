@@ -31,9 +31,11 @@ on:
           * Negation (`'!a/*.js'`, `'*!(b).js'`)
           * extglobs (`+(x|y)`, `!(a|b)`)
           * POSIX character classes (`[[:alpha:][:digit:]]`)
-          * brace expansion (`foo/{1..5}.md`, `bar/{a,b,c}.js`)
-          * regex character classes (`foo-[1-5].js`)
-          * regex logical "or" (`foo/(abc|xyz).js`)
+          * Brace expansion (`foo/{1..5}.md`, `bar/{a,b,c}.js`)
+          * Regex character classes (`foo-[1-5].js`)
+          * Regex logical "or" (`foo/(abc|xyz).js`)
+          
+          Lines beginning with `#` will be treated as comments and ignored
           
           You can see more examples at: https://github.com/micromatch/micromatch#matching-features
         type: string
@@ -41,9 +43,9 @@ on:
         default: |
           package.json
           package-lock.json
-          lib/**
-          jest.config.mjs
           tsconfig.json
+          {src,lib}/**/*.m?[tj]s
+          jest.config.(js|ts|mjs|cjs|json)
 
       skip-gen-test-catch-all-workflow:
         description: >

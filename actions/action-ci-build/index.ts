@@ -74,7 +74,7 @@ async function main() {
       const changesPathsJs = getInput('changes-paths-js')
         .split('\n')
         .map((p) => p.trim())
-        .filter((p) => p != '');
+        .filter((p) => p != '' && !p.startsWith('#'));
       return ciGetChangesMatrix({
         gh,
         pullNumber,
