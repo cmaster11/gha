@@ -31,7 +31,7 @@ jobs:
 
       # Run the test action
       - id: test-action
-        uses: ./__testing__/action-ci-build/tmp-inline/action-ci-build/test-action
+        uses: ./__testing__/action-ci-build/tmp-inline/test-action
 
       # Dump the outputs
       - run: |
