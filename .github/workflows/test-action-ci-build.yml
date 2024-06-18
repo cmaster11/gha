@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+      - run: npm ci
+
       - uses: actions/checkout@v4
         with:
           path: checkout/action-ci-build
