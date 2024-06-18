@@ -24,7 +24,7 @@
     "gen:workflows": "npx tsx lib/ci/gen-workflows.ts",
     "gen:test-catch-all-workflow": "npx tsx lib/ci/gen-test-catch-all-workflow.ts",
     "gen": "npm run gen:workflows && npm run gen:test-catch-all-workflow && npm run gen:docs && actionlint",
-    "prepare": "husky && npx replace-in-file '#!/usr/bin/env sh' '#!/usr/bin/env bash' '.husky/_/h' --quiet && npx replace-in-file 'sh -e' 'bash -e' '.husky/_/h' --quiet"
+    "prepare": "husky"
   },
   "devDependencies": {
     "@actions/artifact": "^2.1.7",
