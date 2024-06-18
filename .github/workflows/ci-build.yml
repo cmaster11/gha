@@ -170,7 +170,11 @@ jobs:
       - get-release-label
     runs-on: ubuntu-latest
     if: >
-      needs.gen-test-catch-all-workflow.outputs.had-changes != 'true' && (
+      (
+        needs.gen-test-catch-all-workflow.result == 'skipped' ||
+        needs.gen-test-catch-all-workflow.outputs.had-changes != 'true'
+      )
+      && (
         needs.get-release-label.outputs.continue-release == 'true' && 
         needs.get-changed-elements.outputs.matrix-actions-empty != 'true'
       )
@@ -218,7 +222,11 @@ jobs:
       - get-release-label
     runs-on: ubuntu-latest
     if: >
-      needs.gen-test-catch-all-workflow.outputs.had-changes != 'true' && (
+      (
+        needs.gen-test-catch-all-workflow.result == 'skipped' ||
+        needs.gen-test-catch-all-workflow.outputs.had-changes != 'true'
+      )
+      && (
         needs.get-release-label.outputs.continue-release == 'true' && 
         needs.get-changed-elements.outputs.matrix-workflows-empty != 'true'
       )
@@ -267,7 +275,11 @@ jobs:
       - get-release-label
     runs-on: ubuntu-latest
     if: >
-      needs.gen-test-catch-all-workflow.outputs.had-changes != 'true' && (
+      (
+        needs.gen-test-catch-all-workflow.result == 'skipped' ||
+        needs.gen-test-catch-all-workflow.outputs.had-changes != 'true'
+      )
+      && (
         needs.get-release-label.outputs.continue-release == 'true' && 
         needs.get-changed-elements.outputs.matrix-actions-empty != 'true'
       )
@@ -321,7 +333,11 @@ jobs:
       - get-release-label
     runs-on: ubuntu-latest
     if: >
-      needs.gen-test-catch-all-workflow.outputs.had-changes != 'true' && (
+      (
+        needs.gen-test-catch-all-workflow.result == 'skipped' ||
+        needs.gen-test-catch-all-workflow.outputs.had-changes != 'true'
+      )
+      && (
         needs.get-release-label.outputs.continue-release == 'true' && 
         needs.get-changed-elements.outputs.matrix-workflows-empty != 'true'
       )
