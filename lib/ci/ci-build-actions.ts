@@ -9,7 +9,8 @@ import type { GithubCommonProps } from '../github-common.js';
 import type { ReleaseLabel } from '../version.js';
 import { isScriptInvokedDirectly } from '../esm.js';
 import { releaseVersionBranch } from '../release-version-branch.js';
-import { setOutput } from '@actions/core';
+import path from 'node:path';
+import { ghaCIBuildInlineTmpDir } from '../constants.js';
 
 export async function ciBuildActions(
   opts:
@@ -28,9 +29,11 @@ export async function ciBuildActions(
   const { actionName } = opts;
 
   const mappedBinaries = await buildBinaries(actionName);
-  const outDir = await copyActionFiles(actionName, mappedBinaries);
-
-  setOutput('out-dir', outDir);
+  const outDir = await copyActionFiles(
+    actionName,
+    mappedBinaries,
+    'inline' in opts ? path.join(ghaCIBuildInlineTmpDir, actionName) : undefined
+  );
 
   if ('inline' in opts) {
     return;

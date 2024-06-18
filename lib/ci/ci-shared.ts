@@ -8,7 +8,7 @@ export const ciTestCatchAllWorkflowName = 'ci-test-catch-all.yml';
 
 export const actionsRemapping = {
   './actions/action-git-init-userinfo': 'action-git-init-userinfo/v0',
-  '${{ steps.ci-build-inline.outputs.out-dir }}': 'action-ci-build/v0'
+  './tmp-inline/action-ci-build': 'action-ci-build/v0'
 };
 
 export interface TestPayload {

@@ -104,14 +104,13 @@ export async function genTestCatchAllWorkflow(
               run: 'npm ci'
             },
             {
-              id: 'ci-build-inline',
               run: 'npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build'
             }
           ]),
       {
         uses: remapped
-          ? actionsRemapping['${{ steps.ci-build-inline.outputs.out-dir }}']
-          : '${{ steps.ci-build-inline.outputs.out-dir }}',
+          ? actionsRemapping['./tmp-inline/action-ci-build']
+          : './tmp-inline/action-ci-build',
         with: {
           phase: 'post-test',
           token: '${{ secrets.GITHUB_TOKEN }}',

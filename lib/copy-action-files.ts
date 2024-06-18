@@ -47,9 +47,11 @@ export async function fixActionYml(
 
 export async function copyActionFiles(
   actionName: string,
-  mappedBinaries: Record<string, string>
+  mappedBinaries: Record<string, string>,
+  tmpDir?: string
 ) {
-  const tmpDir = tmpdir();
+  tmpDir ??= tmpdir();
+  await fs.mkdirp(tmpDir);
   console.log(`Cloning action ${actionName} files to ${tmpDir}`);
 
   const actionDir = path.join(actionsDir, actionName);
