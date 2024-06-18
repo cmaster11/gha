@@ -99,7 +99,7 @@ jobs:
       - shell: bash
         run: npm ci
       - run: npx tsx ./lib/ci/ci-build-actions.ts --inline action-ci-build
-      - uses: ./actions/action-ci-build
+      - uses: ./tmp-inline/action-ci-build
         with:
           phase: post-test
           token: ${{ secrets.GITHUB_TOKEN }}

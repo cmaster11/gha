@@ -17,18 +17,23 @@ on:
         required: false
         default: npm run test
         type: string
+      skip-gen-test-catch-all-workflow:
+        description: |
+          If true, skip the `gen-test-catch-all-workflow` job. This can be useful for example when you don't want to expose a token with `workflows` permission to dependabot and  other collaborators.
+        type: boolean
+        default: ${{ github.actor == 'dependabot[bot]' }}
     secrets:
       token-push-workflows:
         description: |
           A PAT that allows the build workflow to commit and push generated workflows. This token needs to have the `contents: write` and `workflows: write` permissions and needs to belong either to a user or to a GitHub app.
-        required: true
+        required: false
 concurrency:
   group: ${{ (github.event.action == 'closed' && github.event.pull_request.merged) && 'release' || format('pr-{0}', github.event.pull_request.number) }}
   cancel-in-progress: ${{ github.event.action != 'closed' }}
 jobs:
   gen-test-catch-all-workflow:
     name: Generate test workflows
-    if: github.event.action != 'closed'
+    if: github.event.action != 'closed' && inputs.skip-gen-test-catch-all-workflow != true
     runs-on: ubuntu-latest
     outputs:
       had-changes: ${{ steps.gen-test-catch-all-workflow.outputs.had-changes }}
@@ -126,7 +131,10 @@ jobs:
       - get-release-label
     runs-on: ubuntu-latest
     if: |
-      needs.gen-test-catch-all-workflow.outputs.had-changes != 'true' && (
+      (
+        needs.gen-test-catch-all-workflow.result == 'skipped' ||
+        needs.gen-test-catch-all-workflow.outputs.had-changes != 'true'
+      ) && (
         needs.get-release-label.outputs.continue-release == 'true' && 
         needs.get-changed-elements.outputs.matrix-actions-empty != 'true'
       )
@@ -162,7 +170,10 @@ jobs:
       - get-release-label
     runs-on: ubuntu-latest
     if: |
-      needs.gen-test-catch-all-workflow.outputs.had-changes != 'true' && (
+      (
+        needs.gen-test-catch-all-workflow.result == 'skipped' ||
+        needs.gen-test-catch-all-workflow.outputs.had-changes != 'true'
+      ) && (
         needs.get-release-label.outputs.continue-release == 'true' && 
         needs.get-changed-elements.outputs.matrix-workflows-empty != 'true'
       )
@@ -198,7 +209,10 @@ jobs:
       - get-release-label
     runs-on: ubuntu-latest
     if: |
-      needs.gen-test-catch-all-workflow.outputs.had-changes != 'true' && (
+      (
+        needs.gen-test-catch-all-workflow.result == 'skipped' ||
+        needs.gen-test-catch-all-workflow.outputs.had-changes != 'true'
+      ) && (
         needs.get-release-label.outputs.continue-release == 'true' && 
         needs.get-changed-elements.outputs.matrix-actions-empty != 'true'
       )
@@ -237,7 +251,10 @@ jobs:
       - get-release-label
     runs-on: ubuntu-latest
     if: |
-      needs.gen-test-catch-all-workflow.outputs.had-changes != 'true' && (
+      (
+        needs.gen-test-catch-all-workflow.result == 'skipped' ||
+        needs.gen-test-catch-all-workflow.outputs.had-changes != 'true'
+      ) && (
         needs.get-release-label.outputs.continue-release == 'true' && 
         needs.get-changed-elements.outputs.matrix-workflows-empty != 'true'
       )

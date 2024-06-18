@@ -35,7 +35,7 @@ for (const jobKey in workflow.jobs) {
 
     switch (jobKey) {
       case 'gen-test-catch-all-workflow': {
-        if (step.uses == './actions/action-ci-build') {
+        if (step.uses == './tmp-inline/action-ci-build') {
           // Make it so that generated tests will use versioned actions
           step.with.remapped = true;
         }

@@ -109,8 +109,8 @@ export async function genTestCatchAllWorkflow(
           ]),
       {
         uses: remapped
-          ? actionsRemapping['./actions/action-ci-build']
-          : `./actions/action-ci-build`,
+          ? actionsRemapping['./tmp-inline/action-ci-build']
+          : './tmp-inline/action-ci-build',
         with: {
           phase: 'post-test',
           token: '${{ secrets.GITHUB_TOKEN }}',
