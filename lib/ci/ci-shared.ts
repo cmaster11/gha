@@ -10,6 +10,10 @@ export const actionsRemapping = {
   './actions/action-git-init-userinfo': 'action-git-init-userinfo/v0',
   './tmp-inline/action-ci-build': 'action-ci-build/v0'
 };
+export const workflowsRemapping = {
+  './.github/workflows/ci-build.yml':
+    'cmaster11/gha/.github/workflows/wf-build.yml@wf-build/v1'
+};
 
 export interface TestPayload {
   sha: string;

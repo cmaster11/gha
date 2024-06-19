@@ -1,0 +1,155 @@
+# cmaster11/gha/.github/workflows/wf-build.yml
+
+The `wf-build.yml` is an opinionated all-in-one GitHub Actions shared workflow that allows you to build a monorepo
+containing versioned GitHub shared actions and reusable workflows.
+
+> The [`cmaster11/gha`](https://github.com/cmaster11/gha) repository is entirely built on top of this workflow.
+
+## What comes as a result of using this workflow?
+
+You will be able to generate both composite and JS versioned shared
+actions:
+
+```yaml
+jobs:
+  test:
+    name: Run the test action
+    runs-on: ubuntu-latest
+    steps:
+      - uses: cmaster11/gha@action-test/v1
+```
+
+You will be able to generate versioned reusable workflows:
+
+```yaml
+jobs:
+  my-job:
+    uses: cmaster11/gha/.github/workflows/wf-test.yml@wf-test/v1
+```
+
+## How do you use it?
+
+The prerequisites for being able to use this workflow are:
+
+1. Having an `actions` folder, which will contain all your shared actions.
+2. (optional but highly recommended) Having a JSSETUP
+
+Create a workflow named (for example) `.github/workflows/gha-build.yml` with the following contents:
+
+<!-- import:ci-pr.yml BEGIN -->
+
+```yaml
+name: CI - Build on PR
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
+      # Triggers the workflow when labels change in the PR
+      - labeled
+
+jobs:
+  build:
+    uses: cmaster11/gha/.github/workflows/wf-build.yml@wf-build/v1
+    permissions:
+      # Required to create new version branches
+      contents: write
+      # Required to publish comments on the PR
+      pull-requests: write
+      # Required to trigger test workflows via workflow_dispatch
+      actions: write
+      # Required to create commit statuses to mark the
+      # execution of test workflows
+      statuses: write
+
+    secrets:
+      # You need to provide a PAT to enable auto-generation of the
+      # catch-all test workflow. This can be a PAT of a GitHub app,
+      # generated dynamically for every run in a previous job, or a user PAT.
+      #
+      # This token needs to have the `contents: write` and `workflows: write` permissions.
+      #
+      # If using a user PAT, I recommend creating a fine-grained token scoped only
+      # to your GHA repository with only the contents/workflows `write` permissions.
+      token-push-workflows: ${{ secrets.CI_BUILD_TOKEN_WORKFLOWS }}
+
+    with:
+      # You can customize various commands
+      test-command: npm run test:ci
+
+      # If you want to disable linting
+      # lint-command: echo NOOP
+
+      # Or you can completely disable testing, in case you want to run your
+      # own test suites before running the actions/workflows build pipeline.
+      # skip-test: true
+```
+
+<!-- import:ci-pr.yml END -->
+
+## Architecture
+
+<!-- NOTE: the diagram is stored in `../../ARCHITECTURE.mermaid` -->
+
+<!-- import:../../ARCHITECTURE.mermaid BEGIN -->
+
+```mermaid
+flowchart
+    commit["Commit on a PR-branch"]
+
+    subgraph ci-build.yml
+        get-release-label["Job: get-release-label\nFind the release label\nassociated with the PR"]
+        get-changed-dirs["Job: get-changed-dirs\nDetect changed actions\nand workflows"]
+        test["Job: test\nRuns CI tests"]
+        gen-test-catch-all-workflow["Job: gen-test-catch-all-workflow\nAutomatically generates\na workflow to run\nall test workflows"]
+        subgraph build-phase
+            build-actions["Job: build-actions\nBuilds all the changed actions"]
+            build-workflows["Job: build-workflows\nBuilds all the changed workflows"]
+        end
+        cleanup["Job: cleanup\nIf the PR has been closed,\ndeletes all dev branches\ncreated during the PR's\nlifetime"]
+        gen-test-catch-all-workflow --> build-phase
+        test --> build-phase
+        get-changed-dirs -- Generates the build matrix --> build-phase
+        get-release-label --> build-phase
+        post-build-test-actions["Job: post-build-test-actions\nTriggers testing jobs"]
+        post-build-test-workflows["Job: post-build-test-workflows\nTriggers testing jobs"]
+        build-actions -- " Releases the changed\nactions on their branches\n(dev or versioned) " --> post-build-test-actions
+        build-workflows -- " Releases the changed\nworkflows on their branches\n(dev or versioned) " --> post-build-test-workflows
+        test <-. " Tests will fail if\nsome files still need\nto be generated " .-> gen-test-catch-all-workflow
+    end
+
+    subgraph ci-test-catch-all.yml
+        ci-post-test["Job: ci-post-test\nNotifies GitHub about the result of the test"]
+
+        subgraph test-action-example.yml
+            test-action-example["Job: test\nTests the action"]
+        end
+
+        subgraph test-action-another.yml
+            test-action-another["Job: test\nTests the action"]
+        end
+
+        subgraph test-wf-test.yml
+            test-wf-test["Job: test\nTests the workflow"]
+        end
+
+        test-action-example --> ci-post-test
+        test-action-another --> ci-post-test
+        test-wf-test --> ci-post-test
+    end
+
+    post-build-test-actions --> test-action-example.yml
+    post-build-test-actions --> test-action-another.yml
+    post-build-test-workflows --> test-wf-test.yml
+
+    gen-test-catch-all-workflow -- " Creates a new commit\ncontaining the generated\ntest catch-all workflow\nand re-triggers the\nwhole pipeline if\nfiles have changed " --> ci-test-catch-all.yml
+    commit --> ci-build.yml
+
+```
+
+<!-- import:../../ARCHITECTURE.mermaid END -->

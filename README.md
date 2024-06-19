@@ -19,7 +19,8 @@ system to version them all.
 
 <!-- GENERATE_WORKFLOWS BEGIN -->
 
-- [`wf-build`](./.github/workflows/wf-build.yml): Build Github Actions and reusable workflows
+- [`wf-build`](./.github/workflows/wf-build.README.md): The `wf-build.yml` is an opinionated all-in-one GitHub Actions shared workflow that allows you to build a monorepo
+  containing versioned GitHub shared actions and reusable workflows.
 - [`wf-create-release`](./.github/workflows/wf-create-release.yml): Creates a release from an artifact into a standalone branch
 - [`wf-test-subworkflows`](./.github/workflows/wf-test-subworkflows.yml): A test workflow, used to test sub-workflows
 - [`wf-test`](./.github/workflows/wf-test.yml): A test workflow
@@ -106,7 +107,7 @@ jobs:
 
 <!-- NOTE: the diagram is stored in `./ARCHITECTURE.mermaid` -->
 
-<!-- GENERATE_ARCHITECTURE BEGIN -->
+<!-- import:ARCHITECTURE.mermaid BEGIN -->
 
 ```mermaid
 flowchart
@@ -162,4 +163,4 @@ flowchart
 
 ```
 
-<!-- GENERATE_ARCHITECTURE END -->
+<!-- import:ARCHITECTURE.mermaid END -->
