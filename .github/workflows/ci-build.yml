@@ -3,7 +3,7 @@ on:
   workflow_call:
     inputs:
       skip-test:
-        description: >
+        description: |
           If true, do not run the test job. Useful when you require custom testing jobs
           to run before whole actions/workflow build pipeline.
         type: boolean
@@ -22,7 +22,7 @@ on:
         type: string
 
       changes-paths-js:
-        description: >
+        description: |
           A list of globs used to check whether we need to rebuild all the actions containing JS code.
           
           The supported features are:
@@ -48,7 +48,7 @@ on:
           jest.config.(js|ts|mjs|cjs|json)
 
       skip-gen-test-catch-all-workflow:
-        description: >
+        description: |
           If true, skip the `gen-test-catch-all-workflow` job. This can be useful for example
           when you don't want to expose a token with `workflows` permission to dependabot and 
           other collaborators.
@@ -56,7 +56,7 @@ on:
         default: ${{ github.actor == 'dependabot[bot]' }}
     secrets:
       token-push-workflows:
-        description: >
+        description: |
           A PAT that allows the build workflow to commit and push generated workflows.
           This token needs to have the `contents: write` and `workflows: write` permissions
           and needs to belong either to a user or to a GitHub app.
