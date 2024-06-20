@@ -6,16 +6,19 @@ jobs:
   test:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout the dev branch
+        uses: actions/checkout@v4
         with:
           ref: '${{ fromJSON(inputs.test-ctx).ref }}'
 
-      - id: action
+      - name: Run the action
+        id: action
         uses: ./
         with:
           greeting: Hello world!
 
-      - run: |
+      - name: Dump the result of the action
+        run: |
           echo "$JSON" | jq '.'
         env:
           JSON: ${{ toJSON(steps.action) }}

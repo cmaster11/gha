@@ -3,6 +3,7 @@
  */
 
 import type { GithubCommonProps } from '../github-common.js';
+import type { TestPayload } from './ci-shared-test-payload.js';
 
 export const ciTestCatchAllWorkflowName = 'ci-test-catch-all.yml';
 
@@ -15,16 +16,9 @@ export const workflowsRemapping = {
     'cmaster11/gha/.github/workflows/wf-build.yml@wf-build/v1'
 };
 
-export interface TestPayload {
-  sha: string;
-  ref: string;
-  statusContext: string;
-  pullNumber: number;
-}
-
 export async function createCommitStatusAndTriggerTestWorkflow({
   gh,
-  statusContext,
+  commitStatusContext,
   testWorkflowName,
   headSHA,
   versionBranch,
@@ -32,7 +26,7 @@ export async function createCommitStatusAndTriggerTestWorkflow({
   ref
 }: {
   gh: GithubCommonProps;
-  statusContext: string;
+  commitStatusContext: string;
   testWorkflowName: string;
   headSHA: string;
   versionBranch: string;
@@ -42,7 +36,7 @@ export async function createCommitStatusAndTriggerTestWorkflow({
   // Create the status check for the upcoming test workflow
   await gh.octokit.rest.repos.createCommitStatus({
     ...gh.repoProps,
-    context: statusContext,
+    context: commitStatusContext,
     state: 'pending',
     sha: headSHA
   });
@@ -51,7 +45,7 @@ export async function createCommitStatusAndTriggerTestWorkflow({
   const payload: TestPayload = {
     ref: versionBranch,
     sha: headSHA,
-    statusContext,
+    commitStatusContext,
     pullNumber
   };
   await gh.octokit.rest.actions.createWorkflowDispatch({

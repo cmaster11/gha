@@ -12,6 +12,15 @@ import { actionsRemapping, workflowsRemapping } from './ci-shared.js';
 
 $.verbose = true;
 
+// Reads the file and strips the copyright notice
+async function importContent(fileName: string): Promise<string> {
+  let content = await fs.readFile(fileName, 'utf-8');
+
+  content = content.replaceAll(/^\/*.*Copyright.* \*\/$/gms, '');
+
+  return content;
+}
+
 const paths = [
   path.join(rootDir, 'README.md'),
   path.join(workflowsDir, 'wf-build.README.md')
@@ -122,10 +131,7 @@ for (const filePath of paths) {
         break;
     }
 
-    let contents = await fs.readFile(
-      path.join(path.dirname(filePath), p),
-      'utf-8'
-    );
+    let contents = await importContent(path.join(path.dirname(filePath), p));
 
     if (p.replace(/(\.\/)?/, '').startsWith('ci-')) {
       for (const key in actionsRemapping) {

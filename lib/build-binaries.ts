@@ -10,7 +10,7 @@ import { esBuild } from './esbuild.js';
 // Builds the various binaries for the action and returns a map
 // containing the mapped paths of the compiled files (src -> dest)
 export async function buildBinaries(
-  actionName: string,
+  actionName: string
 ): Promise<Record<string, string>> {
   const actionDir = path.join(actionsDir, actionName);
   const binDir = path.join(actionDir, 'bin');

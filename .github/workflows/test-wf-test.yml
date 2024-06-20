@@ -5,4 +5,15 @@ on:
 
 jobs:
   test:
+    # Invoke the reusable workflow
     uses: ./.github/workflows/wf-test.yml
+
+  dump:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump the result of the workflow
+        run: |
+          echo "$JSON" | jq '.'
+        env:
+          JSON: ${{ toJSON(needs.test) }}

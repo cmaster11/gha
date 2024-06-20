@@ -29,7 +29,7 @@ jobs:
 
 ## How do you use it?
 
-The prerequisites for being able to use this workflow are:
+The prerequisites for being able to use this workflow are as follows:
 
 1. Having an `actions` folder, which will contain all your shared actions.
 2. (optional but highly recommended) Having a JSSETUP
@@ -91,6 +91,106 @@ jobs:
 ```
 
 <!-- import:ci-pr.yml END -->
+
+## Testing
+
+You can create test workflows for every shared action and reusable workflow. The only rule is that the name of the test
+workflow needs to be:
+
+- For an action, `test-ACTION-NAME.yml`
+- For a workflow, `test-WORKFLOW-NAME.yml`
+
+### Test workflows (shared actions)
+
+Here you can see an example of a test workflow built to test a shared action:
+
+<!-- import:test-action-test.yml BEGIN -->
+
+```yaml
+name: Test action-test
+on:
+  workflow_call: { inputs: { test-ctx: { type: string } } }
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout the dev branch
+        uses: actions/checkout@v4
+        with:
+          ref: "${{ fromJSON(inputs.test-ctx).ref }}"
+
+      - name: Run the action
+        id: action
+        uses: ./
+        with:
+          greeting: Hello world!
+
+      - name: Dump the result of the action
+        run: |
+          echo "$JSON" | jq '.'
+        env:
+          JSON: ${{ toJSON(steps.action) }}
+```
+
+<!-- import:test-action-test.yml END -->
+
+### Test workflows (reusable workflows)
+
+Here you can see an example of a test workflow built to test a reusable workflow:
+
+<!-- import:test-wf-test.yml BEGIN -->
+
+```yaml
+name: Test wf-test
+
+on:
+  workflow_call: { inputs: { test-ctx: { type: string } } }
+
+jobs:
+  test:
+    # Invoke the reusable workflow
+    uses: ./.github/workflows/wf-test.yml
+
+  dump:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump the result of the workflow
+        run: |
+          echo "$JSON" | jq '.'
+        env:
+          JSON: ${{ toJSON(needs.test) }}
+```
+
+<!-- import:test-wf-test.yml END -->
+
+**Do note** this way of testing will have GitHub use the workflow defined in the **last commit** of the current PR, and
+not in the commit for which the whole flow was triggered. This is just a nit and not a big deal because
+the `wf-build.yml` workflow defines a strict `concurrency` policy, which means any new commit will cause all previous
+test flows to be cancelled.
+
+### `test-ctx`
+
+The `test-ctx` structure is defined as follows:
+
+<!-- import:../../lib/ci/ci-shared-test-payload.ts BEGIN -->
+
+```ts
+export interface TestPayload {
+  // The SHA of the HEAD commit
+  sha: string;
+  // The git ref of the branch we are on
+  ref: string;
+  // The number of the current PR
+  pullNumber: number;
+
+  // The context of the commit status associated with the test
+  commitStatusContext: string;
+}
+```
+
+<!-- import:../../lib/ci/ci-shared-test-payload.ts END -->
 
 ## Architecture
 
