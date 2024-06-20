@@ -35,7 +35,7 @@
     "@types/jest": "^29.5.12",
     "@types/klaw": "^3.0.6",
     "@types/micromatch": "^4.0.7",
-    "@types/node": "^20.14.4",
+    "@types/node": "^20.14.6",
     "@types/semver": "^7.5.8",
     "@types/traverse": "^0.6.37",
     "cross-env": "^7.0.3",
@@ -45,7 +45,7 @@
     "eslint-plugin-unused-imports": "^3.2.0",
     "husky": "^9.0.11",
     "jest": "^29.7.0",
-    "joi": "^17.13.1",
+    "joi": "^17.13.3",
     "klaw": "^4.1.0",
     "micromatch": "^4.0.7",
     "prettier": "^3.3.2",
@@ -58,6 +58,6 @@
     "typescript": "~5.4.3",
     "typescript-eslint": "^7.13.1",
     "yaml": "^2.4.5",
-    "zx": "^8.1.2"
+    "zx": "^8.1.3"
   }
 }
