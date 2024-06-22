@@ -94,13 +94,14 @@ jobs:
 
 ## Testing
 
-You can create test workflows for every shared action and reusable workflow. The only rule is that the name of the test
-workflow needs to be:
+You can create test workflows for every shared action and reusable workflow.
 
-- For an action, `test-ACTION-NAME.yml`
-- For a workflow, `test-WORKFLOW-NAME.yml`
+The testing flow is the same for both shared action and reusable workflows, as both are executed after
+the build phase.
 
 ### Test workflows (shared actions)
+
+The name of the test workflow needs to be `.github/workflows/test-ACTION-NAME.yml`.
 
 Here you can see an example of a test workflow built to test a shared action:
 
@@ -136,6 +137,8 @@ jobs:
 <!-- import:test-action-test.yml END -->
 
 ### Test workflows (reusable workflows)
+
+The name of the test workflow needs to be `.github/workflows/test-WORKFLOW-NAME.yml`.
 
 Here you can see an example of a test workflow built to test a reusable workflow:
 
