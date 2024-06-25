@@ -9,6 +9,7 @@ inputs:
   workflow-name: {}
   release: {}
   release-label: {}
+  changes-paths-js: {}
   remapped: {}
   version-branch: {}
   head-ref: {}
