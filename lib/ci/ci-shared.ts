@@ -13,7 +13,9 @@ export const actionsRemapping = {
 };
 export const workflowsRemapping = {
   './.github/workflows/ci-build.yml':
-    'cmaster11/gha/.github/workflows/wf-build.yml@wf-build/v1'
+    'cmaster11/gha/.github/workflows/wf-build.yml@wf-build/v1',
+  './.github/workflows/ci-build-pr-opened.yml':
+    'cmaster11/gha/.github/workflows/wf-build-pr-opened.yml@wf-build-pr-opened/v1'
 };
 
 export async function createCommitStatusAndTriggerTestWorkflow({
