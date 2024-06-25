@@ -58,6 +58,9 @@ jobs:
   pr-opened:
     if: github.event.action == 'opened'
     uses: ./.github/workflows/ci-build-pr-opened.yml
+    permissions:
+      pull-requests: read
+      contents: read
 
   # Triggers the build flow
   build:
