@@ -1,0 +1,17 @@
+name: Check PR release labels
+on:
+  workflow_call: {}
+jobs:
+  get-release-label:
+    name: Get release label
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+      contents: read
+    steps:
+      - name: Get release label
+        id: get-release-label
+        uses: cmaster11/gha@action-ci-build/v0
+        with:
+          phase: get-release-label
+          token: ${{ secrets.GITHUB_TOKEN }}
