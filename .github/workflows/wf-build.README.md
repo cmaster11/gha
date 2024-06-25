@@ -27,6 +27,8 @@ jobs:
     uses: cmaster11/gha/.github/workflows/wf-test.yml@wf-test/v1
 ```
 
+test
+
 ## How do you use it?
 
 The prerequisites for being able to use this workflow are as follows:
