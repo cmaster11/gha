@@ -54,7 +54,14 @@ on:
       - labeled
 
 jobs:
+  # Verifies the presence of release labels when the PR is opened
+  pr-opened:
+    if: github.event.action == 'opened'
+    uses: ./.github/workflows/ci-build-pr-opened.yml
+
+  # Triggers the build flow
   build:
+    if: github.event.action != 'opened'
     uses: cmaster11/gha/.github/workflows/wf-build.yml@wf-build/v1
     permissions:
       # Required to create new version branches

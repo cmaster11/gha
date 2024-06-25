@@ -19,6 +19,7 @@ system to version them all.
 
 <!-- GENERATE_WORKFLOWS BEGIN -->
 
+- [`wf-build-pr-opened`](./.github/workflows/wf-build-pr-opened.yml): Check PR release labels
 - [`wf-build`](./.github/workflows/wf-build.README.md): The `wf-build.yml` is an opinionated all-in-one GitHub Actions shared workflow that allows you to build a monorepo
   containing versioned GitHub shared actions and reusable workflows.
 - [`wf-create-release`](./.github/workflows/wf-create-release.yml): Creates a release from an artifact into a standalone branch
