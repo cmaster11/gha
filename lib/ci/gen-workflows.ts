@@ -11,10 +11,12 @@ import { actionsRemapping } from './ci-shared.js';
 
 $.verbose = true;
 
-const workflowsToGen = ['ci-build.yml', 'ci-build-pr-opened.yml'];
+const workflowsToGen = (await fs.readdir(workflowsDir)).filter((f) =>
+  f.startsWith('gen-wf')
+);
 
 for (const workflowName of workflowsToGen) {
-  // Build the wf-build.yml workflow from the ci-build.yml one
+  // Build the wf-build.yml workflow from the gen-wf-build.yml one
   const workflow = parse(
     await fs.readFile(path.join(workflowsDir, workflowName), 'utf-8')
   );

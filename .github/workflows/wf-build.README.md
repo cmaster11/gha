@@ -32,9 +32,13 @@ jobs:
 The prerequisites for being able to use this workflow are as follows:
 
 1. Having an `actions` folder, which will contain all your shared actions.
-2. (optional but highly recommended) Having a JSSETUP
+2. (optional but highly recommended) Having a TypeScript project set up in the root of the repository.
 
-Create a workflow named (for example) `.github/workflows/gha-build.yml` with the following contents:
+To get started, create the two following workflows in your repository:
+
+### `.github/workflows/gha-build.yml`
+
+This is the main workflow, which will take care of building and versioning your shared actions and reusable workflows.
 
 <!-- import:ci-pr.yml BEGIN -->
 
@@ -91,6 +95,99 @@ jobs:
 ```
 
 <!-- import:ci-pr.yml END -->
+
+You can see the full configuration reference below:
+
+<!-- import-wf-inputs:wf-build.yml BEGIN -->
+
+#### skip-test
+
+If true, do not run the test job. Useful when you require custom testing jobs
+to run before whole actions/workflow build pipeline.
+
+- Type: `boolean`
+- Default: `false`
+
+#### lint-command
+
+The command used to run lint tests.
+
+- Type: `string`
+- Default: `npm run lint`
+
+#### test-command
+
+The command used to run tests.
+
+- Type: `string`
+- Default: `npm run test`
+
+#### changes-paths-js
+
+A list of globs used to check whether we need to rebuild all the actions containing JS code.
+
+The supported features are:
+
+- Wildcards (`**`, `*.js`)
+- Negation (`'!a/*.js'`, `'*!(b).js'`)
+- extglobs (`+(x|y)`, `!(a|b)`)
+- POSIX character classes (`[[:alpha:][:digit:]]`)
+- Brace expansion (`foo/{1..5}.md`, `bar/{a,b,c}.js`)
+- Regex character classes (`foo-[1-5].js`)
+- Regex logical "or" (`foo/(abc|xyz).js`)
+
+Lines beginning with `#` will be treated as comments and ignored
+
+You can see more examples at: https://github.com/micromatch/micromatch#matching-features
+
+- Type: `string`
+- Default:
+  ```
+  package.json
+  package-lock.json
+  tsconfig.json
+  {src,lib}/**/*.m?[tj]s
+  jest.config.(js|ts|mjs|cjs|json)
+  ```
+
+#### skip-gen-test-catch-all-workflow
+
+If true, skip the `gen-test-catch-all-workflow` job. This can be useful for example
+when you don't want to expose a token with `workflows` permission to dependabot and
+other collaborators.
+
+- Type: `boolean`
+- Default: `${{ github.actor == 'dependabot[bot]' }}`
+<!-- import-wf-inputs:wf-build.yml END -->
+
+### `.github/workflows/gha-pr-check-labels.yml`
+
+<!-- import:ci-pr-check-labels.yml BEGIN -->
+
+```yaml
+name: Check release labels
+
+on:
+  pull_request:
+    branches:
+      - main
+
+    # Trigger this workflow on events which could cause the
+    # PR to have no labels
+    types:
+      - opened
+      - unlabeled
+
+jobs:
+  # Verifies the presence of release labels when the PR is opened
+  pr-opened:
+    uses: cmaster11/gha/.github/workflows/wf-pr-opened.yml@wf-pr-opened/v1
+    permissions:
+      pull-requests: read
+      contents: read
+```
+
+<!-- import:ci-pr-check-labels.yml END -->
 
 ## Testing
 

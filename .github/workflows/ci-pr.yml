@@ -14,7 +14,7 @@ on:
 jobs:
   # Triggers the build flow
   build:
-    uses: ./.github/workflows/ci-build.yml
+    uses: ./.github/workflows/gen-wf-build.yml
     permissions:
       # Required to create new version branches
       contents: write
