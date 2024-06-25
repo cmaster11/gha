@@ -26,7 +26,8 @@ export async function genTestCatchAllWorkflow(
     /^test-(action|workflow|wf)-[^.]+.yml$/.test(w)
   );
 
-  const jobs: Record<string, {}> = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const jobs: Record<string, any> = {};
 
   for (const workflowFile of allTestWorkflows) {
     const workflowName = workflowFile.replace(/\.yml/, '');

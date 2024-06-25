@@ -44,10 +44,10 @@ export async function ciPostBuildTestActions({
     throw err;
   }
 
-  const statusContext = `CI Test: ${actionName}`;
+  const commitStatusContext = `CI Test: ${actionName}`;
   await createCommitStatusAndTriggerTestWorkflow({
     gh,
-    statusContext,
+    commitStatusContext,
     testWorkflowName,
     headSHA,
     versionBranch,

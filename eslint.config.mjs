@@ -38,5 +38,5 @@ export default tseslint.config({
       }
     ]
   },
-  ignores: ['node_modules/**', '*.d.ts', '*.config.mjs']
+  ignores: ['node_modules/**', '*.d.ts', '*.config.mjs', '__testing__/action-ci-build/actions/test-action/**']
 });

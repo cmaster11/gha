@@ -16,9 +16,9 @@ import { ciCleanup } from '../../lib/ci/ci-cleanup.js';
 import { inspect } from '../../lib/inspect.js';
 import { ciBuildWorkflows } from '../../lib/ci/ci-build-workflows.js';
 import { ciPostBuildTestWorkflows } from '../../lib/ci/ci-post-build-test-workflows.js';
-import type { TestPayload } from '../../lib/ci/ci-shared.js';
 import { ciPostTest } from '../../lib/ci/ci-post-test.js';
 import { ciGenTestCatchAllWorkflow } from '../../lib/ci/ci-gen-test-catch-all-workflow.js';
+import type { TestPayload } from '../../lib/ci/ci-shared-test-payload.js';
 
 async function main() {
   const phase = getInput('phase', { required: true });

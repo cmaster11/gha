@@ -8,11 +8,23 @@ import { actionsDir, rootDir, workflowsDir } from '../constants.js';
 import { parse } from 'yaml';
 import * as prettier from 'prettier';
 import { getGitHubWorkflows } from '../github-workflows.js';
+import { actionsRemapping, workflowsRemapping } from './ci-shared.js';
 
 $.verbose = true;
 
-const readmePath = path.join(rootDir, 'README.md');
-let readmeContent = await fs.readFile(readmePath, 'utf-8');
+// Reads the file and strips the copyright notice
+async function importContent(fileName: string): Promise<string> {
+  let content = await fs.readFile(fileName, 'utf-8');
+
+  content = content.replaceAll(/^\/*.*Copyright.* \*\/$/gms, '');
+
+  return content;
+}
+
+const paths = [
+  path.join(rootDir, 'README.md'),
+  path.join(workflowsDir, 'wf-build.README.md')
+];
 
 // List all actions
 const actionLinks: string[] = [];
@@ -32,8 +44,9 @@ for (const action of allActions) {
     );
     desc = content
       .replace(/^# .+$/m, '')
+      .replaceAll(/\r/g, '')
       .trim()
-      .split('\n')[0];
+      .split('\n\n')[0];
     if (desc == null)
       throw new Error(
         `The action ${action} is missing the first line in the README.md file.`
@@ -67,8 +80,9 @@ for (const workflow of allWorkflows) {
     const content = await fs.readFile(readmeFile, 'utf-8');
     desc = content
       .replace(/^# .+$/m, '')
+      .replaceAll(/\r/g, '')
       .trim()
-      .split('\n')[0];
+      .split('\n\n')[0];
     if (desc == null)
       throw new Error(
         `The workflow ${workflow} is missing the first line in the README.md file.`
@@ -86,27 +100,69 @@ for (const workflow of allWorkflows) {
   );
 }
 
-readmeContent =
-  readmeContent.split('<!-- GENERATE_ACTIONS BEGIN -->')[0] +
-  '<!-- GENERATE_ACTIONS BEGIN -->\n' +
-  actionLinks.join('\n') +
-  '\n<!-- GENERATE_ACTIONS END -->' +
-  readmeContent.split('<!-- GENERATE_ACTIONS END -->')[1];
+for (const filePath of paths) {
+  let content = await fs.readFile(filePath, 'utf-8');
 
-readmeContent =
-  readmeContent.split('<!-- GENERATE_WORKFLOWS BEGIN -->')[0] +
-  '<!-- GENERATE_WORKFLOWS BEGIN -->\n' +
-  workflowLinks.join('\n') +
-  '\n<!-- GENERATE_WORKFLOWS END -->' +
-  readmeContent.split('<!-- GENERATE_WORKFLOWS END -->')[1];
+  if (content.includes('<!-- GENERATE_ACTIONS BEGIN -->'))
+    content =
+      content.split('<!-- GENERATE_ACTIONS BEGIN -->')[0] +
+      '<!-- GENERATE_ACTIONS BEGIN -->\n' +
+      actionLinks.join('\n') +
+      '\n<!-- GENERATE_ACTIONS END -->' +
+      content.split('<!-- GENERATE_ACTIONS END -->')[1];
 
-readmeContent =
-  readmeContent.split('<!-- GENERATE_ARCHITECTURE BEGIN -->')[0] +
-  '<!-- GENERATE_ARCHITECTURE BEGIN -->\n```mermaid\n' +
-  (await fs.readFile(path.join(rootDir, 'ARCHITECTURE.mermaid'), 'utf-8')) +
-  '\n```\n<!-- GENERATE_ARCHITECTURE END -->' +
-  readmeContent.split('<!-- GENERATE_ARCHITECTURE END -->')[1];
+  if (content.includes('<!-- GENERATE_WORKFLOWS BEGIN -->'))
+    content =
+      content.split('<!-- GENERATE_WORKFLOWS BEGIN -->')[0] +
+      '<!-- GENERATE_WORKFLOWS BEGIN -->\n' +
+      workflowLinks.join('\n') +
+      '\n<!-- GENERATE_WORKFLOWS END -->' +
+      content.split('<!-- GENERATE_WORKFLOWS END -->')[1];
 
-readmeContent = await prettier.format(readmeContent, { parser: 'markdown' });
+  const re = /<!-- import:([^ ]+) BEGIN -->.*<!-- import:\1 END -->/gs;
+  let match: RegExpMatchArray | null;
+  while ((match = re.exec(content)) != null) {
+    const p = match[1];
+    console.log(`[${filePath}] Found import ${p}`);
+    let mdExt = path.extname(p).replace(/^\./, '');
+    switch (mdExt) {
+      case 'yml':
+        mdExt = 'yaml';
+        break;
+    }
 
-await fs.writeFile(readmePath, readmeContent);
+    let contents = await importContent(path.join(path.dirname(filePath), p));
+
+    if (p.replace(/(\.\/)?/, '').startsWith('ci-')) {
+      for (const key in actionsRemapping) {
+        contents = contents.replace(
+          key,
+          actionsRemapping[key as keyof typeof actionsRemapping]
+        );
+      }
+      for (const key in workflowsRemapping) {
+        contents = contents.replace(
+          key,
+          workflowsRemapping[key as keyof typeof workflowsRemapping]
+        );
+      }
+    }
+
+    const keyBegin = `<!-- import:${p} BEGIN -->`;
+    const keyEnd = `<!-- import:${p} END -->`;
+    content =
+      content.split(keyBegin)[0] +
+      keyBegin +
+      '\n```' +
+      mdExt +
+      '\n' +
+      contents +
+      '\n```\n' +
+      keyEnd +
+      content.split(keyEnd)[1];
+  }
+
+  content = await prettier.format(content, { parser: 'markdown' });
+
+  await fs.writeFile(filePath, content);
+}
