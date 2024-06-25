@@ -39,18 +39,17 @@ Create a workflow named (for example) `.github/workflows/gha-build.yml` with the
 <!-- import:ci-pr.yml BEGIN -->
 
 ```yaml
-name: CI - Build on PR
+name: Build Github Actions and reusable workflows
 
 on:
   pull_request:
     branches:
       - main
     types:
-      - opened
       - synchronize
       - reopened
       - closed
-      # Triggers the workflow when labels change in the PR
+      # Triggers the workflow when labels are added to the PR
       - labeled
 
 jobs:

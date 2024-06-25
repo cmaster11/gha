@@ -70,15 +70,13 @@ concurrency:
       || format('pr-{0}', github.event.pull_request.number) 
     }}
 
-  # Only cancel existing builds if we're in dev mode, and make sure the "opened"
-  # event cannot cancel another flow
-  cancel-in-progress: ${{ github.event.action != 'opened' && github.event.action != 'closed' }}
+  # Only cancel existing builds if we're in dev mode
+  cancel-in-progress: ${{ github.event.action != 'closed' }}
 
 jobs:
   gen-test-catch-all-workflow:
     name: Generate test workflows
     if: >
-      github.event.action != 'opened' && 
       github.event.action != 'closed' && 
       inputs.skip-gen-test-catch-all-workflow != true
     runs-on: ubuntu-latest
@@ -140,7 +138,7 @@ jobs:
     name: Test (JS)
     if: >
       inputs.skip-test != true && (
-        (github.event.action != 'opened' && github.event.action != 'closed') ||
+        (github.event.action != 'closed') ||
         (github.event.action == 'closed' && github.event.pull_request.merged)
       )
     runs-on: ubuntu-latest
@@ -170,7 +168,7 @@ jobs:
   get-changed-elements:
     name: Get changes
     if: >
-      (github.event.action != 'opened' && github.event.action != 'closed') ||
+      (github.event.action != 'closed') ||
       (github.event.action == 'closed' && github.event.pull_request.merged)
     runs-on: ubuntu-latest
     permissions:

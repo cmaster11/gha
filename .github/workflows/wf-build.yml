@@ -63,12 +63,12 @@ concurrency:
       (github.event.action == 'closed' && github.event.pull_request.merged) && 'release' 
       || format('pr-{0}', github.event.pull_request.number) 
     }}
-  cancel-in-progress: ${{ github.event.action != 'opened' && github.event.action != 'closed' }}
+  cancel-in-progress: ${{ github.event.action != 'closed' }}
 jobs:
   gen-test-catch-all-workflow:
     name: Generate test workflows
     if: |
-      github.event.action != 'opened' &&  github.event.action != 'closed' &&  inputs.skip-gen-test-catch-all-workflow != true
+      github.event.action != 'closed' &&  inputs.skip-gen-test-catch-all-workflow != true
     runs-on: ubuntu-latest
     outputs:
       had-changes: ${{ steps.gen-test-catch-all-workflow.outputs.had-changes }}
@@ -108,7 +108,7 @@ jobs:
     name: Test (JS)
     if: |
       inputs.skip-test != true && (
-        (github.event.action != 'opened' && github.event.action != 'closed') ||
+        (github.event.action != 'closed') ||
         (github.event.action == 'closed' && github.event.pull_request.merged)
       )
     runs-on: ubuntu-latest
@@ -137,7 +137,7 @@ jobs:
   get-changed-elements:
     name: Get changes
     if: |
-      (github.event.action != 'opened' && github.event.action != 'closed') || (github.event.action == 'closed' && github.event.pull_request.merged)
+      (github.event.action != 'closed') || (github.event.action == 'closed' && github.event.pull_request.merged)
     runs-on: ubuntu-latest
     permissions:
       contents: read

@@ -1,0 +1,20 @@
+name: Check release labels
+
+on:
+  pull_request:
+    branches:
+      - main
+
+    # Trigger this workflow on events which could cause the
+    # PR to have no labels
+    types:
+      - opened
+      - unlabeled
+
+jobs:
+  # Verifies the presence of release labels when the PR is opened
+  pr-opened:
+    uses: ./.github/workflows/ci-build-pr-opened.yml
+    permissions:
+      pull-requests: read
+      contents: read
