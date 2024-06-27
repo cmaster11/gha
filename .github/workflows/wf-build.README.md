@@ -179,8 +179,9 @@ on:
       - unlabeled
 
 jobs:
-  # Verifies the presence of release labels when the PR is opened
-  pr-opened:
+  # Verifies the presence of release labels when the PR
+  # is opened or labels have changes
+  check-labels:
     uses: cmaster11/gha/.github/workflows/wf-build-check-labels-only.yml@wf-build-check-labels-only.yml/v1
     permissions:
       pull-requests: read
