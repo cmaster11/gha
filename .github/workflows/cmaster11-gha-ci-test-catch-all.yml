@@ -25,7 +25,6 @@ on:
       - main
     paths:
       - .github/workflows/cmaster11-gha-ci-test-catch-all.yml
-# bumpppp
 jobs:
   test-action-ci-build:
     if: github.event_name == 'workflow_dispatch' && inputs.workflow-name == 'test-action-ci-build.yml'
