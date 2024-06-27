@@ -181,7 +181,7 @@ on:
 jobs:
   # Verifies the presence of release labels when the PR is opened
   pr-opened:
-    uses: cmaster11/gha/.github/workflows/wf-pr-opened.yml@wf-pr-opened/v1
+    uses: cmaster11/gha/.github/workflows/wf-build-check-labels-only.yml@wf-build-check-labels-only.yml/v1
     permissions:
       pull-requests: read
       contents: read
@@ -302,10 +302,10 @@ export interface TestPayload {
 flowchart
     commit["Commit on a PR-branch"]
 
-    subgraph ci-build.yml
+    subgraph wf-build.yml
         get-release-label["Job: get-release-label\nFind the release label\nassociated with the PR"]
         get-changed-dirs["Job: get-changed-dirs\nDetect changed actions\nand workflows"]
-        test["Job: test\nRuns CI tests"]
+        test["Job: test\nRuns CI tests\n(Tests will fail if\nsome files still need\nto be generated)"]
         gen-test-catch-all-workflow["Job: gen-test-catch-all-workflow\nAutomatically generates\na workflow to run\nall test workflows"]
         subgraph build-phase
             build-actions["Job: build-actions\nBuilds all the changed actions"]
@@ -320,10 +320,9 @@ flowchart
         post-build-test-workflows["Job: post-build-test-workflows\nTriggers testing jobs"]
         build-actions -- " Releases the changed\nactions on their branches\n(dev or versioned) " --> post-build-test-actions
         build-workflows -- " Releases the changed\nworkflows on their branches\n(dev or versioned) " --> post-build-test-workflows
-        test <-. " Tests will fail if\nsome files still need\nto be generated " .-> gen-test-catch-all-workflow
     end
 
-    subgraph ci-test-catch-all.yml
+    subgraph cmaster11-gha-ci-test-catch-all.yml
         ci-post-test["Job: ci-post-test\nNotifies GitHub about the result of the test"]
 
         subgraph test-action-example.yml
@@ -347,8 +346,8 @@ flowchart
     post-build-test-actions --> test-action-another.yml
     post-build-test-workflows --> test-wf-test.yml
 
-    gen-test-catch-all-workflow -- " Creates a new commit\ncontaining the generated\ntest catch-all workflow\nand re-triggers the\nwhole pipeline if\nfiles have changed " --> ci-test-catch-all.yml
-    commit --> ci-build.yml
+    gen-test-catch-all-workflow -- " Creates a new commit\ncontaining the generated\ntest catch-all workflow\nand re-triggers the\nwhole pipeline if\nfiles have changed " --> cmaster11-gha-ci-test-catch-all.yml
+    commit --> wf-build.yml
 
 ```
 

@@ -16,7 +16,8 @@ const workflowsToGen = (await fs.readdir(workflowsDir)).filter((f) =>
 );
 
 for (const workflowName of workflowsToGen) {
-  // Build the wf-build.yml workflow from the gen-wf-build.yml one
+  // Build the wf-XXX.yml workflow from the gen-wf-XXX.yml one
+  const outFileName = workflowName.replace(/^gen-wf-/, 'wf-');
   const workflow = parse(
     await fs.readFile(path.join(workflowsDir, workflowName), 'utf-8')
   );
@@ -90,7 +91,6 @@ for (const workflowName of workflowsToGen) {
   let content = stringify(workflow, { lineWidth: 0 });
   content = await prettier.format(content, { parser: 'yaml' });
 
-  const outFileName = workflowName.replace(/^ci-/, 'wf-');
   const outFilePath = path.join(workflowsDir, outFileName);
   await fs.writeFile(outFilePath, content);
 }

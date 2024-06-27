@@ -18,6 +18,7 @@ import { gitHubCreateOrUpdateComment } from '../github-comments.js';
 import { getGitHubWorkflowsUsingAction } from '../github-workflows.js';
 import { getPRSuffix } from '../version.js';
 import micromatch from 'micromatch';
+import { gitHubCommentTitle } from './ci-shared.js';
 
 export async function ciGetChangesMatrix({
   gh,
@@ -70,7 +71,7 @@ export async function ciGetChangesMatrix({
 
   {
     const body = [
-      '### [cmaster11/gha]',
+      gitHubCommentTitle,
       '#### Changed actions',
       ...(changedActions.length == 0
         ? ['No changed actions detected']
