@@ -5,15 +5,19 @@
 import type { GithubCommonProps } from '../github-common.js';
 import type { TestPayload } from './ci-shared-test-payload.js';
 
-export const ciTestCatchAllWorkflowName = 'ci-test-catch-all.yml';
+export const ciTestCatchAllWorkflowName = 'cmaster11-gha-ci-test-catch-all.yml';
+
+export const gitHubCommentTitle = '### [cmaster11/gha]';
 
 export const actionsRemapping = {
   './actions/action-git-init-userinfo': 'action-git-init-userinfo/v0',
   './tmp-inline/action-ci-build': 'action-ci-build/v0'
 };
 export const workflowsRemapping = {
-  './.github/workflows/ci-build.yml':
-    'cmaster11/gha/.github/workflows/wf-build.yml@wf-build/v1'
+  './.github/workflows/gen-wf-build.yml':
+    'cmaster11/gha/.github/workflows/wf-build.yml@wf-build/v1',
+  './.github/workflows/gen-wf-build-check-labels-only.yml':
+    'cmaster11/gha/.github/workflows/wf-build-check-labels-only.yml@wf-build-check-labels-only.yml/v1'
 };
 
 export async function createCommitStatusAndTriggerTestWorkflow({

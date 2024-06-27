@@ -32,28 +32,32 @@ jobs:
 The prerequisites for being able to use this workflow are as follows:
 
 1. Having an `actions` folder, which will contain all your shared actions.
-2. (optional but highly recommended) Having a JSSETUP
+2. (optional but highly recommended) Having a TypeScript project set up in the root of the repository.
 
-Create a workflow named (for example) `.github/workflows/gha-build.yml` with the following contents:
+To get started, create the two following workflows in your repository:
+
+### `.github/workflows/gha-build.yml`
+
+This is the main workflow, which will take care of building and versioning your shared actions and reusable workflows.
 
 <!-- import:ci-pr.yml BEGIN -->
 
 ```yaml
-name: CI - Build on PR
+name: Build Github Actions and reusable workflows
 
 on:
   pull_request:
     branches:
       - main
     types:
-      - opened
       - synchronize
       - reopened
       - closed
-      # Triggers the workflow when labels change in the PR
+      # Triggers the workflow when labels are added to the PR
       - labeled
 
 jobs:
+  # Triggers the build flow
   build:
     uses: cmaster11/gha/.github/workflows/wf-build.yml@wf-build/v1
     permissions:
@@ -91,6 +95,100 @@ jobs:
 ```
 
 <!-- import:ci-pr.yml END -->
+
+You can see the full configuration reference below:
+
+<!-- import-wf-inputs:wf-build.yml BEGIN -->
+
+#### skip-test
+
+If true, do not run the test job. Useful when you require custom testing jobs
+to run before whole actions/workflow build pipeline.
+
+- Type: `boolean`
+- Default: `false`
+
+#### lint-command
+
+The command used to run lint tests.
+
+- Type: `string`
+- Default: `npm run lint`
+
+#### test-command
+
+The command used to run tests.
+
+- Type: `string`
+- Default: `npm run test`
+
+#### changes-paths-js
+
+A list of globs used to check whether we need to rebuild all the actions containing JS code.
+
+The supported features are:
+
+- Wildcards (`**`, `*.js`)
+- Negation (`'!a/*.js'`, `'*!(b).js'`)
+- extglobs (`+(x|y)`, `!(a|b)`)
+- POSIX character classes (`[[:alpha:][:digit:]]`)
+- Brace expansion (`foo/{1..5}.md`, `bar/{a,b,c}.js`)
+- Regex character classes (`foo-[1-5].js`)
+- Regex logical "or" (`foo/(abc|xyz).js`)
+
+Lines beginning with `#` will be treated as comments and ignored
+
+You can see more examples at: https://github.com/micromatch/micromatch#matching-features
+
+- Type: `string`
+- Default:
+  ```
+  package.json
+  package-lock.json
+  tsconfig.json
+  {src,lib}/**/*.m?[tj]s
+  jest.config.(js|ts|mjs|cjs|json)
+  ```
+
+#### skip-gen-test-catch-all-workflow
+
+If true, skip the `gen-test-catch-all-workflow` job. This can be useful for example
+when you don't want to expose a token with `workflows` permission to dependabot and
+other collaborators.
+
+- Type: `boolean`
+- Default: `${{ github.actor == 'dependabot[bot]' }}`
+<!-- import-wf-inputs:wf-build.yml END -->
+
+### `.github/workflows/gha-pr-check-labels.yml`
+
+<!-- import:ci-pr-check-labels.yml BEGIN -->
+
+```yaml
+name: Check release labels
+
+on:
+  pull_request:
+    branches:
+      - main
+
+    # Trigger this workflow on events which could cause the
+    # PR to have no labels
+    types:
+      - opened
+      - unlabeled
+
+jobs:
+  # Verifies the presence of release labels when the PR
+  # is opened or labels have changes
+  check-labels:
+    uses: cmaster11/gha/.github/workflows/wf-build-check-labels-only.yml@wf-build-check-labels-only.yml/v1
+    permissions:
+      pull-requests: read
+      contents: read
+```
+
+<!-- import:ci-pr-check-labels.yml END -->
 
 ## Testing
 
@@ -202,13 +300,17 @@ export interface TestPayload {
 <!-- import:../../ARCHITECTURE.mermaid BEGIN -->
 
 ```mermaid
+%%
+%% NOTE: the diagram is stored in `./ARCHITECTURE.mermaid`
+%%
+
 flowchart
     commit["Commit on a PR-branch"]
 
-    subgraph ci-build.yml
+    subgraph wf-build.yml
         get-release-label["Job: get-release-label\nFind the release label\nassociated with the PR"]
         get-changed-dirs["Job: get-changed-dirs\nDetect changed actions\nand workflows"]
-        test["Job: test\nRuns CI tests"]
+        test["Job: test\nRuns CI tests\n(Tests will fail if\nsome files still need\nto be generated)"]
         gen-test-catch-all-workflow["Job: gen-test-catch-all-workflow\nAutomatically generates\na workflow to run\nall test workflows"]
         subgraph build-phase
             build-actions["Job: build-actions\nBuilds all the changed actions"]
@@ -223,10 +325,9 @@ flowchart
         post-build-test-workflows["Job: post-build-test-workflows\nTriggers testing jobs"]
         build-actions -- " Releases the changed\nactions on their branches\n(dev or versioned) " --> post-build-test-actions
         build-workflows -- " Releases the changed\nworkflows on their branches\n(dev or versioned) " --> post-build-test-workflows
-        test <-. " Tests will fail if\nsome files still need\nto be generated " .-> gen-test-catch-all-workflow
     end
 
-    subgraph ci-test-catch-all.yml
+    subgraph cmaster11-gha-ci-test-catch-all.yml
         ci-post-test["Job: ci-post-test\nNotifies GitHub about the result of the test"]
 
         subgraph test-action-example.yml
@@ -250,8 +351,8 @@ flowchart
     post-build-test-actions --> test-action-another.yml
     post-build-test-workflows --> test-wf-test.yml
 
-    gen-test-catch-all-workflow -- " Creates a new commit\ncontaining the generated\ntest catch-all workflow\nand re-triggers the\nwhole pipeline if\nfiles have changed " --> ci-test-catch-all.yml
-    commit --> ci-build.yml
+    gen-test-catch-all-workflow -- " Creates a new commit\ncontaining the generated\ntest catch-all workflow\nand re-triggers the\nwhole pipeline if\nfiles have changed " --> cmaster11-gha-ci-test-catch-all.yml
+    commit --> wf-build.yml
 
 ```
 

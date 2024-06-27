@@ -19,6 +19,7 @@ system to version them all.
 
 <!-- GENERATE_WORKFLOWS BEGIN -->
 
+- [`wf-build-check-labels-only`](./.github/workflows/wf-build-check-labels-only.yml): Check PR release labels
 - [`wf-build`](./.github/workflows/wf-build.README.md): The `wf-build.yml` is an opinionated all-in-one GitHub Actions shared workflow that allows you to build a monorepo
   containing versioned GitHub shared actions and reusable workflows.
 - [`wf-create-release`](./.github/workflows/wf-create-release.yml): Creates a release from an artifact into a standalone branch
@@ -110,13 +111,17 @@ jobs:
 <!-- import:ARCHITECTURE.mermaid BEGIN -->
 
 ```mermaid
+%%
+%% NOTE: the diagram is stored in `./ARCHITECTURE.mermaid`
+%%
+
 flowchart
     commit["Commit on a PR-branch"]
 
-    subgraph ci-build.yml
+    subgraph wf-build.yml
         get-release-label["Job: get-release-label\nFind the release label\nassociated with the PR"]
         get-changed-dirs["Job: get-changed-dirs\nDetect changed actions\nand workflows"]
-        test["Job: test\nRuns CI tests"]
+        test["Job: test\nRuns CI tests\n(Tests will fail if\nsome files still need\nto be generated)"]
         gen-test-catch-all-workflow["Job: gen-test-catch-all-workflow\nAutomatically generates\na workflow to run\nall test workflows"]
         subgraph build-phase
             build-actions["Job: build-actions\nBuilds all the changed actions"]
@@ -131,10 +136,9 @@ flowchart
         post-build-test-workflows["Job: post-build-test-workflows\nTriggers testing jobs"]
         build-actions -- " Releases the changed\nactions on their branches\n(dev or versioned) " --> post-build-test-actions
         build-workflows -- " Releases the changed\nworkflows on their branches\n(dev or versioned) " --> post-build-test-workflows
-        test <-. " Tests will fail if\nsome files still need\nto be generated " .-> gen-test-catch-all-workflow
     end
 
-    subgraph ci-test-catch-all.yml
+    subgraph cmaster11-gha-ci-test-catch-all.yml
         ci-post-test["Job: ci-post-test\nNotifies GitHub about the result of the test"]
 
         subgraph test-action-example.yml
@@ -158,8 +162,8 @@ flowchart
     post-build-test-actions --> test-action-another.yml
     post-build-test-workflows --> test-wf-test.yml
 
-    gen-test-catch-all-workflow -- " Creates a new commit\ncontaining the generated\ntest catch-all workflow\nand re-triggers the\nwhole pipeline if\nfiles have changed " --> ci-test-catch-all.yml
-    commit --> ci-build.yml
+    gen-test-catch-all-workflow -- " Creates a new commit\ncontaining the generated\ntest catch-all workflow\nand re-triggers the\nwhole pipeline if\nfiles have changed " --> cmaster11-gha-ci-test-catch-all.yml
+    commit --> wf-build.yml
 
 ```
 

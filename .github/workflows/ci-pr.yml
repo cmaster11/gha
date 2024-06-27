@@ -1,20 +1,20 @@
-name: CI - Build on PR
+name: Build Github Actions and reusable workflows
 
 on:
   pull_request:
     branches:
       - main
     types:
-      - opened
       - synchronize
       - reopened
       - closed
-      # Triggers the workflow when labels change in the PR
+      # Triggers the workflow when labels are added to the PR
       - labeled
 
 jobs:
+  # Triggers the build flow
   build:
-    uses: ./.github/workflows/ci-build.yml
+    uses: ./.github/workflows/gen-wf-build.yml
     permissions:
       # Required to create new version branches
       contents: write

@@ -63,6 +63,8 @@ async function main() {
       const headRef = getInput('head-ref', { required: true });
       const remapped = getBooleanInput('remapped', { required: true });
       return ciGenTestCatchAllWorkflow({
+        gh,
+        pullNumber,
         headRef,
         remapped
       });
