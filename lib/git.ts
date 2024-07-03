@@ -19,8 +19,13 @@ export async function getGitRemoteBranchesByGlob(
     .map((b) => b.trim().replace(/^origin\//, ''));
 }
 
-export async function gitDiffLines(baseSHA: string) {
-  return (await $`git diff --name-status ${baseSHA}`).stdout
+export async function gitDiffLines(baseSHA: string, verbose?: boolean) {
+  return (
+    await $`git diff --name-status ${baseSHA}`.verbose(
+      // This function is called frequently and generates a lot of noise
+      verbose ?? false
+    )
+  ).stdout
     .split('\n')
     .map((line) => line.trim())
     .filter((line) => line !== '')
