@@ -6,7 +6,21 @@ containing versioned GitHub shared actions and reusable workflows.
 > The [`cmaster11/gha`](https://github.com/cmaster11/gha) repository is entirely built on top of this workflow.
 
 <!-- toc BEGIN -->
-<!-- toc END -->
+
+## Table of Contents
+
+- [cmaster11/gha/.github/workflows/wf-build.yml](#cmaster11ghagithubworkflowswf-buildyml)
+  - [What comes as a result of using this workflow?](#what-comes-as-a-result-of-using-this-workflow)
+  - [What is the UX like?](#what-is-the-ux-like)
+  - [How do you set it up?](#how-do-you-set-it-up)
+    - [`.github/workflows/gha-build.yml`](#githubworkflowsgha-buildyml)
+    - [`.github/workflows/gha-pr-check-labels.yml`](#githubworkflowsgha-pr-check-labelsyml)
+  - [Testing](#testing)
+    - [Test workflows (shared actions)](#test-workflows-shared-actions)
+    - [Test workflows (reusable workflows)](#test-workflows-reusable-workflows)
+    - [`test-ctx`](#test-ctx)
+  - [Architecture](#architecture)
+  <!-- toc END -->
 
 ## What comes as a result of using this workflow?
 
