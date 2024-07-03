@@ -47,3 +47,14 @@ jobs:
       # Or you can completely disable testing, in case you want to run your
       # own test suites before running the actions/workflows build pipeline.
       # skip-test: true
+
+      # You can also decide which glob paths will trigger a rebuild of
+      # all the possible JS actions
+      changes-paths-js: |
+        package.json
+        package-lock.json
+        tsconfig.json
+        lib/**/*.ts
+        # Exclude the CI folder because it contains CI-specific code
+        !lib/ci/**
+        jest.config.mjs

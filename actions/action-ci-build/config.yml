@@ -1,2 +1,6 @@
 copy:
   node_modules/esbuild/bin/esbuild: dist/esbuild
+
+changesPaths:
+  # Excluded in the main ci-pr.yml
+  - lib/ci/**/*.ts

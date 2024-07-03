@@ -7,10 +7,15 @@ import { parse } from 'yaml';
 
 export interface ActionConfig {
   copy?: Record<string, string>;
+  changesPaths?: string | string[];
 }
 
 const ActionConfigSchema = Joi.object({
-  copy: Joi.object({}).unknown(true).meta({ unknownType: Joi.string() })
+  copy: Joi.object({}).unknown(true).meta({ unknownType: Joi.string() }),
+  changesPaths: Joi.alternatives([
+    Joi.string(),
+    Joi.array().items(Joi.string())
+  ])
 });
 
 export async function getActionConfig(
