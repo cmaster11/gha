@@ -18,10 +18,11 @@ export async function globCopy(
   patterns: string | string[],
   destConfig: GlobCopyConfig,
   opts: {
-    cwd: string;
+    srcCwd: string;
+    destCwd: string;
   }
 ) {
-  const files = await glob(patterns, { cwd: opts.cwd });
+  const files = await glob(patterns, { cwd: opts.srcCwd });
   for (let file of files) {
     if (typeof destConfig != 'string') {
       if (destConfig.strip)
@@ -31,9 +32,11 @@ export async function globCopy(
         );
       if (file.startsWith('/')) file = file.substring(1);
     }
-    const srcPath = path.join(opts.cwd, file);
+    const srcPath = path.join(opts.srcCwd, file);
     const destPath = path.join(
-      typeof destConfig == 'string' ? destConfig : destConfig.dest,
+      typeof destConfig == 'string'
+        ? path.join(opts.destCwd, destConfig)
+        : path.join(opts.destCwd, destConfig.dest),
       file
     );
     const dstDir = path.dirname(destPath);

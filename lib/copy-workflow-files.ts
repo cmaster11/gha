@@ -46,7 +46,10 @@ export async function copyWorkflowFiles(workflowName: string) {
     console.log(
       `Copying config-defined glob pattern ${copyKey} to ${workflowConfig.copy[copyKey]}`
     );
-    await globCopy(copyKey, workflowConfig.copy[copyKey], { cwd: rootDir });
+    await globCopy(copyKey, workflowConfig.copy[copyKey], {
+      srcCwd: rootDir,
+      destCwd: tmpDir
+    });
   }
 
   return tmpDir;

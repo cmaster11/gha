@@ -75,7 +75,10 @@ export async function copyActionFiles(
     console.log(
       `Copying config-defined glob pattern ${copyKey} to ${actionConfig.copy[copyKey]}`
     );
-    await globCopy(copyKey, actionConfig.copy[copyKey], { cwd: rootDir });
+    await globCopy(copyKey, actionConfig.copy[copyKey], {
+      srcCwd: rootDir,
+      destCwd: tmpDir
+    });
   }
 
   await fixActionYml(tmpDir, mappedBinaries);
