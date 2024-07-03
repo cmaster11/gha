@@ -4,11 +4,11 @@
 
 import 'zx/globals';
 import path from 'node:path';
-import { actionsDir, rootDir, workflowsDir } from '../constants.js';
+import { actionsDir, rootDir, workflowsDir } from '../lib/constants.js';
 import { parse } from 'yaml';
 import * as prettier from 'prettier';
-import { getGitHubWorkflows } from '../github-workflows.js';
-import { actionsRemapping, workflowsRemapping } from './ci-shared.js';
+import { getGitHubWorkflows } from '../lib/github-workflows.js';
+import { actionsRemapping, workflowsRemapping } from '../lib/ci/ci-shared.js';
 import { mdtocs } from 'mdtocs';
 
 $.verbose = true;

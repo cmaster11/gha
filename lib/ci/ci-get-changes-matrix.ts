@@ -19,7 +19,7 @@ import { getGitHubWorkflowsUsingAction } from '../github-workflows.js';
 import { getPRSuffix } from '../version.js';
 import micromatch from 'micromatch';
 import { gitHubCommentTitle } from './ci-shared.js';
-import { getActionConfig } from '../action-config.js';
+import { getActionConfig } from '../config.js';
 
 export async function ciGetChangesMatrix({
   gh,

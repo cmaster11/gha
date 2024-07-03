@@ -3,8 +3,11 @@
  */
 
 import path from 'node:path';
-import { workflowsDir } from './constants.js';
+import { rootDir, workflowsConfigsDir, workflowsDir } from './constants.js';
 import { glob } from 'zx';
+import { globCopy } from './glob.js';
+
+import { getWorkflowConfig } from './config.js';
 
 export async function copyWorkflowFiles(workflowName: string) {
   const tmpDir = tmpdir();
@@ -33,6 +36,17 @@ export async function copyWorkflowFiles(workflowName: string) {
 
     console.log(`Copying file ${file} to ${dest}`);
     await fs.copy(path.join(workflowsDir, file), dest);
+  }
+
+  const workflowConfig = await getWorkflowConfig(
+    path.join(workflowsConfigsDir, `${workflowName}.config.yml`)
+  );
+
+  for (const copyKey in workflowConfig.copy) {
+    console.log(
+      `Copying config-defined glob pattern ${copyKey} to ${workflowConfig.copy[copyKey]}`
+    );
+    await globCopy(copyKey, workflowConfig.copy[copyKey], { cwd: rootDir });
   }
 
   return tmpDir;

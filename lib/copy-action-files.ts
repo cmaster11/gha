@@ -3,9 +3,10 @@
  */
 
 import path from 'node:path';
-import { actionsDir } from './constants.js';
+import { actionsDir, rootDir } from './constants.js';
 import { parse, stringify } from 'yaml';
-import { getActionConfig } from './action-config.js';
+import { getActionConfig } from './config.js';
+import { globCopy } from './glob.js';
 
 export async function fixActionYml(
   actionDir: string,
@@ -71,12 +72,10 @@ export async function copyActionFiles(
   }
 
   for (const copyKey in actionConfig.copy) {
-    const src = (await fs.exists(path.join(actionDir, copyKey)))
-      ? path.join(actionDir, copyKey)
-      : copyKey;
-    const dest = path.join(tmpDir, actionConfig.copy[copyKey]);
-    console.log(`Copying config-defined file ${src} to ${dest}`);
-    await fs.copy(src, dest);
+    console.log(
+      `Copying config-defined glob pattern ${copyKey} to ${actionConfig.copy[copyKey]}`
+    );
+    await globCopy(copyKey, actionConfig.copy[copyKey], { cwd: rootDir });
   }
 
   await fixActionYml(tmpDir, mappedBinaries);
