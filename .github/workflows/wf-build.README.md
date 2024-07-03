@@ -1,4 +1,4 @@
-# cmaster11/gha/.github/workflows/wf-build.yml
+# `cmaster11/gha/.github/workflows/wf-build.yml`
 
 The `wf-build.yml` is an opinionated all-in-one GitHub Actions shared workflow that allows you to build a monorepo
 containing versioned GitHub shared actions and reusable workflows.
@@ -9,7 +9,7 @@ containing versioned GitHub shared actions and reusable workflows.
 
 ## Table of Contents
 
-- [cmaster11/gha/.github/workflows/wf-build.yml](#cmaster11ghagithubworkflowswf-buildyml)
+- [`cmaster11/gha/.github/workflows/wf-build.yml`](#cmaster11ghagithubworkflowswf-buildyml)
   - [What comes as a result of using this workflow?](#what-comes-as-a-result-of-using-this-workflow)
   - [What is the UX like?](#what-is-the-ux-like)
   - [How do you set it up?](#how-do-you-set-it-up)
@@ -65,6 +65,9 @@ The prerequisites for being able to use this workflow are as follows:
 2. (optional but highly recommended) Having a TypeScript project set up in the root of the repository.
 
 To get started, create the two following workflows in your repository:
+
+1. [`.github/workflows/gha-build.yml`](#githubworkflowsgha-buildyml)
+2. [`.github/workflows/gha-pr-check-labels.yml`](#githubworkflowsgha-pr-check-labelsyml)
 
 ### `.github/workflows/gha-build.yml`
 
@@ -203,6 +206,29 @@ other collaborators.
 
 ### `.github/workflows/gha-pr-check-labels.yml`
 
+This is a utility workflow that covers the `opened` and `unlabeled`
+GitHub [events](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request). Why?
+
+The [`.github/workflows/gha-build.yml`](#githubworkflowsgha-buildyml) workflow only listens
+for `synchronize`, `reopened`, `closed` and `labeled` events because:
+
+1. When opening an unlabeled PR using the GitHub UI, only the `opened` event is raised, so we want to make sure we know
+   the PR is not labeled and raise an error. When this event is raised, it is possible the PR will have or not have any
+   labels.
+2. When removing a label, but not adding another one, only the `unlabeled` event is raised. We need to cover this case
+   too because, if we have 0 labels, we should raise an error.
+3. When opening a labeled PR using the GitHub UI, both the `opened` and `labeled` events are raised at the same time,
+   causing potentially duplicate workflows executions. This means we need to react to either of the two, but not both!
+   If we then need to pick only one event to watch, it should be the `labeled` event, because the `opened` one will be
+   raised no matter what when opening a PR, even if the PR has no labels (point 1).
+
+You could be thinking "Can't you just filter out a duplicate job using the `concurrency` GHA feature? Or using an `if`
+condition?". You wish. If two workflows are executed at the same time, it can happen that the former cancels the
+latter, in which case your PR will have a "failed" status. If you were to use an `if` condition of sorts, and you
+were to execute the same workflow twice, but one of the two executions is skipped, again, "failed" status on your PR.
+
+Because of the previous points, this tiny workflow is (IMHO™) a good coverage for the potentially missed events.
+
 <!-- import:ci-pr-check-labels.yml BEGIN -->
 
 ```yaml
@@ -223,7 +249,7 @@ jobs:
   # Verifies the presence of release labels when the PR
   # is opened or labels have changes
   check-labels:
-    uses: cmaster11/gha/.github/workflows/wf-build-check-labels-only.yml@wf-build-check-labels-only.yml/v1
+    uses: cmaster11/gha/.github/workflows/wf-build-check-labels-only.yml@wf-build-check-labels-only/v1
     permissions:
       pull-requests: read
       contents: read
@@ -237,6 +263,20 @@ You can create test workflows for every shared action and reusable workflow.
 
 The testing flow is the same for both shared action and reusable workflows, as both are executed after
 the build phase.
+
+The only requirement to be able to use test workflows is for them to listen to the `workflow_call` event, and accept the
+`test-ctx` input.
+
+```yaml
+on:
+  workflow_call: { inputs: { test-ctx: { type: string } } }
+```
+
+After you create and commit new test workflows, the `gen-test-catch-all-workflow` will take care of creating a special
+"wrapper" workflow (`cmaster11-gha-ci-test-catch-all.yml`) that will allow the CI to run all the various tests. This
+generated file will be automatically committed to your branch, and you will be tagged in a GitHub comment when this
+happens. Whenever a new generation happens (because of changed test files' names) and you want to continue your local
+development, you will have then to pull the latest changes with `git pull origin BRANCH_NAME`.
 
 ### Test workflows (shared actions)
 
