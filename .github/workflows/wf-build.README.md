@@ -5,6 +5,23 @@ containing versioned GitHub shared actions and reusable workflows.
 
 > The [`cmaster11/gha`](https://github.com/cmaster11/gha) repository is entirely built on top of this workflow.
 
+<!-- toc BEGIN -->
+
+## Table of Contents
+
+- [cmaster11/gha/.github/workflows/wf-build.yml](#cmaster11ghagithubworkflowswf-buildyml)
+  - [What comes as a result of using this workflow?](#what-comes-as-a-result-of-using-this-workflow)
+  - [What is the UX like?](#what-is-the-ux-like)
+  - [How do you set it up?](#how-do-you-set-it-up)
+    - [`.github/workflows/gha-build.yml`](#githubworkflowsgha-buildyml)
+    - [`.github/workflows/gha-pr-check-labels.yml`](#githubworkflowsgha-pr-check-labelsyml)
+  - [Testing](#testing)
+    - [Test workflows (shared actions)](#test-workflows-shared-actions)
+    - [Test workflows (reusable workflows)](#test-workflows-reusable-workflows)
+    - [`test-ctx`](#test-ctx)
+  - [Architecture](#architecture)
+  <!-- toc END -->
+
 ## What comes as a result of using this workflow?
 
 You will be able to generate both composite and JS versioned shared
@@ -27,7 +44,20 @@ jobs:
     uses: cmaster11/gha/.github/workflows/wf-test.yml@wf-test/v1
 ```
 
-## How do you use it?
+## What is the UX like?
+
+The standard flow for publishing the version for a new action or workflow can be summarized in these few steps:
+
+1. Open a PR with changes to one or more actions or workflows, and assign a version
+   label to the PR (`patch`, `minor`, `major`, `no-release`).
+2. If the PR includes test files, the `wf-build.yml` workflow will take care of executing the tests in the right order (
+   first running action tests and then running workflow tests, because the latter usually depend on the former).
+3. When the PR is then merged to the main branch, the `wf-build.yml` workflow will take care of
+   building/packaging/tagging your actions and workflows in their corresponding version
+   branches (the version branches will look like `action-test/v1`/`wf-test/v1` and you will also have access to tags
+   like `action-test/v1.4.1`).
+
+## How do you set it up?
 
 The prerequisites for being able to use this workflow are as follows:
 
@@ -92,6 +122,17 @@ jobs:
       # Or you can completely disable testing, in case you want to run your
       # own test suites before running the actions/workflows build pipeline.
       # skip-test: true
+
+      # You can also decide which glob paths will trigger a rebuild of
+      # all the possible JS actions
+      changes-paths-js: |
+        package.json
+        package-lock.json
+        tsconfig.json
+        lib/**/*.ts
+        # Exclude the CI folder because it contains CI-specific code
+        !lib/ci/**
+        jest.config.mjs
 ```
 
 <!-- import:ci-pr.yml END -->

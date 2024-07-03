@@ -19,6 +19,7 @@ import { getGitHubWorkflowsUsingAction } from '../github-workflows.js';
 import { getPRSuffix } from '../version.js';
 import micromatch from 'micromatch';
 import { gitHubCommentTitle } from './ci-shared.js';
+import { getActionConfig } from '../action-config.js';
 
 export async function ciGetChangesMatrix({
   gh,
@@ -49,9 +50,13 @@ export async function ciGetChangesMatrix({
     const branches = await getGitRemoteBranchesByGlob(changedAction + '/v*');
     const latestVersion = branches.reduce((n: number, el) => {
       const match = /\/v(\d+)$/.exec(el);
-      if (match == null) return n;
+      if (match == null) {
+        return n;
+      }
       const num = parseInt(match[1]);
-      if (num > n) return num;
+      if (num > n) {
+        return num;
+      }
       return n;
     }, -1);
     changedActionsWithLatestVersion[changedAction] =
@@ -113,6 +118,9 @@ async function getChangedActions({
   baseSHA: string;
   changesPathsJs: string[];
 }): Promise<string[]> {
+  const allActions = await fs.readdir(actionsDir);
+  const diffLines = await gitDiffLines(baseSHA);
+
   const changedActions = new Set<string>([
     ...(
       await getChangedDirectories({
@@ -147,9 +155,8 @@ async function getChangedActions({
       })
   ]);
 
+  // If any JS-related files change, rebuild all JS actions
   if (changesPathsJs.length > 0) {
-    // If any JS-related files change, rebuild all JS actions
-    const diffLines = await gitDiffLines(baseSHA);
     const jsMatches = micromatch(
       diffLines.map(([, p]) => p),
       changesPathsJs
@@ -160,7 +167,6 @@ async function getChangedActions({
         `Found global JS changes: ${inspect(jsMatches, { depth: null })}`
       );
 
-      const allActions = await fs.readdir(actionsDir);
       for (const actionName of allActions) {
         const actionDir = path.join(actionsDir, actionName);
         for await (const file of klaw(actionDir, {
@@ -174,6 +180,28 @@ async function getChangedActions({
           );
           changedActions.add(actionName);
           break;
+        }
+      }
+    }
+  }
+
+  // Find actions that have a custom "change files pattern"
+  {
+    for (const actionName of allActions) {
+      const actionDir = path.join(actionsDir, actionName);
+      const actionConfig = await getActionConfig(
+        path.join(actionDir, 'config.yml')
+      );
+      if (actionConfig.changesPaths) {
+        const matches = micromatch(
+          diffLines.map(([, p]) => p),
+          actionConfig.changesPaths
+        );
+        if (matches.length > 0) {
+          console.log(
+            `Found changed action ${actionName} because of action-configured changesPaths`
+          );
+          changedActions.add(actionName);
         }
       }
     }
