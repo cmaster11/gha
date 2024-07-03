@@ -10,16 +10,16 @@ containing versioned GitHub shared actions and reusable workflows.
 ## Table of Contents
 
 - [`cmaster11/gha/.github/workflows/wf-build.yml`](#cmaster11ghagithubworkflowswf-buildyml)
-  - [What comes as a result of using this workflow?](#what-comes-as-a-result-of-using-this-workflow)
-  - [What is the UX like?](#what-is-the-ux-like)
-  - [How do you set it up?](#how-do-you-set-it-up)
-    - [`.github/workflows/gha-build.yml`](#githubworkflowsgha-buildyml)
-    - [`.github/workflows/gha-pr-check-labels.yml`](#githubworkflowsgha-pr-check-labelsyml)
-  - [Testing](#testing)
-    - [Test workflows (shared actions)](#test-workflows-shared-actions)
-    - [Test workflows (reusable workflows)](#test-workflows-reusable-workflows)
-    - [`test-ctx`](#test-ctx)
-  - [Architecture](#architecture)
+    - [What comes as a result of using this workflow?](#what-comes-as-a-result-of-using-this-workflow)
+    - [What is the UX like?](#what-is-the-ux-like)
+    - [How do you set it up?](#how-do-you-set-it-up)
+        - [`.github/workflows/gha-build.yml`](#githubworkflowsgha-buildyml)
+        - [`.github/workflows/gha-pr-check-labels.yml`](#githubworkflowsgha-pr-check-labelsyml)
+    - [Testing](#testing)
+        - [Test workflows (shared actions)](#test-workflows-shared-actions)
+        - [Test workflows (reusable workflows)](#test-workflows-reusable-workflows)
+        - [`test-ctx`](#test-ctx)
+    - [Architecture](#architecture)
   <!-- toc END -->
 
 ## What comes as a result of using this workflow?
@@ -202,6 +202,7 @@ other collaborators.
 
 - Type: `boolean`
 - Default: `${{ github.actor == 'dependabot[bot]' }}`
+
 <!-- import-wf-inputs:wf-build.yml END -->
 
 ### `.github/workflows/gha-pr-check-labels.yml`
@@ -273,9 +274,11 @@ on:
 ```
 
 After you create and commit new test workflows, the `gen-test-catch-all-workflow` will take care of creating a special
-"wrapper" workflow (`cmaster11-gha-ci-test-catch-all.yml`) that will allow the CI to run all the various tests. This
-generated file will be automatically committed to your branch, and you will be tagged in a GitHub comment when this
-happens. Whenever a new generation happens (because of changed test files' names) and you want to continue your local
+"wrapper" workflow ([`cmaster11-gha-ci-test-catch-all.yml`](cmaster11-gha-ci-test-catch-all.yml)) that will allow the CI
+to run all the various tests. This generated file will be automatically committed to your branch, and you will be tagged
+in a GitHub comment when this happens.
+
+Whenever a new generation happens (because of changed test files' names) and you want to continue your local
 development, you will have then to pull the latest changes with `git pull origin BRANCH_NAME`.
 
 ### Test workflows (shared actions)
@@ -431,7 +434,6 @@ flowchart
     post-build-test-actions --> test-action-example.yml
     post-build-test-actions --> test-action-another.yml
     post-build-test-workflows --> test-wf-test.yml
-
     gen-test-catch-all-workflow -- " Creates a new commit\ncontaining the generated\ntest catch-all workflow\nand re-triggers the\nwhole pipeline if\nfiles have changed " --> cmaster11-gha-ci-test-catch-all.yml
     commit --> wf-build.yml
 
