@@ -22,7 +22,7 @@ export async function globCopy(
     destCwd: string;
   }
 ) {
-  const files = await glob(patterns, { cwd: opts.srcCwd });
+  const files = await glob(patterns, { cwd: opts.srcCwd, onlyFiles: true });
   for (let file of files) {
     if (typeof destConfig != 'string') {
       if (destConfig.strip)
