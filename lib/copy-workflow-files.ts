@@ -15,29 +15,32 @@ export async function copyWorkflowFiles(workflowName: string) {
   await fs.mkdirp(tmpWorkflowsDir);
   console.log(`Cloning workflow ${workflowName} files to ${tmpWorkflowsDir}`);
 
-  // Copy over all relevant workflow files
-  const filesToCopy = await glob(
-    [
-      `${workflowName}.yml`,
-      // Any sub-workflows
-      `${workflowName}.*.yml`,
-      `${workflowName}.README.md`
-    ],
-    {
-      cwd: workflowsDir
-    }
-  );
+  {
+    // Copy over all relevant workflow files
+    const filesToCopy = await glob(
+      [
+        `${workflowName}.yml`,
+        // Any sub-workflows
+        `${workflowName}.*.yml`,
+        `${workflowName}.README.md`
+      ],
+      {
+        cwd: workflowsDir
+      }
+    );
 
-  for (const file of filesToCopy) {
-    let dest = path.join(tmpWorkflowsDir, file);
-    if (file == `${workflowName}.README.md`) {
-      dest = path.join(tmpDir, 'README.md');
-    }
+    for (const file of filesToCopy) {
+      let dest = path.join(tmpWorkflowsDir, file);
+      if (file == `${workflowName}.README.md`) {
+        dest = path.join(tmpDir, 'README.md');
+      }
 
-    console.log(`Copying file ${file} to ${dest}`);
-    await fs.copy(path.join(workflowsDir, file), dest);
+      console.log(`Copying file ${file} to ${dest}`);
+      await fs.copy(path.join(workflowsDir, file), dest);
+    }
   }
 
+  // Copy any additionally defined files
   const workflowConfig = await getWorkflowConfig(
     path.join(workflowsConfigsDir, `${workflowName}.config.yml`)
   );
