@@ -4,10 +4,10 @@
 
 import 'zx/globals';
 import path from 'node:path';
-import { workflowsDir } from '../constants.js';
+import { workflowsDir } from '../lib/constants.js';
 import { parse, stringify } from 'yaml';
 import * as prettier from 'prettier';
-import { actionsRemapping } from './ci-shared.js';
+import { actionsRemapping } from '../lib/ci/ci-shared.js';
 
 $.verbose = true;
 

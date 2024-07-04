@@ -10,7 +10,7 @@ import {
 } from '../get-changed-directories.js';
 import { inspect } from 'node:util';
 import { setOutput } from '@actions/core';
-import { actionsDir } from '../constants.js';
+import { actionsDir, workflowsConfigsDir, workflowsDir } from '../constants.js';
 import path from 'node:path';
 import klaw from 'klaw';
 import type { GithubCommonProps } from '../github-common.js';
@@ -19,6 +19,8 @@ import { getGitHubWorkflowsUsingAction } from '../github-workflows.js';
 import { getPRSuffix } from '../version.js';
 import micromatch from 'micromatch';
 import { gitHubCommentTitle } from './ci-shared.js';
+import { getActionConfig, getWorkflowConfig } from '../config.js';
+import { escapeRegExp } from '../regex.js';
 
 export async function ciGetChangesMatrix({
   gh,
@@ -33,6 +35,9 @@ export async function ciGetChangesMatrix({
 }) {
   // Fetch all remote branches
   await $`git fetch origin`;
+
+  // Logging/debugging purposes
+  await gitDiffLines(baseSHA, true);
 
   /*
   Find out all changes actions and then any workflows
@@ -49,9 +54,13 @@ export async function ciGetChangesMatrix({
     const branches = await getGitRemoteBranchesByGlob(changedAction + '/v*');
     const latestVersion = branches.reduce((n: number, el) => {
       const match = /\/v(\d+)$/.exec(el);
-      if (match == null) return n;
+      if (match == null) {
+        return n;
+      }
       const num = parseInt(match[1]);
-      if (num > n) return num;
+      if (num > n) {
+        return num;
+      }
       return n;
     }, -1);
     changedActionsWithLatestVersion[changedAction] =
@@ -113,6 +122,9 @@ async function getChangedActions({
   baseSHA: string;
   changesPathsJs: string[];
 }): Promise<string[]> {
+  const allActions = await fs.readdir(actionsDir);
+  const diffLines = await gitDiffLines(baseSHA);
+
   const changedActions = new Set<string>([
     ...(
       await getChangedDirectories({
@@ -147,9 +159,8 @@ async function getChangedActions({
       })
   ]);
 
+  // If any JS-related files change, rebuild all JS actions
   if (changesPathsJs.length > 0) {
-    // If any JS-related files change, rebuild all JS actions
-    const diffLines = await gitDiffLines(baseSHA);
     const jsMatches = micromatch(
       diffLines.map(([, p]) => p),
       changesPathsJs
@@ -160,7 +171,6 @@ async function getChangedActions({
         `Found global JS changes: ${inspect(jsMatches, { depth: null })}`
       );
 
-      const allActions = await fs.readdir(actionsDir);
       for (const actionName of allActions) {
         const actionDir = path.join(actionsDir, actionName);
         for await (const file of klaw(actionDir, {
@@ -174,6 +184,28 @@ async function getChangedActions({
           );
           changedActions.add(actionName);
           break;
+        }
+      }
+    }
+  }
+
+  // Find actions that have a custom "change files pattern"
+  {
+    for (const actionName of allActions) {
+      const actionDir = path.join(actionsDir, actionName);
+      const actionConfig = await getActionConfig(
+        path.join(actionDir, 'config.yml')
+      );
+      if (actionConfig.changesPaths) {
+        const matches = micromatch(
+          diffLines.map(([, p]) => p),
+          actionConfig.changesPaths
+        );
+        if (matches.length > 0) {
+          console.log(
+            `Found changed action ${actionName} because of action-configured changesPaths`
+          );
+          changedActions.add(actionName);
         }
       }
     }
@@ -194,24 +226,52 @@ async function getChangedWorkflows({
   // key/latest version branch
   changedActionsWithLatestVersion: Record<string, number | undefined>;
 }): Promise<string[]> {
-  const changedWorkflows = new Set<string>([
-    ...(
-      await getChangedFiles({
-        baseSHA,
-        regex: /^\.github\/workflows\/(test-)?(?:workflow|wf)-[^.]+\.yml$/,
-        ignoreDeletions: true
-      })
-    ).map((d) => {
-      const newValue = d.replace(
-        /^\.github\/workflows\/(?:test-)?((?:workflow|wf)-.+)\.yml$/,
-        '$1'
-      );
+  const allWorkflows = (await fs.readdir(workflowsDir))
+    .filter((p) => /^(wf|workflow)-.+\.yml$/.test(p))
+    .map((p) => p.replace(/\.yml$/, ''));
+  const diffLines = await gitDiffLines(baseSHA);
+
+  const changedWorkflows = new Set<string>();
+
+  for (const workflowName of allWorkflows) {
+    // Check if any related files have changes
+    if (
+      (
+        await getChangedFiles({
+          baseSHA,
+          regex: [
+            // Workflow config
+            new RegExp(
+              '^' +
+                escapeRegExp(
+                  `${path.resolve(workflowsConfigsDir)}/${workflowName}.config.yml`
+                ) +
+                '$'
+            ),
+
+            // Workflow file and related YML files
+            new RegExp(
+              '^' +
+                escapeRegExp(`.github/workflows/${workflowName}`) +
+                '(\\..+)?\\.yml$'
+            ),
+
+            // Readme file
+            new RegExp(
+              '^' + escapeRegExp(`.github/workflows/${workflowName}.README.md`)
+            )
+          ],
+
+          ignoreDeletions: true
+        })
+      ).length > 0
+    ) {
       console.log(
-        `Found changed workflow ${newValue} because of changed workflow${/\/test-/.test(d) ? ' test' : ''} file`
+        `Found changed workflow ${workflowName} because of related files`
       );
-      return newValue;
-    })
-  ]);
+      changedWorkflows.add(workflowName);
+    }
+  }
 
   // Find all workflows that are using one of the changed actions
   for (const changedAction in changedActionsWithLatestVersion) {
@@ -232,6 +292,27 @@ async function getChangedWorkflows({
         `Found changed workflow ${changedWorkflow} because of related action ${changedAction}/${variant} changed`
       );
       changedWorkflows.add(changedWorkflow);
+    }
+  }
+
+  // Find workflows that have a custom "change files pattern"
+  {
+    for (const workflowName of allWorkflows) {
+      const workflowConfig = await getWorkflowConfig(
+        path.join(workflowsConfigsDir, `${workflowName}.config.yml`)
+      );
+      if (workflowConfig.changesPaths) {
+        const matches = micromatch(
+          diffLines.map(([, p]) => p),
+          workflowConfig.changesPaths
+        );
+        if (matches.length > 0) {
+          console.log(
+            `Found changed workflow ${workflowName} because of workflow-configured changesPaths`
+          );
+          changedWorkflows.add(workflowName);
+        }
+      }
     }
   }
 
