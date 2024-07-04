@@ -24,6 +24,7 @@ export async function globCopy(
 ) {
   const files = await glob(patterns, { cwd: opts.srcCwd, onlyFiles: true });
   for (let file of files) {
+    const srcPath = path.join(opts.srcCwd, file);
     if (typeof destConfig != 'string') {
       if (destConfig.strip)
         file = file.replace(
@@ -32,7 +33,6 @@ export async function globCopy(
         );
       if (file.startsWith('/')) file = file.substring(1);
     }
-    const srcPath = path.join(opts.srcCwd, file);
     const destPath = path.join(
       typeof destConfig == 'string'
         ? path.join(opts.destCwd, destConfig)
