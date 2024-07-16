@@ -17,7 +17,7 @@ export const workflowsRemapping = {
   './.github/workflows/gen-wf-build.yml':
     'cmaster11/gha/.github/workflows/wf-build.yml@wf-build/v1',
   './.github/workflows/gen-wf-build-check-labels-only.yml':
-    'cmaster11/gha/.github/workflows/wf-build-check-labels-only.yml@wf-build-check-labels-only.yml/v1'
+    'cmaster11/gha/.github/workflows/wf-build-check-labels-only.yml@wf-build-check-labels-only/v1'
 };
 
 export async function createCommitStatusAndTriggerTestWorkflow({

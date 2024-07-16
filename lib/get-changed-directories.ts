@@ -8,7 +8,7 @@ import { gitDiffLines } from './git.js';
 
 export interface GetChangedFilesOpts {
   baseSHA: string;
-  regex?: RegExp;
+  regex?: RegExp | RegExp[];
   ignoreDeletions?: boolean;
 }
 
@@ -20,7 +20,7 @@ export async function getChangedFiles({
   regex ??= /.*/;
 
   const diffLines = (await gitDiffLines(baseSHA)).filter(([, p]) =>
-    regex.test(p)
+    Array.isArray(regex) ? regex.some((re) => re.test(p)) : regex.test(p)
   );
 
   // Composes an object where the key is the file and the value is `true` if at least 1 file was NOT deleted

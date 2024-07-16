@@ -1,0 +1,7 @@
+copy:
+  '.github/workflows/docs/wf-build/**':
+    dest: docs/wf-build
+    strip: .github/workflows
+
+changesPaths:
+  - .github/workflows/docs/wf-build/**

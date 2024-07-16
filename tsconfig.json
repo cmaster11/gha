@@ -22,5 +22,5 @@
     "resolveJsonModule": true,
     "esModuleInterop": true
   },
-  "include": ["lib", "actions"]
+  "include": ["bin", "lib", "actions"]
 }

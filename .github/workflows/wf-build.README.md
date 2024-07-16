@@ -1,9 +1,28 @@
-# cmaster11/gha/.github/workflows/wf-build.yml
+# `cmaster11/gha/.github/workflows/wf-build.yml`
 
-The `wf-build.yml` is an opinionated all-in-one GitHub Actions shared workflow that allows you to build a monorepo
-containing versioned GitHub shared actions and reusable workflows.
+The `wf-build.yml` is an opinionated all-in-one GitHub reusable workflow that allows you to build a monorepo
+containing versioned GitHub actions and reusable workflows.
 
 > The [`cmaster11/gha`](https://github.com/cmaster11/gha) repository is entirely built on top of this workflow.
+
+<!-- toc BEGIN -->
+
+## Table of Contents
+
+- [`cmaster11/gha/.github/workflows/wf-build.yml`](#cmaster11ghagithubworkflowswf-buildyml)
+  - [What comes as a result of using this workflow?](#what-comes-as-a-result-of-using-this-workflow)
+  - [What is the UX like?](#what-is-the-ux-like)
+  - [How do you set it up?](#how-do-you-set-it-up)
+    - [`.github/workflows/gha-build.yml`](#githubworkflowsgha-buildyml)
+    - [`.github/workflows/gha-pr-check-labels.yml`](#githubworkflowsgha-pr-check-labelsyml)
+  - [Developing actions](#developing-actions)
+  - [Developing workflows](#developing-workflows)
+  - [Testing](#testing)
+    - [Test workflows (actions)](#test-workflows-actions)
+    - [Test workflows (reusable workflows)](#test-workflows-reusable-workflows)
+    - [`test-ctx`](#test-ctx)
+  - [Architecture](#architecture)
+  <!-- toc END -->
 
 ## What comes as a result of using this workflow?
 
@@ -27,18 +46,34 @@ jobs:
     uses: cmaster11/gha/.github/workflows/wf-test.yml@wf-test/v1
 ```
 
-## How do you use it?
+## What is the UX like?
+
+The standard flow for publishing the version for a new action or workflow can be summarized in these few steps:
+
+1. Open a PR with changes to one or more actions or workflows, and assign a version
+   label to the PR (`patch`, `minor`, `major`, `no-release`).
+2. If the PR includes test files, the `wf-build.yml` workflow will take care of executing the tests in the right order (
+   first running action tests and then running workflow tests, because the latter usually depend on the former).
+3. When the PR is then merged to the main branch, the `wf-build.yml` workflow will take care of
+   building/packaging/tagging your actions and workflows in their corresponding version
+   branches (the version branches will look like `action-test/v1`/`wf-test/v1` and you will also have access to tags
+   like `action-test/v1.4.1`).
+
+## How do you set it up?
 
 The prerequisites for being able to use this workflow are as follows:
 
-1. Having an `actions` folder, which will contain all your shared actions.
+1. Having an `actions` folder, which will contain all the actions you want to share.
 2. (optional but highly recommended) Having a TypeScript project set up in the root of the repository.
 
 To get started, create the two following workflows in your repository:
 
+1. [`.github/workflows/gha-build.yml`](#githubworkflowsgha-buildyml)
+2. [`.github/workflows/gha-pr-check-labels.yml`](#githubworkflowsgha-pr-check-labelsyml)
+
 ### `.github/workflows/gha-build.yml`
 
-This is the main workflow, which will take care of building and versioning your shared actions and reusable workflows.
+This is the main workflow, which will take care of building and versioning your actions and reusable workflows.
 
 <!-- import:ci-pr.yml BEGIN -->
 
@@ -92,6 +127,17 @@ jobs:
       # Or you can completely disable testing, in case you want to run your
       # own test suites before running the actions/workflows build pipeline.
       # skip-test: true
+
+      # You can also decide which glob paths will trigger a rebuild of
+      # all the possible JS actions
+      changes-paths-js: |
+        package.json
+        package-lock.json
+        tsconfig.json
+        lib/**/*.ts
+        # Exclude the CI folder because it contains CI-specific code
+        !lib/ci/**
+        jest.config.mjs
 ```
 
 <!-- import:ci-pr.yml END -->
@@ -162,6 +208,29 @@ other collaborators.
 
 ### `.github/workflows/gha-pr-check-labels.yml`
 
+This is a utility workflow that covers the `opened` and `unlabeled`
+GitHub [events](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request). Why?
+
+The [`.github/workflows/gha-build.yml`](#githubworkflowsgha-buildyml) workflow only listens
+for `synchronize`, `reopened`, `closed` and `labeled` events because:
+
+1. When opening an unlabeled PR using the GitHub UI, only the `opened` event is raised, so we want to make sure we know
+   the PR is not labeled and raise an error. When this event is raised, it is possible the PR will have or not have any
+   labels.
+2. When removing a label, but not adding another one, only the `unlabeled` event is raised. We need to cover this case
+   too because, if we have 0 labels, we should raise an error.
+3. When opening a labeled PR using the GitHub UI, both the `opened` and `labeled` events are raised at the same time,
+   causing potentially duplicate workflows executions. This means we need to react to either of the two, but not both!
+   If we then need to pick only one event to watch, it should be the `labeled` event, because the `opened` one will be
+   raised no matter what when opening a PR, even if the PR has no labels (point 1).
+
+You could be thinking "Can't you just filter out a duplicate job using the `concurrency` GHA feature? Or using an `if`
+condition?". You wish. If two workflows are executed at the same time, it can happen that the former cancels the
+latter, in which case your PR will have a "failed" status. If you were to use an `if` condition of sorts, and you
+were to execute the same workflow twice, but one of the two executions is skipped, again, "failed" status on your PR.
+
+Because of the previous points, this tiny workflow is (IMHO™) a good coverage for the potentially missed events.
+
 <!-- import:ci-pr-check-labels.yml BEGIN -->
 
 ```yaml
@@ -182,7 +251,7 @@ jobs:
   # Verifies the presence of release labels when the PR
   # is opened or labels have changes
   check-labels:
-    uses: cmaster11/gha/.github/workflows/wf-build-check-labels-only.yml@wf-build-check-labels-only.yml/v1
+    uses: cmaster11/gha/.github/workflows/wf-build-check-labels-only.yml@wf-build-check-labels-only/v1
     permissions:
       pull-requests: read
       contents: read
@@ -190,14 +259,48 @@ jobs:
 
 <!-- import:ci-pr-check-labels.yml END -->
 
+## Developing actions
+
+TODO
+TODO
+TODO
+TODO
+TODO
+
+## Developing workflows
+
+TODO
+TODO
+TODO
+TODO
+TODO
+
 ## Testing
 
-You can create test workflows for every shared action and reusable workflow.
+You can create test workflows for every action and reusable workflow.
 
-The testing flow is the same for both shared action and reusable workflows, as both are executed after
+The testing flow is the same for both actions and reusable workflows, as both are executed after
 the build phase.
 
-### Test workflows (shared actions)
+The only requirement to be able to use test workflows is for them to listen to the `workflow_call` event, and accept the
+`test-ctx` input.
+
+```yaml
+on:
+  workflow_call: { inputs: { test-ctx: { type: string } } }
+```
+
+After you create and commit new test workflows, the `gen-test-catch-all-workflow` will take care of creating a special
+"wrapper" workflow ([`cmaster11-gha-ci-test-catch-all.yml`](cmaster11-gha-ci-test-catch-all.yml)) that will allow the CI
+to run all the various tests. This generated file will be automatically committed to your branch, and you will be tagged
+in a GitHub comment when this happens.
+
+Whenever a new generation happens (because of changed test files' names) and you want to continue your local
+development, you will have then to pull the latest changes with `git pull origin BRANCH_NAME`.
+
+![](docs/wf-build/img-test-catch-all-comment.png)
+
+### Test workflows (actions)
 
 The name of the test workflow needs to be `.github/workflows/test-ACTION-NAME.yml`.
 
