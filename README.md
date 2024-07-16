@@ -1,7 +1,7 @@
 # `cmaster11/gha/.github/workflows/wf-build.yml`
 
-The `wf-build.yml` is an opinionated all-in-one GitHub Actions shared workflow that allows you to build a monorepo
-containing versioned GitHub shared actions and reusable workflows.
+The `wf-build.yml` is an opinionated all-in-one GitHub reusable workflow that allows you to build a monorepo
+containing versioned GitHub actions and reusable workflows.
 
 > The [`cmaster11/gha`](https://github.com/cmaster11/gha) repository is entirely built on top of this workflow.
 
@@ -15,8 +15,10 @@ containing versioned GitHub shared actions and reusable workflows.
   - [How do you set it up?](#how-do-you-set-it-up)
     - [`.github/workflows/gha-build.yml`](#githubworkflowsgha-buildyml)
     - [`.github/workflows/gha-pr-check-labels.yml`](#githubworkflowsgha-pr-check-labelsyml)
+  - [Developing actions](#developing-actions)
+  - [Developing workflows](#developing-workflows)
   - [Testing](#testing)
-    - [Test workflows (shared actions)](#test-workflows-shared-actions)
+    - [Test workflows (actions)](#test-workflows-actions)
     - [Test workflows (reusable workflows)](#test-workflows-reusable-workflows)
     - [`test-ctx`](#test-ctx)
   - [Architecture](#architecture)
@@ -61,7 +63,7 @@ The standard flow for publishing the version for a new action or workflow can be
 
 The prerequisites for being able to use this workflow are as follows:
 
-1. Having an `actions` folder, which will contain all your shared actions.
+1. Having an `actions` folder, which will contain all the actions you want to share.
 2. (optional but highly recommended) Having a TypeScript project set up in the root of the repository.
 
 To get started, create the two following workflows in your repository:
@@ -71,7 +73,7 @@ To get started, create the two following workflows in your repository:
 
 ### `.github/workflows/gha-build.yml`
 
-This is the main workflow, which will take care of building and versioning your shared actions and reusable workflows.
+This is the main workflow, which will take care of building and versioning your actions and reusable workflows.
 
 <!-- import:ci-pr.yml BEGIN -->
 
@@ -257,11 +259,27 @@ jobs:
 
 <!-- import:ci-pr-check-labels.yml END -->
 
+## Developing actions
+
+TODO
+TODO
+TODO
+TODO
+TODO
+
+## Developing workflows
+
+TODO
+TODO
+TODO
+TODO
+TODO
+
 ## Testing
 
-You can create test workflows for every shared action and reusable workflow.
+You can create test workflows for every action and reusable workflow.
 
-The testing flow is the same for both shared action and reusable workflows, as both are executed after
+The testing flow is the same for both actions and reusable workflows, as both are executed after
 the build phase.
 
 The only requirement to be able to use test workflows is for them to listen to the `workflow_call` event, and accept the
@@ -282,7 +300,7 @@ development, you will have then to pull the latest changes with `git pull origin
 
 ![](docs/wf-build/img-test-catch-all-comment.png)
 
-### Test workflows (shared actions)
+### Test workflows (actions)
 
 The name of the test workflow needs to be `.github/workflows/test-ACTION-NAME.yml`.
 
