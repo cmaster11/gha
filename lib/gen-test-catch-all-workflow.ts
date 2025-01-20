@@ -21,7 +21,7 @@ export async function genTestCatchAllWorkflow(
     ? await fs.readFile(outFilePath, 'utf-8')
     : undefined;
 
-  // Build the wf-build.yml workflow from the gen-wf-build.yml one
+  // Build the wf-build.yml workflow from the tpl-wf-build.yml one
   const allTestWorkflows = (await fs.readdir(workflowsDir)).filter((w) =>
     /^test-(action|workflow|wf)-[^.]+.yml$/.test(w)
   );

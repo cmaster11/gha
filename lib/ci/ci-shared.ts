@@ -14,9 +14,9 @@ export const actionsRemapping = {
   './tmp-inline/action-ci-build': 'action-ci-build/v0'
 };
 export const workflowsRemapping = {
-  './.github/workflows/gen-wf-build.yml':
+  './.github/workflows/tpl-wf-build.yml':
     'cmaster11/gha/.github/workflows/wf-build.yml@wf-build/v1',
-  './.github/workflows/gen-wf-build-check-labels-only.yml':
+  './.github/workflows/tpl-wf-build-check-labels-only.yml':
     'cmaster11/gha/.github/workflows/wf-build-check-labels-only.yml@wf-build-check-labels-only/v1'
 };
 
