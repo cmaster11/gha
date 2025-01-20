@@ -12,12 +12,12 @@ import { actionsRemapping } from '../lib/ci/ci-shared.js';
 $.verbose = true;
 
 const workflowsToGen = (await fs.readdir(workflowsDir)).filter((f) =>
-  f.startsWith('gen-wf')
+  f.startsWith('tpl-wf')
 );
 
 for (const workflowName of workflowsToGen) {
-  // Build the wf-XXX.yml workflow from the gen-wf-XXX.yml one
-  const outFileName = workflowName.replace(/^gen-wf-/, 'wf-');
+  // Build the wf-XXX.yml workflow from the tpl-wf-XXX.yml one
+  const outFileName = workflowName.replace(/^tpl-wf-/, 'wf-');
   const workflow = parse(
     await fs.readFile(path.join(workflowsDir, workflowName), 'utf-8')
   );

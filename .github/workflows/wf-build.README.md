@@ -403,9 +403,7 @@ export interface TestPayload {
 <!-- import:../../ARCHITECTURE.mermaid BEGIN -->
 
 ```mermaid
-%%
 %% NOTE: the diagram is stored in `./ARCHITECTURE.mermaid`
-%%
 
 flowchart
     commit["Commit on a PR-branch"]

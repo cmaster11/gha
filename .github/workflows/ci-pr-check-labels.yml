@@ -15,7 +15,7 @@ jobs:
   # Verifies the presence of release labels when the PR
   # is opened or labels have changes
   check-labels:
-    uses: ./.github/workflows/gen-wf-build-check-labels-only.yml
+    uses: ./.github/workflows/tpl-wf-build-check-labels-only.yml
     permissions:
       pull-requests: read
       contents: read
