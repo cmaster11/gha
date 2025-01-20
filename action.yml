@@ -1,0 +1,30 @@
+name: ci-build.yml helper
+description: An internal helper for the ci-build.yml workflow.
+inputs:
+  phase:
+    required: true
+  token:
+    required: true
+  action-name: {}
+  workflow-name: {}
+  release: {}
+  release-label: {}
+  changes-paths-js: {}
+  remapped: {}
+  version-branch: {}
+  head-ref: {}
+  head-sha: {}
+  needs-json: {}
+  test-ctx: {}
+outputs:
+  had-changes: {}
+  release-label: {}
+  continue-release: {}
+  matrix-actions: {}
+  matrix-actions-empty: {}
+  matrix-workflows: {}
+  matrix-workflows-empty: {}
+  version-branch: {}
+runs:
+  using: node20
+  main: dist/index.mjs
