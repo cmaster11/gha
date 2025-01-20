@@ -19,6 +19,7 @@ import { ciPostBuildTestWorkflows } from '../../lib/ci/ci-post-build-test-workfl
 import { ciPostTest } from '../../lib/ci/ci-post-test.js';
 import { ciGenTestCatchAllWorkflow } from '../../lib/ci/ci-gen-test-catch-all-workflow.js';
 import type { TestPayload } from '../../lib/ci/ci-shared-test-payload.js';
+import { globStringToGlob } from '../../lib/glob.js';
 
 async function main() {
   const phase = getInput('phase', { required: true });
@@ -73,10 +74,7 @@ async function main() {
       return ciGetReleaseLabel({ gh, pullNumber });
     }
     case 'get-changed-elements': {
-      const changesPathsJs = getInput('changes-paths-js')
-        .split('\n')
-        .map((p) => p.trim())
-        .filter((p) => p != '' && !p.startsWith('#'));
+      const changesPathsJs = globStringToGlob(getInput('changes-paths-js'));
       return ciGetChangesMatrix({
         gh,
         pullNumber,

@@ -4,7 +4,7 @@
 
 import 'zx/globals';
 import { minimist } from 'zx';
-import { genTestCatchAllWorkflow } from '../gen-test-catch-all-workflow.js';
+import { genTestCatchAllWorkflow } from '../lib/gen-test-catch-all-workflow.js';
 
 $.verbose = true;
 

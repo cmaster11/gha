@@ -4,11 +4,12 @@
 
 import 'zx/globals';
 import path from 'node:path';
-import { actionsDir, rootDir, workflowsDir } from '../constants.js';
+import { actionsDir, rootDir, workflowsDir } from '../lib/constants.js';
 import { parse } from 'yaml';
 import * as prettier from 'prettier';
-import { getGitHubWorkflows } from '../github-workflows.js';
-import { actionsRemapping, workflowsRemapping } from './ci-shared.js';
+import { getGitHubWorkflows } from '../lib/github-workflows.js';
+import { actionsRemapping, workflowsRemapping } from '../lib/ci/ci-shared.js';
+import { mdtocs } from 'mdtocs';
 
 $.verbose = true;
 
@@ -19,6 +20,23 @@ async function importContent(fileName: string): Promise<string> {
   content = content.replaceAll(/^\/*.*Copyright.* \*\/$/gms, '');
 
   return content;
+}
+
+function replaceContent(
+  src: string,
+  key: string,
+  value: string,
+  re?: RegExp
+): string {
+  const keyBegin = `<!-- ${key} BEGIN -->`;
+  const keyEnd = `<!-- ${key} END -->`;
+
+  const contentLenBefore = src.length;
+  src =
+    src.split(keyBegin)[0] + keyBegin + value + keyEnd + src.split(keyEnd)[1];
+  const contentLenAfter = src.length;
+  if (re) re.lastIndex += contentLenAfter - contentLenBefore;
+  return src;
 }
 
 const paths = [
@@ -114,33 +132,33 @@ for (const workflow of allWorkflows) {
 for (const filePath of paths) {
   let content = await fs.readFile(filePath, 'utf-8');
 
-  if (content.includes('<!-- GENERATE_ACTIONS BEGIN -->')) {
-    if (!content.includes('<!-- GENERATE_ACTIONS END -->')) {
-      throw new Error("'<!-- GENERATE_ACTIONS END -->' not found");
+  // First, strip away all the generated bits
+  {
+    const re = /<!-- ([^ ]+) BEGIN -->.*?<!-- \1 END -->/gs;
+    let match: RegExpMatchArray | null;
+    while ((match = re.exec(content)) != null) {
+      content = replaceContent(content, match[1], '\n', re);
     }
-    content =
-      content.split('<!-- GENERATE_ACTIONS BEGIN -->')[0] +
-      '<!-- GENERATE_ACTIONS BEGIN -->\n' +
-      actionLinks.join('\n') +
-      '\n<!-- GENERATE_ACTIONS END -->' +
-      content.split('<!-- GENERATE_ACTIONS END -->')[1];
   }
 
-  if (content.includes('<!-- GENERATE_WORKFLOWS BEGIN -->')) {
-    if (!content.includes('<!-- GENERATE_WORKFLOWS END -->')) {
-      throw new Error("'<!-- GENERATE_WORKFLOWS END -->' not found");
+  // Process TOC
+  {
+    const re = /<!-- toc BEGIN -->.*?<!-- toc END -->/gs;
+    let match: RegExpMatchArray | null;
+    while ((match = re.exec(content)) != null) {
+      const toc = mdtocs(content);
+      content = replaceContent(
+        content,
+        'toc',
+        '\n## Table of Contents\n' + toc,
+        re
+      );
     }
-    content =
-      content.split('<!-- GENERATE_WORKFLOWS BEGIN -->')[0] +
-      '<!-- GENERATE_WORKFLOWS BEGIN -->\n' +
-      workflowLinks.join('\n') +
-      '\n<!-- GENERATE_WORKFLOWS END -->' +
-      content.split('<!-- GENERATE_WORKFLOWS END -->')[1];
   }
 
   // Process direct raw imports
   {
-    const re = /<!-- import:([^ ]+) BEGIN -->.*<!-- import:\1 END -->/gs;
+    const re = /<!-- import:([^ ]+) BEGIN -->.*?<!-- import:\1 END -->/gs;
     let match: RegExpMatchArray | null;
     while ((match = re.exec(content)) != null) {
       const p = match[1];
@@ -169,29 +187,19 @@ for (const filePath of paths) {
         }
       }
 
-      const keyBegin = `<!-- import:${p} BEGIN -->`;
-      const keyEnd = `<!-- import:${p} END -->`;
-
-      const contentLenBefore = content.length;
-      content =
-        content.split(keyBegin)[0] +
-        keyBegin +
-        '\n```' +
-        mdExt +
-        '\n' +
-        contents +
-        '\n```\n' +
-        keyEnd +
-        content.split(keyEnd)[1];
-      const contentLenAfter = content.length;
-      re.lastIndex += contentLenAfter - contentLenBefore;
+      content = replaceContent(
+        content,
+        `import:${p}`,
+        '\n```' + mdExt + '\n' + contents + '\n```\n',
+        re
+      );
     }
   }
 
   // Process import-wf-inputs
   {
     const re =
-      /<!-- import-wf-inputs:([^ ]+) BEGIN -->.*<!-- import-wf-inputs:\1 END -->/gs;
+      /<!-- import-wf-inputs:([^ ]+) BEGIN -->.*?<!-- import-wf-inputs:\1 END -->/gs;
     let match: RegExpMatchArray | null;
     while ((match = re.exec(content)) != null) {
       const p = match[1];
@@ -239,21 +247,37 @@ ${description}
         )
         .join('\n\n');
 
-      const keyBegin = `<!-- import-wf-inputs:${p} BEGIN -->`;
-      const keyEnd = `<!-- import-wf-inputs:${p} END -->`;
-
-      const contentLenBefore = content.length;
-      content =
-        content.split(keyBegin)[0] +
-        keyBegin +
-        '\n' +
-        inputDocs +
-        '\n' +
-        keyEnd +
-        content.split(keyEnd)[1];
-      const contentLenAfter = content.length;
-      re.lastIndex += contentLenAfter - contentLenBefore;
+      content = replaceContent(
+        content,
+        `import-wf-inputs:${p}`,
+        '\n' + inputDocs + '\n',
+        re
+      );
     }
+  }
+
+  if (content.includes('<!-- GENERATE_ACTIONS BEGIN -->')) {
+    if (!content.includes('<!-- GENERATE_ACTIONS END -->')) {
+      throw new Error("'<!-- GENERATE_ACTIONS END -->' not found");
+    }
+    content =
+      content.split('<!-- GENERATE_ACTIONS BEGIN -->')[0] +
+      '<!-- GENERATE_ACTIONS BEGIN -->\n' +
+      actionLinks.join('\n') +
+      '\n<!-- GENERATE_ACTIONS END -->' +
+      content.split('<!-- GENERATE_ACTIONS END -->')[1];
+  }
+
+  if (content.includes('<!-- GENERATE_WORKFLOWS BEGIN -->')) {
+    if (!content.includes('<!-- GENERATE_WORKFLOWS END -->')) {
+      throw new Error("'<!-- GENERATE_WORKFLOWS END -->' not found");
+    }
+    content =
+      content.split('<!-- GENERATE_WORKFLOWS BEGIN -->')[0] +
+      '<!-- GENERATE_WORKFLOWS BEGIN -->\n' +
+      workflowLinks.join('\n') +
+      '\n<!-- GENERATE_WORKFLOWS END -->' +
+      content.split('<!-- GENERATE_WORKFLOWS END -->')[1];
   }
 
   content = await prettier.format(content, { parser: 'markdown' });
